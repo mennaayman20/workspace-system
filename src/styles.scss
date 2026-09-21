@@ -1,1 +1,14 @@
-/* You can add global styles to this file, and also import other style files */
+/* src/styles.scss */
+@import "primeicons/primeicons.css";
+
+/* Tailwind Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* Custom Reset & Global Fonts */
+body {
+  margin: 0;
+  font-family: var(--font-family, system-ui, -apple-system, sans-serif);
+  background-color: #f8fafc;
+  direction: ltr; /* النظام باللغة العربية */
+}
