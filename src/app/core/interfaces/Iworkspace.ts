@@ -1,48 +1,74 @@
-export type WorkspaceType = 
-  | 'Open Workspace' 
-  | 'Private Desk' 
-  | 'Dedicated Desk' 
-  | 'Meeting Room' 
-  | 'Private Office' 
-  | 'Training Room' 
-  | 'Conference Room';
+// حالات المساحات المتاحة بناءً على الـ Enum في Swagger
+export type WorkspaceStatus = 'Available' | 'Occupied' | 'Reserved' | 'Maintenance' | 'Inactive';
 
-export type WorkspaceStatus = 
-  | 'Available' 
-  | 'Occupied' 
-  | 'Reserved' 
-  | 'Maintenance' 
-  | 'Inactive';
+// Interface لنوع المساحة (WorkspaceType)
+export interface WorkspaceType {
+  id: number;
+  name: string;
+  description?: string;
+  isActive?: boolean;
+}
 
+// Interface للمساحة الرئيسية (Workspace)
 export interface Workspace {
-  id: string;
+  id: number;
+  workspaceTypeId: number;
+  workspaceTypeName?: string;
   name: string;
-  type: WorkspaceType;
+  code: string;
+  floor: string;
+  location: string;
   capacity: number;
+  description?: string;
   status: WorkspaceStatus;
+  isDeleted?: boolean;
+}
+
+// DTOs الخاصة بالـ Workspace Commands
+export interface CreateWorkspaceCommand {
+  workspaceTypeId: number;
+  name: string;
+  code: string;
+  floor: string;
   location: string;
+  capacity: number;
   description?: string;
-  pricingPlanId?: string;
-  pricingPlanName?: string;
+}
+
+export interface UpdateWorkspaceCommand extends CreateWorkspaceCommand {
+  id: number;
+}
+
+export interface ChangeWorkspaceStatusCommand {
+  id: number;
+  status: WorkspaceStatus;
+}
+
+// DTOs الخاصة بالـ WorkspaceType Commands
+export interface CreateWorkspaceTypeCommand {
+  name: string;
+  description?: string;
+}
+
+export interface UpdateWorkspaceTypeCommand extends CreateWorkspaceTypeCommand {
+  id: number;
+}
+
+export interface ChangeWorkspaceTypeStatusCommand {
+  id: number;
   isActive: boolean;
 }
 
-export interface CreateWorkspaceDto {
-  name: string;
-  type: WorkspaceType;
-  capacity: number;
-  location: string;
-  description?: string;
-  pricingPlanId?: string;
-  isActive: boolean;
-}
-
-export interface CreateWorkspaceDto {
-  name: string;
-  type: WorkspaceType;
-  capacity: number;
-  location: string;
-  description?: string;
-  pricingPlanId?: string;
-  isActive: boolean;
+export interface PaginatedResponse<T> {
+  succeeded: boolean;
+  message: string;
+  data: {
+    items: T[];
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    totalCount: number;
+    totalPages: number;
+    pageNumber: number;
+    pageSize: number;
+  };
 }

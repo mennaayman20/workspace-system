@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://api.workspace.com/v1',
+  apiUrl: 'https://myworkspace.runasp.net',
   useMockData: true // لتفعيل البيانات الوهمية مؤقتاً
 };

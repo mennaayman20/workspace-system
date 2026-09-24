@@ -1,123 +1,144 @@
-import { Injectable } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
-import { delay } from 'rxjs/operators';
-import { CreateWorkspaceDto, Workspace } from '../interfaces/Iworkspace';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { map, Observable, shareReplay, tap } from 'rxjs';
+
+import {
+  Workspace,
+  WorkspaceType,
+  CreateWorkspaceCommand,
+  UpdateWorkspaceCommand,
+  ChangeWorkspaceStatusCommand,
+  CreateWorkspaceTypeCommand,
+  UpdateWorkspaceTypeCommand,
+  ChangeWorkspaceTypeStatusCommand,
+  PaginatedResponse
+} from '../../core/interfaces/Iworkspace';
+import { environment } from '../environments/environment';
+
+export interface ApiResponse<T> {
+  data: T;
+  message?: string;
+  isSuccess?: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class WorkspaceService {
-  private readonly STORAGE_KEY = 'mock_workspaces_db';
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = `${environment.apiUrl}/api`;
 
-  // البيانات الافتراضية
-  private initialWorkspaces: Workspace[] = [
-    {
-      id: 'ws-101',
-      name: 'Meeting Room 01',
-      type: 'Meeting Room',
-      capacity: 10,
-      status: 'Occupied',
-      location: 'الدور الأول - الفرع الرئيسي',
-      pricingPlanName: 'ساعة اجتماعات - 150 ج.م',
-      isActive: true
-    },
-    {
-      id: 'ws-102',
-      name: 'Meeting Room 02',
-      type: 'Meeting Room',
-      capacity: 6,
-      status: 'Available',
-      location: 'الدور الأول - الفرع الرئيسي',
-      pricingPlanName: 'ساعة اجتماعات - 150 ج.م',
-      isActive: true
-    },
-    {
-      id: 'ws-103',
-      name: 'Open Workspace Desk A',
-      type: 'Open Workspace',
-      capacity: 40,
-      status: 'Available',
-      location: 'الدور الأرضي',
-      pricingPlanName: 'ساعة مفتوحة - 30 ج.م',
-      isActive: true
-    },
-    {
-      id: 'ws-104',
-      name: 'Private Office 01',
-      type: 'Private Office',
-      capacity: 4,
-      status: 'Reserved',
-      location: 'الدور الثاني',
-      pricingPlanName: 'مكتب خاص يومي - 500 ج.م',
-      isActive: true
+  private workspacesCache$?: Observable<Workspace[]>;
+  private workspaceTypesCache$?: Observable<WorkspaceType[]>;
+
+  // ==========================================
+  // 1. WORKSPACE ENDPOINTS
+  // ==========================================
+
+  getWorkspaces(forceReload = false): Observable<Workspace[]> {
+    if (!this.workspacesCache$ || forceReload) {
+      this.workspacesCache$ = this.http
+        .get<PaginatedResponse<Workspace>>(`${this.baseUrl}/Workspace`)
+        .pipe(
+          map(res => res.data.items),
+          shareReplay(1)
+        );
     }
-  ];
-
-  constructor() {
-    this.initStorage();
+    return this.workspacesCache$;
   }
 
-  // تهيئة البيانات في الـ localStorage أول مرة فقط
-  private initStorage(): void {
-    const existingData = localStorage.getItem(this.STORAGE_KEY);
-    if (!existingData) {
-      this.saveToStorage(this.initialWorkspaces);
+  getWorkspaceById(id: number): Observable<Workspace> {
+    return this.http.get<ApiResponse<Workspace>>(`${this.baseUrl}/Workspace/${id}`).pipe(
+      map(res => res.data)
+    );
+  }
+
+  createWorkspace(command: CreateWorkspaceCommand): Observable<Workspace> {
+    return this.http.post<ApiResponse<Workspace>>(`${this.baseUrl}/Workspace`, command).pipe(
+      map(res => res.data),
+      tap(() => this.clearWorkspacesCache())
+    );
+  }
+
+  updateWorkspace(id: number, command: UpdateWorkspaceCommand): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/Workspace/${id}`, command).pipe(
+      tap(() => this.clearWorkspacesCache())
+    );
+  }
+
+  deleteWorkspace(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/Workspace/${id}`).pipe(
+      tap(() => this.clearWorkspacesCache())
+    );
+  }
+
+  changeWorkspaceStatus(id: number, command: ChangeWorkspaceStatusCommand): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/Workspace/${id}/status`, command).pipe(
+      tap(() => this.clearWorkspacesCache())
+    );
+  }
+
+  restoreWorkspace(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/Workspace/${id}/restore`, {}).pipe(
+      tap(() => this.clearWorkspacesCache())
+    );
+  }
+
+  // ==========================================
+  // 2. WORKSPACE TYPE ENDPOINTS
+  // ==========================================
+
+  getWorkspaceTypes(forceReload = false): Observable<WorkspaceType[]> {
+    if (!this.workspaceTypesCache$ || forceReload) {
+      this.workspaceTypesCache$ = this.http
+        .get<PaginatedResponse<WorkspaceType>>(`${this.baseUrl}/WorkspaceType`)
+        .pipe(
+          map(res => res.data.items),
+          shareReplay(1)
+        );
     }
+    return this.workspaceTypesCache$;
   }
 
-  // دالة مساعدة لقراءة البيانات من LocalStorage
-  private getFromStorage(): Workspace[] {
-    const data = localStorage.getItem(this.STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
+  getWorkspaceTypeById(id: number): Observable<WorkspaceType> {
+    return this.http.get<ApiResponse<WorkspaceType>>(`${this.baseUrl}/WorkspaceType/${id}`).pipe(
+      map(res => res.data)
+    );
   }
 
-  // دالة مساعدة لحفظ البيانات في LocalStorage
-  private saveToStorage(data: Workspace[]): void {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+  createWorkspaceType(command: CreateWorkspaceTypeCommand): Observable<number> {
+    return this.http.post<ApiResponse<number>>(`${this.baseUrl}/WorkspaceType`, command).pipe(
+      map(res => res.data),
+      tap(() => this.clearWorkspaceTypesCache())
+    );
   }
 
-  // جلب كافة المساحات
-  getWorkspaces(): Observable<Workspace[]> {
-    const workspaces = this.getFromStorage();
-    return of([...workspaces]).pipe(delay(500));
+  updateWorkspaceType(id: number, command: UpdateWorkspaceTypeCommand): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/WorkspaceType/${id}`, command).pipe(
+      tap(() => this.clearWorkspaceTypesCache())
+    );
   }
 
-  // إضافة مساحة جديدة
-  createWorkspace(dto: CreateWorkspaceDto): Observable<Workspace> {
-    const workspaces = this.getFromStorage();
-    
-    const newWorkspace: Workspace = {
-      ...dto,
-      id: `ws-${Date.now()}`,
-      status: 'Available'
-    };
-
-    workspaces.unshift(newWorkspace);
-    this.saveToStorage(workspaces);
-
-    return of(newWorkspace).pipe(delay(400));
+  changeWorkspaceTypeStatus(id: number, command: ChangeWorkspaceTypeStatusCommand): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/WorkspaceType/${id}/status`, command).pipe(
+      tap(() => this.clearWorkspaceTypesCache())
+    );
   }
 
-  // تعديل مساحة
-  updateWorkspace(id: string, dto: Partial<CreateWorkspaceDto>): Observable<Workspace> {
-    const workspaces = this.getFromStorage();
-    const index = workspaces.findIndex(w => w.id === id);
+  // ==========================================
+  // 3. CACHE CLEARERS
+  // ==========================================
 
-    if (index !== -1) {
-      workspaces[index] = { ...workspaces[index], ...dto };
-      this.saveToStorage(workspaces);
-      return of(workspaces[index]).pipe(delay(400));
-    }
-
-    return throwError(() => new Error('المساحة غير موجودة'));
+  clearWorkspacesCache(): void {
+    this.workspacesCache$ = undefined;
   }
 
-  // حذف مساحة
-  deleteWorkspace(id: string): Observable<boolean> {
-    let workspaces = this.getFromStorage();
-    workspaces = workspaces.filter(w => w.id !== id);
-    this.saveToStorage(workspaces);
+  clearWorkspaceTypesCache(): void {
+    this.workspaceTypesCache$ = undefined;
+  }
 
-    return of(true).pipe(delay(300));
+  clearAllCache(): void {
+    this.clearWorkspacesCache();
+    this.clearWorkspaceTypesCache();
   }
 }

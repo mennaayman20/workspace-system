@@ -1,0 +1,38 @@
+<div class="p-6 dir-rtl text-right font-sans bg-white rounded-2xl shadow-xl max-w-md border border-slate-100">
+  <!-- Header / Icon -->
+  <div class="flex items-center gap-3 mb-4">
+    <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+      <!-- أيقونة التنبيه / السؤال -->
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+      </svg>
+    </div>
+    <h2 class="text-xl font-bold text-slate-800 m-0">
+      {{ data.title || 'تأكيد الإجراء' }}
+    </h2>
+  </div>
+
+  <!-- Content / Message -->
+  <div class="mb-6">
+    <p class="text-slate-600 text-sm leading-relaxed m-0">
+      {{ data.message || 'هل أنت تأكد من متابعة هذه العملية؟' }}
+    </p>
+  </div>
+
+  <!-- Actions / Buttons -->
+  <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
+    <button 
+      type="button"
+      (click)="onCancel()"
+      class="px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors duration-200">
+      {{ data.cancelText || 'إلغاء' }}
+    </button>
+    <button 
+      type="button"
+      (click)="onConfirm()"
+      class="px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 shadow-md shadow-rose-200 transition-all duration-200">
+      {{ data.confirmText || 'نعم، تأكيد' }}
+    </button>
+  </div>
+</div>

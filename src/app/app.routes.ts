@@ -1,20 +1,51 @@
 import { Routes } from '@angular/router';
-import { CustomerFormModalComponent } from './features/customers/components/customer-form-modal/customer-form-modal.component';
-import { DashboardComponent } from './features/dashboard/dashboard/dashboard.component';
-
-import { BookingComponent } from './features/bookings/booking/booking.component';
-import { PosComponent } from './features/pos/pos/pos.component';
-import { PaymentsComponent } from './features/payments/payments/payments.component';
-import { WorkspacesComponent } from './features/workspaces/workspaces.component';
+import { LoginComponent } from './features/login/login.component';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
+  // 1. إعادة التوجيه التلقائي للمسار الرئيسي إلى صفحة تسجيل الدخول
+  { 
+    path: '', 
+    redirectTo: 'login', 
+    pathMatch: 'full' 
+  },
 
-   {path:'control-panel', component:DashboardComponent },
-   {path:'Workspaces', component:WorkspacesComponent },
-   {path:'booking', component: BookingComponent },
-   {path:'Customers', component:CustomerFormModalComponent },
-   
-   {path:'pos', component:PosComponent },
-   {path:'payments', component:PaymentsComponent },
+  // 2. مسار تسجيل الدخول (غير محمي)
+  { 
+    path: 'login', 
+    component: LoginComponent 
+  },
 
+  // 3. المسارات المحمية (تستخدم Lazy Loading مع authGuard للأداء والأمان)
+  {
+    path: 'control-panel',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/dashboard/dashboard/dashboard.component').then(m => m.DashboardComponent)
+  },
+  {
+    path: 'Workspaces',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/workspaces/workspaces.component').then(m => m.WorkspacesComponent)
+  },
+//   {
+//     path: 'bookings',
+//    //  canActivate: [authGuard],
+//     loadComponent: () => import('./features/bookings/bookings.component').then(m => m.BookingsComponent)
+//   },
+  {
+    path: 'pos',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/pos/pos/pos.component').then(m => m.PosComponent)
+  },
+  {
+    path: 'payments',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/payments/payments/payments.component').then(m => m.PaymentsComponent)
+  },
+
+  // 4. حماية ضد أي مسار غير معروف (Wildcard Route)
+  { 
+    path: '**', 
+    redirectTo: 'login' 
+  }
 ];

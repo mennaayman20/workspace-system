@@ -1,6 +1,6 @@
 /* src/styles.scss */
 @import "primeicons/primeicons.css";
-
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
 /* Tailwind Directives */
 @tailwind base;
 @tailwind components;
@@ -12,3 +12,5 @@ body {
   background-color: #f8fafc;
   direction: ltr; /* النظام باللغة العربية */
 }
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

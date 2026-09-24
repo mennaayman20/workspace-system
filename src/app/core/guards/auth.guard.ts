@@ -1,28 +1,16 @@
-import { isPlatformBrowser } from '@angular/common';
-import { inject, PLATFORM_ID } from '@angular/core';
+import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
-// just a function
 export const authGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
 
-const router =inject(Router)
- const pLATFORM_ID =inject(PLATFORM_ID)
- 
- if(isPlatformBrowser (pLATFORM_ID)){
-   if(localStorage.getItem('token') !==null){
-
-return true;
-
-  }
-else{
-
-router.navigate(['/login'])
-
-    return false;
-}
- }
-  else{
-    return false;
+  if (authService.isLoggedIn()) {
+    return true; // مسموح بالدخول
   }
 
+  // إذا لم يكن مسجلاً، يتم توجيهه للـ Login
+  router.navigate(['/login']);
+  return false;
 };

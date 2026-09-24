@@ -1,131 +1,303 @@
-<div class="p-6 space-y-6 dir-rtl">
-  
-  <!-- Header & Actions -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div>
-      <h1 class="text-xl font-bold text-slate-900">إدارة المساحات (Workspaces)</h1>
-      <p class="text-xs text-slate-500 mt-1">عرض وإدارة قاعات الاجتماعات والمكاتب والمساحات المفتوحة</p>
+<style>
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp .35s ease-out both; }
+  @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
+</style>
+
+<div class="p-4 sm:p-8 space-y-6 sm:space-y-8 dir-rtl max-w-7xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-up">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-blue-600/25">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 10h.01M15 10h.01"/></svg>
+      </div>
+      <div>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">إدارة المساحات</h1>
+        <p class="text-sm text-slate-500 mt-1">عرض وتحديث حالات القاعات والمكاتب المسجلة في النظام</p>
+      </div>
     </div>
-    
-    <button 
-      (click)="openAddModal()" 
-      class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-4 py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2">
-      <span>+ إضافة مساحة جديدة</span>
+
+    <button type="button" (click)="openAddModal()"
+      class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-l from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+      <svg class="w-4 h-4 transition-transform duration-200 group-hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+      إضافة مساحة جديدة
     </button>
   </div>
 
-  <!-- Filters Section -->
-  <div class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-100">
-    <button 
-      (click)="onFilterChange('ALL')"
-      [class]="selectedStatusFilter === 'ALL' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-      class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
-      الكل ({{ workspaces.length }})
-    </button>
-    <button 
-      (click)="onFilterChange('Available')"
-      [class]="selectedStatusFilter === 'Available' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-      class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
-      المتاحة
-    </button>
-    <button 
-      (click)="onFilterChange('Occupied')"
-      [class]="selectedStatusFilter === 'Occupied' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-      class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
-      المشغولة
-    </button>
-    <button 
-      (click)="onFilterChange('Reserved')"
-      [class]="selectedStatusFilter === 'Reserved' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-      class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
-      المحجوزة
-    </button>
-  </div>
-
-  <!-- 1. Loading State -->
-  @if (isLoading) {
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      @for (i of [1,2,3]; track i) {
-        <div class="p-4 border border-slate-200 rounded-2xl animate-pulse space-y-3">
-          <div class="h-4 bg-slate-200 rounded w-1/2"></div>
-          <div class="h-3 bg-slate-100 rounded w-1/3"></div>
-          <div class="h-8 bg-slate-100 rounded w-full mt-4"></div>
-        </div>
+  <!-- Loading skeleton -->
+  @if (isLoading()) {
+    <div class="space-y-4" aria-busy="true">
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <div class="h-24 rounded-2xl bg-slate-100 animate-pulse"></div>
+        }
+      </div>
+      @for (i of [1, 2, 3, 4]; track i) {
+        <div class="h-16 rounded-2xl bg-slate-100 animate-pulse"></div>
       }
     </div>
   }
 
-  <!-- 2. Error State -->
-  @if (errorMessage && !isLoading) {
-    <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-between text-rose-700 text-xs">
-      <span>{{ errorMessage }}</span>
-      <button (click)="loadWorkspaces()" class="underline font-bold">إعادة المحاولة</button>
+  <!-- Error -->
+  @if (errorMessage() && !isLoading()) {
+    <div role="alert" class="p-5 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-2xl flex items-center justify-between gap-3 fade-up">
+      <span class="font-medium">{{ errorMessage() }}</span>
+      <button type="button" (click)="loadInitialData()"
+        class="px-4 py-2 bg-white border border-rose-200 rounded-xl font-bold hover:bg-rose-100 transition-colors">
+        إعادة المحاولة
+      </button>
     </div>
   }
 
-  <!-- 3. Empty State -->
-  @if (!isLoading && !errorMessage && filteredWorkspaces.length === 0) {
-    <div class="text-center py-12 border border-dashed border-slate-200 rounded-2xl">
-      <p class="text-sm text-slate-500 font-medium">لا توجد مساحات مطابقة للفلتر المحدد.</p>
-    </div>
-  }
+  @if (!isLoading() && !errorMessage()) {
 
-  <!-- 4. Success State (Data Display) -->
-  @if (!isLoading && !errorMessage && filteredWorkspaces.length > 0) {
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      
-      @for (item of filteredWorkspaces; track item.id) {
-        <div class="p-4 bg-white border border-slate-200 rounded-2xl hover:border-blue-200 transition-all shadow-sm flex flex-col justify-between gap-4">
-          
-          <div>
-            <div class="flex items-start justify-between gap-2 mb-2">
-              <div>
-                <h3 class="text-sm font-bold text-slate-800">{{ item.name }}</h3>
-                <span class="text-[11px] text-slate-500">{{ item.type }}</span>
+    <!-- Stat cards (double as filters) -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+      <button type="button" (click)="onFilterStatus('all')"
+        [class]="statusFilter() === 'all' ? 'ring-2 ring-blue-500 bg-blue-50/60 border-transparent' : 'bg-white border-slate-200 hover:border-slate-300'"
+        class="fade-up text-right p-4 sm:p-5 rounded-2xl border shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+        <div class="flex items-center gap-2 text-sm font-semibold text-slate-500">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> الكل
+        </div>
+        <div class="mt-2 text-3xl font-extrabold text-slate-900">{{ statusCounts()['all'] }}</div>
+      </button>
+
+      @for (s of statusOptions; track s.value; let i = $index) {
+        <button type="button" (click)="onFilterStatus(s.value)"
+          [style.animation-delay.ms]="(i + 1) * 50"
+          [class]="statusFilter() === s.value ? 'ring-2 ring-blue-500 bg-blue-50/60 border-transparent' : 'bg-white border-slate-200 hover:border-slate-300'"
+          class="fade-up text-right p-4 sm:p-5 rounded-2xl border shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+          <div class="flex items-center gap-2 text-sm font-semibold text-slate-500">
+            <span class="w-2.5 h-2.5 rounded-full"
+              [class]="s.value === 'Available' ? 'bg-emerald-500' : s.value === 'Occupied' ? 'bg-rose-500' : s.value === 'Reserved' ? 'bg-amber-500' : 'bg-slate-400'"></span>
+            {{ s.label }}
+          </div>
+          <div class="mt-2 text-3xl font-extrabold text-slate-900">{{ statusCounts()[s.value] }}</div>
+        </button>
+      }
+    </div>
+
+<!-- شريط الأدوات المدمج والمصغر (Compact Toolbar) -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white p-2.5 sm:p-3 rounded-xl border border-slate-200/80 shadow-xs fade-up">
+  
+  <!-- حقل البحث -->
+  <div class="relative flex-1 max-w-xs">
+    <svg class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 right-3 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m20 20-3.5-3.5"/></svg>
+    <input
+      type="search"
+      [value]="searchTerm()"
+      (input)="onSearch($any($event.target).value)"
+      placeholder="ابحث بالاسم، الكود، الطابق..."
+      class="w-full pr-9 pl-3 py-1.5 bg-slate-50 border border-slate-200/90 rounded-lg text-xs placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+  </div>
+
+  <!-- فلاتر الحالة المصغرة (Compact Pills) -->
+  <div class="flex items-center gap-1 overflow-x-auto pb-0.5 sm:pb-0 scrollbar-none">
+    
+    <!-- زر "الكل" -->
+    <button type="button" (click)="onFilterStatus('all')"
+      [class]="statusFilter() === 'all' ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200/70'"
+      class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5">
+      <span>الكل</span>
+      <span class="px-1.5 py-0.2 rounded-md text-[10px] font-extrabold" 
+            [class]="statusFilter() === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'">
+        {{ statusCounts()['all'] }}
+      </span>
+    </button>
+
+    <!-- باقي الفلاتر -->
+    @for (s of statusOptions; track s.value) {
+      <button type="button" (click)="onFilterStatus(s.value)"
+        [class]="statusFilter() === s.value ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200/70'"
+        class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5">
+        <span>{{ s.label }}</span>
+        <span class="px-1.5 py-0.2 rounded-md text-[10px] font-extrabold" 
+              [class]="statusFilter() === s.value ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'">
+          {{ statusCounts()[s.value] }}
+        </span>
+      </button>
+    }
+
+  </div>
+
+</div>
+
+    <!-- Empty states -->
+    @if (filteredWorkspaces().length === 0) {
+      <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center space-y-4 fade-up">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14"/></svg>
+        </div>
+        @if (workspaces().length === 0) {
+          <p class="text-base font-bold text-slate-800">لا توجد مساحات مضافة حتى الآن</p>
+          <button type="button" (click)="openAddModal()"
+            class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors">
+            + أضف أول مساحة
+          </button>
+        } @else {
+          <p class="text-base font-bold text-slate-800">لا توجد نتائج مطابقة للبحث</p>
+          <button type="button" (click)="resetFilters()"
+            class="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600 transition-colors">
+            مسح الفلاتر
+          </button>
+        }
+      </div>
+    } @else {
+
+      <!-- Desktop / tablet table -->
+      <div class="hidden md:block bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm fade-up" style="animation-delay: 300ms">
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse min-w-[900px]">
+            <thead>
+              <tr class="bg-slate-50/80 text-xs font-bold text-slate-500 tracking-wide">
+                <th scope="col" class="py-4 px-6">المساحة</th>
+                <th scope="col" class="py-4 px-6">الكود</th>
+                <th scope="col" class="py-4 px-6">الطابق / الموقع</th>
+                <th scope="col" class="py-4 px-6">السعة</th>
+                <th scope="col" class="py-4 px-6">الحالة</th>
+                <th scope="col" class="py-4 px-6 text-center">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-sm text-slate-600">
+              @for (ws of filteredWorkspaces(); track ws.id; let i = $index) {
+                <tr class="fade-up group hover:bg-blue-50/40 transition-colors duration-200"
+                    [style.animation-delay.ms]="i * 40"
+                    [class.opacity-50]="isBusy(ws.id)" [class.pointer-events-none]="isBusy(ws.id)">
+
+                  <td class="py-4 px-6">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 font-extrabold flex items-center justify-center text-base">
+                        {{ ws.name.charAt(0) }}
+                      </div>
+                      <span class="font-bold text-slate-900 text-[15px]">{{ ws.name }}</span>
+                    </div>
+                  </td>
+
+                  <td class="py-4 px-6">
+                    <span dir="ltr" class="inline-block px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono text-[13px] font-bold">{{ ws.code }}</span>
+                  </td>
+
+                  <td class="py-4 px-6">{{ ws.floor }} <span class="text-slate-300 mx-1">•</span> {{ ws.location }}</td>
+
+                  <td class="py-4 px-6">
+                    <span class="font-bold text-slate-800">{{ ws.capacity }}</span> أفراد
+                  </td>
+
+                  <td class="py-4 px-6">
+                    <span [class]="getStatusBadgeClass(ws.status)"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset">
+                      <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                      {{ statusLabel(ws.status) }}
+                    </span>
+                  </td>
+
+                  <td class="py-4 px-6">
+                    <div class="flex items-center justify-center gap-2">
+                      <select
+                        [value]="ws.status"
+                        [disabled]="isBusy(ws.id)"
+                        (change)="onStatusChange(ws, $any($event.target).value)"
+                        [attr.aria-label]="'تغيير حالة ' + ws.name"
+                        class="h-10 bg-white border border-slate-200 rounded-xl px-3 text-sm text-slate-700 hover:border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all">
+                        @for (s of statusOptions; track s.value) {
+                          <option [value]="s.value" [selected]="s.value === ws.status">{{ s.label }}</option>
+                        }
+                      </select>
+
+                      <button type="button" (click)="openEditModal(ws)" [disabled]="isBusy(ws.id)"
+                        title="تعديل" aria-label="تعديل"
+                        class="w-10 h-10 rounded-xl flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white hover:scale-105 transition-all duration-200">
+                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m16.5 3.5 4 4L8 20l-5 1 1-5L16.5 3.5Z"/></svg>
+                      </button>
+
+                      <button type="button" (click)="onDelete(ws)" [disabled]="isBusy(ws.id)"
+                        title="حذف" aria-label="حذف"
+                        class="w-10 h-10 rounded-xl flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white hover:scale-105 transition-all duration-200">
+                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Mobile cards -->
+      <div class="block md:hidden space-y-4">
+        @for (ws of filteredWorkspaces(); track ws.id; let i = $index) {
+          <div class="fade-up bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4"
+               [style.animation-delay.ms]="i * 50" [class.opacity-50]="isBusy(ws.id)">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 font-extrabold flex items-center justify-center text-lg">
+                  {{ ws.name.charAt(0) }}
+                </div>
+                <div class="min-w-0">
+                  <h3 class="font-bold text-slate-900 text-base truncate">{{ ws.name }}</h3>
+                  <span dir="ltr" class="text-xs font-mono font-bold text-slate-500">{{ ws.code }}</span>
+                </div>
               </div>
-              <span [class]="getStatusBadgeClass(item.status)" class="px-2.5 py-1 text-[10px] font-bold border rounded-lg">
-                {{ getStatusLabel(item.status) }}
+              <span [class]="getStatusBadgeClass(ws.status)"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset shrink-0">
+                <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                {{ statusLabel(ws.status) }}
               </span>
             </div>
 
-            <div class="space-y-1.5 text-xs text-slate-600 mt-3">
-              <div class="flex items-center gap-2">
-                <span class="text-slate-400">📍</span>
-                <span>{{ item.location }}</span>
+            <div class="grid grid-cols-2 gap-3 text-sm bg-slate-50 rounded-xl p-3">
+              <div>
+                <span class="text-slate-400 text-xs block mb-0.5">الطابق / الموقع</span>
+                <span class="font-semibold text-slate-700">{{ ws.floor }} - {{ ws.location }}</span>
               </div>
-              <div class="flex items-center gap-2">
-                <span class="text-slate-400">👥</span>
-                <span>السعة: {{ item.capacity }} شخص</span>
+              <div>
+                <span class="text-slate-400 text-xs block mb-0.5">السعة</span>
+                <span class="font-semibold text-slate-700">{{ ws.capacity }} أفراد</span>
               </div>
-              <div class="flex items-center gap-2">
-                <span class="text-slate-400">🏷️</span>
-                <span>خطة التسعير: {{ item.pricingPlanName || 'غير محدودة' }}</span>
+            </div>
+
+            <div class="space-y-2">
+              <select
+                [value]="ws.status"
+                [disabled]="isBusy(ws.id)"
+                (change)="onStatusChange(ws, $any($event.target).value)"
+                [attr.aria-label]="'تغيير حالة ' + ws.name"
+                class="w-full h-11 bg-white border border-slate-200 rounded-xl px-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
+                @for (s of statusOptions; track s.value) {
+                  <option [value]="s.value" [selected]="s.value === ws.status">{{ s.label }}</option>
+                }
+              </select>
+
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" (click)="openEditModal(ws)" [disabled]="isBusy(ws.id)"
+                  class="h-11 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-sm font-bold transition-colors">
+                  تعديل
+                </button>
+                <button type="button" (click)="onDelete(ws)" [disabled]="isBusy(ws.id)"
+                  class="h-11 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-sm font-bold transition-colors">
+                  حذف
+                </button>
               </div>
             </div>
           </div>
+        }
+      </div>
+    }
+  }
 
-          <!-- داخل الكارت الخاص بكل مساحة -->
-<div class="pt-3 border-t border-slate-100 flex items-center justify-between">
-  <button 
-    (click)="openEditModal(item)" 
-    class="text-xs text-slate-600 hover:text-blue-600 font-medium transition-colors">
-    تعديل
-  </button>
-  <button class="text-xs text-blue-600 hover:text-blue-700 font-bold">عرض التفاصيل</button>
-</div>
-        </div>
-      }
-
-    </div>
+  <!-- Add / Edit modal -->
+  @if (isModalOpen()) {
+    <app-add-workspace-modal
+      [workspaceTypes]="workspaceTypes()"
+      [workspaceToEdit]="editingWorkspace()"
+      (closeModal)="closeModal()"
+      (saved)="refreshAfterSave()">
+    </app-add-workspace-modal>
   }
 
 </div>
-
-<!-- استدعاء المودال الفرعي بشكل نظيف سطر واحد -->
-<app-add-workspace-modal 
-  [isOpen]="isAddModalOpen" 
-  [isSubmitting]="isSubmitting"
-  [selectedWorkspace]="selectedWorkspaceToEdit"
-  (closeModal)="closeAddModal()"
-  (submitForm)="onSaveWorkspace($event)">
-</app-add-workspace-modal>

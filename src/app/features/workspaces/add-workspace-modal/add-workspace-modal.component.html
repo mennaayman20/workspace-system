@@ -1,93 +1,159 @@
-@if (isOpen) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm dir-rtl">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-150">
-      
-      <!-- Dynamic Modal Header -->
-      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-        <h2 class="text-base font-bold text-slate-800">
-          {{ selectedWorkspace ? 'تعديل مساحة العمل' : 'إضافة مساحة عمل جديدة' }}
-        </h2>
-        <button (click)="onClose()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+<div
+  class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 dir-rtl"
+  (click)="onBackdropClick($event)">
+
+  <div
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="workspace-modal-title"
+    class="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+
+    <!-- Header -->
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <h3 id="workspace-modal-title" class="text-sm font-bold text-slate-800">
+        {{ isEditMode ? 'تعديل مساحة العمل' : 'إضافة مساحة عمل جديدة' }}
+      </h3>
+      <button type="button" (click)="onClose()" aria-label="إغلاق"
+        class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">✕</button>
+    </div>
+
+    @if (errorMessage()) {
+      <div role="alert" class="mx-6 mt-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="p-6 space-y-4 overflow-y-auto">
+
+      <!-- Type -->
+      <div>
+        <label for="ws-type" class="block text-xs font-bold text-slate-700 mb-1">
+          نوع المساحة <span class="text-rose-500">*</span>
+        </label>
+        <select id="ws-type" formControlName="workspaceTypeId"
+          [class.border-rose-400]="fieldError('workspaceTypeId')"
+          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-blue-500">
+          <option [ngValue]="null" disabled>اختر نوع المساحة</option>
+          @for (type of workspaceTypes(); track type.id) {
+            <option [ngValue]="type.id">{{ type.name }}</option>
+          }
+          <option [ngValue]="NEW_TYPE_VALUE">+ إضافة نوع جديد</option>
+        </select>
+        @if (fieldError('workspaceTypeId'); as msg) {
+          <span class="text-[10px] text-rose-500 mt-1 block">يرجى اختيار نوع المساحة</span>
+        }
+
+        @if (addingNewType()) {
+          <div class="mt-2">
+            <input type="text" formControlName="newTypeName" maxlength="50" aria-label="اسم النوع الجديد"
+              placeholder="اسم النوع الجديد (مثال: مكتب فردي)"
+              [class.border-rose-400]="fieldError('newTypeName')"
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-blue-500" />
+            @if (fieldError('newTypeName'); as msg) {
+              <span class="text-[10px] text-rose-500 mt-1 block">{{ msg }}</span>
+            }
+          </div>
+        }
       </div>
 
-      <!-- Modal Form Body -->
-      <form [formGroup]="workspaceForm" (ngSubmit)="onSubmit()" class="p-6 space-y-4">
-        
+      <!-- Name + code -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">اسم المساحة <span class="text-rose-500">*</span></label>
-          <input 
-            type="text" 
-            formControlName="name"
-            placeholder="مثال: Meeting Room 03"
-            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-blue-500 focus:outline-none transition-all"
-          />
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">نوع المساحة <span class="text-rose-500">*</span></label>
-            <select 
-              formControlName="type"
-              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-blue-500 focus:outline-none transition-all">
-              @for (type of workspaceTypes; track type) {
-                <option [value]="type">{{ type }}</option>
-              }
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">السعة <span class="text-rose-500">*</span></label>
-            <input 
-              type="number" 
-              formControlName="capacity"
-              min="1"
-              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-blue-500 focus:outline-none transition-all"
-            />
-          </div>
+          <label for="ws-name" class="block text-xs font-bold text-slate-700 mb-1">
+            اسم المساحة <span class="text-rose-500">*</span>
+          </label>
+          <input id="ws-name" type="text" formControlName="name" maxlength="100" placeholder="مثال: قاعة الأمل"
+            [class.border-rose-400]="fieldError('name')"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-blue-500" />
+          @if (fieldError('name'); as msg) {
+            <span class="text-[10px] text-rose-500 mt-1 block">{{ msg }}</span>
+          }
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">الموقع / الدور <span class="text-rose-500">*</span></label>
-          <input 
-            type="text" 
-            formControlName="location"
-            placeholder="مثال: الدور الأول"
-            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-blue-500 focus:outline-none transition-all"
-          />
+          <label for="ws-code" class="block text-xs font-bold text-slate-700 mb-1">
+            كود المساحة <span class="text-rose-500">*</span>
+          </label>
+          <input id="ws-code" type="text" formControlName="code" maxlength="20" dir="ltr" placeholder="WS-101"
+            [class.border-rose-400]="fieldError('code')"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono uppercase focus:bg-white focus:outline-none focus:border-blue-500" />
+          @if (fieldError('code'); as msg) {
+            <span class="text-[10px] text-rose-500 mt-1 block">{{ msg }}</span>
+          }
+        </div>
+      </div>
+
+      <!-- Floor + location -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="ws-floor" class="block text-xs font-bold text-slate-700 mb-1">
+            الطابق <span class="text-rose-500">*</span>
+          </label>
+          <input id="ws-floor" type="text" formControlName="floor" maxlength="50" placeholder="الأول"
+            [class.border-rose-400]="fieldError('floor')"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-blue-500" />
+          @if (fieldError('floor'); as msg) {
+            <span class="text-[10px] text-rose-500 mt-1 block">{{ msg }}</span>
+          }
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">الوصف (اختياري)</label>
-          <textarea 
-            formControlName="description"
-            rows="2"
-            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-blue-500 focus:outline-none transition-all resize-none"
-          ></textarea>
+          <label for="ws-location" class="block text-xs font-bold text-slate-700 mb-1">
+            الموقع <span class="text-rose-500">*</span>
+          </label>
+          <input id="ws-location" type="text" formControlName="location" maxlength="100" placeholder="المبنى الرئيسي"
+            [class.border-rose-400]="fieldError('location')"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-blue-500" />
+          @if (fieldError('location'); as msg) {
+            <span class="text-[10px] text-rose-500 mt-1 block">{{ msg }}</span>
+          }
         </div>
+      </div>
 
-        <!-- Dynamic Footer Button -->
-        <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
-          <button 
-            type="button" 
-            (click)="onClose()"
-            class="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-all">
-            إلغاء
-          </button>
-          
-          <button 
-            type="submit" 
-            [disabled]="isSubmitting"
-            class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-all disabled:opacity-50">
-            @if (isSubmitting) {
-              <span>جاري الحفظ...</span>
-            } @else {
-              <span>{{ selectedWorkspace ? 'تعديل التغييرات' : 'حفظ المساحة' }}</span>
-            }
-          </button>
+      <!-- Capacity -->
+      <div>
+        <label for="ws-capacity" class="block text-xs font-bold text-slate-700 mb-1">
+          السعة (عدد الأفراد) <span class="text-rose-500">*</span>
+        </label>
+        <input id="ws-capacity" type="number" formControlName="capacity" min="1" max="1000" step="1" inputmode="numeric"
+          [class.border-rose-400]="fieldError('capacity')"
+          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-blue-500" />
+        @if (fieldError('capacity'); as msg) {
+          <span class="text-[10px] text-rose-500 mt-1 block">{{ msg }}</span>
+        }
+      </div>
+
+      <!-- Description -->
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <label for="ws-desc" class="block text-xs font-bold text-slate-700">الوصف (اختياري)</label>
+          <span class="text-[10px] text-slate-400">{{ (form.controls.description.value?.length ?? 0) }}/500</span>
         </div>
+        <textarea id="ws-desc" formControlName="description" rows="3" maxlength="500"
+          placeholder="تفاصيل إضافية عن المساحة..."
+          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-blue-500 resize-none"></textarea>
+        @if (fieldError('description'); as msg) {
+          <span class="text-[10px] text-rose-500 mt-1 block">{{ msg }}</span>
+        }
+      </div>
 
-      </form>
+      <!-- Actions -->
+      <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
+        <button type="button" (click)="onClose()" [disabled]="isSubmitting()"
+          class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors disabled:opacity-50">
+          إلغاء
+        </button>
 
-    </div>
+        <button type="submit" [disabled]="isSubmitting()"
+          class="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
+          @if (isSubmitting()) {
+            {{ isEditMode ? 'جاري الحفظ...' : 'جاري الإضافة...' }}
+          } @else {
+            {{ isEditMode ? 'حفظ التعديلات' : 'حفظ المساحة' }}
+          }
+        </button>
+      </div>
+
+    </form>
   </div>
-}
+</div>
