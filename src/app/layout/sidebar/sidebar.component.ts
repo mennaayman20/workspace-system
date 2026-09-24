@@ -32,7 +32,7 @@ export class SidebarComponent {
     { label: 'لوحة التحكّم', route: 'control-panel', icon: '📊' },
     { label: 'مساحات العمل', route: 'Workspaces', icon: '🚪' },
 
-    { label: 'الحجوزات والاشتراكات', route: 'bookings', icon: '📅' },
+    { label: 'دخول عميل', route: 'customers', icon: '📅' },
 
     { label: 'المشروبات والـ POS', route: 'pos', icon: '☕' },
     { label: 'الخزينة والتقارير', route: 'payments', icon: '💳' },
