@@ -67,45 +67,61 @@ export class PricingPlanDetailsComponent implements OnInit {
     this.load();
   }
 
-  load(): void {
-    if (!Number.isInteger(this.planId) || this.planId <= 0) {
-      this.errorMessage.set('رابط الخطة غير صحيح.');
-      return;
-    }
-
-    this.isLoading.set(true);
-    this.errorMessage.set(null);
-
-    forkJoin({
-      plan: this.planService.getById(this.planId),
-      rules: this.ruleService.getByPlan(this.planId),
-      types: this.workspaceService.getWorkspaceTypes(true),
-    })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: ({ plan, rules, types }) => {
-          this.plan.set(plan);
-          this.rules.set(rules);
-          this.workspaceTypes.set(types);
-          this.isLoading.set(false);
-        },
-        error: (err) => {
-          this.isLoading.set(false);
-          this.errorMessage.set(apiErrorMessage(err, 'تعذر تحميل بيانات الخطة، حاول مرة أخرى.'));
-        },
-      });
+load(): void {
+  if (!Number.isInteger(this.planId) || this.planId <= 0) {
+    this.errorMessage.set('رابط الخطة غير صحيح.');
+    return;
   }
 
-  /** تحديث هادئ للقواعد بعد الحفظ (من غير skeleton). */
-  refreshRules(): void {
-    this.ruleService
-      .getByPlan(this.planId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (rules) => this.rules.set(rules),
-        error: () => this.notify.show('تعذر تحديث الأسعار، حدّث الصفحة'),
-      });
-  }
+  this.isLoading.set(true);
+  this.errorMessage.set(null);
+
+  forkJoin({
+    plan: this.planService.getById(this.planId),
+    rules: this.ruleService.getByPlan(this.planId),
+    types: this.workspaceService.getWorkspaceTypes(true),
+  })
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+      next: ({ plan, rules, types }: any) => {
+        // 1. استخراج الخطة
+        const planData = plan?.data || plan;
+        this.plan.set(planData);
+
+        // 2. استخراج الـ rules بشكل مضمون (سواء كانت Array مباشرة أو داخل data/items)
+        const rulesList = Array.isArray(rules)
+          ? rules
+          : rules?.data?.items || rules?.data || rules?.items || [];
+        this.rules.set(rulesList);
+
+        // 3. استخراج أنواع المساحات
+        const typesList = Array.isArray(types)
+          ? types
+          : types?.data?.items || types?.data || types?.items || [];
+        this.workspaceTypes.set(typesList);
+
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.errorMessage.set(apiErrorMessage(err, 'تعذر تحميل بيانات الخطة، حاول مرة أخرى.'));
+      },
+    });
+}
+refreshRules(): void {
+  this.ruleService
+    .getByPlan(this.planId)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+      next: (rules: any) => {
+        const rulesList = Array.isArray(rules)
+          ? rules
+          : rules?.data?.items || rules?.data || rules?.items || [];
+        this.rules.set(rulesList);
+      },
+      error: () => this.notify.show('تعذر تحديث الأسعار، حدّث الصفحة'),
+    });
+}
 
   editPlan(): void {
     const plan = this.plan();
