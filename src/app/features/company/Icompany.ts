@@ -1,29 +1,34 @@
 export interface Company {
   id: number;
   name: string;
-  contactPerson: string;
-  phone: string;
-  email?: string | null;
-  taxNumber?: string | null;
-  taxInformation?: string | null;
-  contractDetails?: string | null;
-  pricingPlanId?: number | null;
-  creditLimit: number;
-  isActive: boolean;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
+  taxNumber?: string;
+  taxInformation?: string;
+  contractDetails?: string;
+  pricingPlanId?: number;
+  creditLimit?: number;
+  isActive?: boolean;
 }
 
 export interface CreateCompanyDto {
   name: string;
-  contactPerson: string;
-  phone: string;
-  email?: string | null;
-  taxNumber?: string | null;
-  taxInformation?: string | null;
-  contractDetails?: string | null;
-  pricingPlanId?: number | null;
-  creditLimit: number;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
+  taxNumber?: string;
+  taxInformation?: string;
+  contractDetails?: string;
+  pricingPlanId?: number;
+  creditLimit?: number;
 }
 
-export interface CompanyStatusDto {
+export interface UpdateCompanyDto extends CreateCompanyDto {
+  id: number;
+}
+
+export interface ChangeCompanyStatusDto {
+  id: number;
   isActive: boolean;
 }

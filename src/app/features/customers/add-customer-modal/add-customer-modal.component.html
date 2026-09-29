@@ -1,88 +1,109 @@
 <div class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-40 dir-rtl">
   <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl space-y-4">
     
+    <!-- Header -->
     <div class="flex justify-between items-center border-b pb-3">
       <h3 class="text-lg font-bold text-slate-800">
-        {{ customerToEdit ? 'تعديل بيانات العميل' : 'إضافة عميل جديد' }}
+        {{ customerToEdit() ? 'تعديل بيانات العميل' : 'إضافة عميل جديد' }}
       </h3>
-      <button (click)="closeModal.emit()" class="text-slate-400 hover:text-slate-600">✕</button>
+      <button (click)="onClose()" class="text-slate-400 hover:text-slate-600 transition-colors">✕</button>
     </div>
 
-    @if (errorMessage) {
-      <div class="p-3 bg-red-50 text-red-600 rounded-xl text-sm border border-red-200">
-        {{ errorMessage }}
+    <!-- Success Message -->
+    @if (successMessage()) {
+      <div class="p-3 bg-green-50 text-green-700 rounded-xl text-sm border border-green-200 font-medium flex items-center justify-between">
+        <span>✓ {{ successMessage() }}</span>
       </div>
     }
 
+    <!-- Error Message -->
+    @if (errorMessage()) {
+      <div class="p-3 bg-red-50 text-red-600 rounded-xl text-sm border border-red-200 font-medium">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <!-- Form -->
     <form [formGroup]="customerForm" (ngSubmit)="onSubmit()" class="space-y-4">
       
       <!-- الاسم بالكامل -->
       <div>
         <label class="block text-xs font-bold text-slate-700 mb-1">الاسم بالكامل *</label>
         <input formControlName="fullName" type="text" placeholder="اسم العميل"
-               class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500" />
+               class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        @if (customerForm.get('fullName')?.touched && customerForm.get('fullName')?.invalid) {
+          <span class="text-xs text-red-500 mt-1 block">الاسم مطلوب</span>
+        }
       </div>
 
       <!-- الموبايل -->
       <div>
         <label class="block text-xs font-bold text-slate-700 mb-1">رقم الموبايل *</label>
         <input formControlName="mobileNumber" type="text" placeholder="01012345678"
-               class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500" />
+               class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        @if (customerForm.get('mobileNumber')?.touched && customerForm.get('mobileNumber')?.invalid) {
+          <span class="text-xs text-red-500 mt-1 block">رقم الموبايل مطلوب</span>
+        }
       </div>
 
       <!-- البريد الإلكتروني -->
       <div>
         <label class="block text-xs font-bold text-slate-700 mb-1">البريد الإلكتروني (اختياري)</label>
         <input formControlName="email" type="email" placeholder="example@domain.com"
-               class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500" />
+               class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        @if (customerForm.get('email')?.touched && customerForm.get('email')?.hasError('email')) {
+          <span class="text-xs text-red-500 mt-1 block">صيغة البريد الإلكتروني غير صحيحة</span>
+        }
       </div>
 
       <!-- نوع العميل -->
       <div>
         <label class="block text-xs font-bold text-slate-700 mb-1">نوع العميل *</label>
-        <select formControlName="customerType" class="w-full px-3 py-2 border rounded-xl text-sm bg-white">
-          @for (type of customerTypes; track type) {
-            <option [value]="type">{{ type }}</option>
-          }
+        <select formControlName="customerType" class="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="WalkIn">WalkIn (نقدي/عابر)</option>
+          <option value="Corporate">Corporate (شركات)</option>
+          <option value="VIP">VIP</option>
+          <option value="Regular">Regular (دائم)</option>
         </select>
       </div>
 
-      <!-- حقل خيار الشركة: يظهر فقط عند اختيار Corporate -->
+      <!-- حقل اختيار الشركة -->
       @if (customerForm.get('customerType')?.value === 'Corporate') {
         <div class="p-3 bg-blue-50/50 border border-blue-200 rounded-xl space-y-2">
           <label class="block text-xs font-bold text-slate-800">اختر الشركة المربوط بها العميل *</label>
           
-          <input #companySearch type="text" (input)="onCompanySearch(companySearch.value)"
-                 placeholder="ابحث باسم الشركة..." 
-                 class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" />
-
-          <select formControlName="companyId" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+          <select formControlName="companyId" class="w-full px-3 py-2 border rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500">
             <option [ngValue]="null">-- حدد شركة من القائمة --</option>
-            @for (comp of companiesList; track comp.id) {
+            @for (comp of companies(); track comp.id) {
               <option [value]="comp.id">{{ comp.name }}</option>
             }
           </select>
-          
-          <div class="flex justify-between items-center text-xs pt-1">
+          @if (customerForm.get('companyId')?.touched && customerForm.get('companyId')?.invalid) {
+            <span class="text-xs text-red-500 block">يرجى اختيار الشركة</span>
+          }
+
+          <!-- خيار إضافة شركة جديدة -->
+          <div class="flex justify-between items-center text-xs pt-1 border-t border-blue-100 mt-2">
             <span class="text-slate-500">الشركة غير مسجلة بالسيستم؟</span>
-            <button type="button" (click)="showCompanyModal = true" class="text-blue-600 font-bold hover:underline">
+            <button type="button" (click)="showCompanyModal.set(true)" class="text-blue-600 font-bold hover:underline">
               + إضافة شركة جديدة الآن
             </button>
           </div>
         </div>
       }
 
-      <!-- ملاحظات -->
-      <div>
-        <label class="block text-xs font-bold text-slate-700 mb-1">ملاحظات (اختياري)</label>
-        <textarea formControlName="notes" rows="2" class="w-full px-3 py-2 border rounded-xl text-sm"></textarea>
-      </div>
-
       <!-- الأزرار -->
-      <div class="flex justify-end gap-2 pt-2 border-t">
-        <button type="button" (click)="closeModal.emit()" class="px-4 py-2 border rounded-xl text-sm font-bold text-slate-600">إلغاء</button>
-        <button type="submit" [disabled]="isSubmitting" class="px-5 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold disabled:bg-slate-300">
-          {{ isSubmitting ? 'جاري الحفظ...' : 'حفظ العميل' }}
+      <div class="flex justify-end gap-2 pt-3 border-t">
+        <button type="button" (click)="onClose()" 
+                class="px-4 py-2 border rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+          إلغاء
+        </button>
+        
+        <!-- زر حفظ العميل بتنسيق أزرق ظاهر بدون شروط تعطل اللون -->
+        <button type="submit" 
+                [disabled]="isSubmitting()" 
+                class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm transition-colors cursor-pointer disabled:bg-slate-300 disabled:cursor-not-allowed">
+          {{ isSubmitting() ? 'جاري الحفظ...' : 'حفظ العميل' }}
         </button>
       </div>
 
@@ -90,10 +111,10 @@
   </div>
 </div>
 
-<!-- مودال إنشاء شركة فرعي يفتح إذا كانت الشركة غير موجودة -->
-@if (showCompanyModal) {
+<!-- مودال إنشاء شركة فرعي -->
+@if (showCompanyModal()) {
   <app-add-company-modal 
-    (companyCreated)="onCompanyCreated($event)"
-    (closeModal)="showCompanyModal = false">
+    (companySaved)="onCompanyCreated($event)"
+    (closeModal)="showCompanyModal.set(false)">
   </app-add-company-modal>
 }

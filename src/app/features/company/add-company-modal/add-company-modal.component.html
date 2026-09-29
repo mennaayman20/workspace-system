@@ -1,71 +1,108 @@
 <div class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 dir-rtl">
-  <div class="bg-white rounded-2xl w-full max-w-xl p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+  <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
     
+    <!-- Header -->
     <div class="flex justify-between items-center border-b pb-3">
-      <h3 class="text-lg font-bold text-slate-800">إضافة حساب شركة جديد</h3>
-      <button (click)="closeModal.emit()" class="text-slate-400 hover:text-slate-600">✕</button>
+      <div class="flex items-center gap-2">
+        <lucide-icon [img]="BuildingIcon" class="w-5 h-5 text-blue-600"></lucide-icon>
+        <h3 class="text-lg font-bold text-slate-800">
+          {{ companyToEdit() ? 'تعديل بيانات الشركة' : 'إضافة شركة جديدة' }}
+        </h3>
+      </div>
+      <button (click)="onClose()" type="button" class="text-slate-400 hover:text-slate-600 transition-colors">
+        <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
+      </button>
     </div>
 
-    @if (errorMessage) {
+    <!-- Error Message -->
+    @if (errorMessage()) {
       <div class="p-3 bg-red-50 text-red-600 rounded-xl text-sm border border-red-200">
-        {{ errorMessage }}
+        {{ errorMessage() }}
       </div>
     }
 
-    <form [formGroup]="companyForm" (ngSubmit)="onSubmit()" class="grid grid-cols-2 gap-4">
+    <!-- Form -->
+    <form [formGroup]="companyForm" (ngSubmit)="onSubmit()" class="space-y-3">
       
       <!-- اسم الشركة -->
-      <div class="col-span-1">
+      <div>
         <label class="block text-xs font-bold text-slate-700 mb-1">اسم الشركة *</label>
-        <input formControlName="name" type="text" placeholder="مثال: Nile Tech"
-               class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500" />
+        <input formControlName="name" type="text" placeholder="مثال: شركة الأمل للحلول الذكية"
+               [ngClass]="{'border-red-500 focus:ring-red-200': isFieldInvalid('name')}"
+               class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        @if (isFieldInvalid('name')) {
+          <span class="text-xs text-red-500 mt-1 block">اسم الشركة مطلوب (حرفين على الأقل)</span>
+        }
       </div>
 
-      <!-- المسؤول الرئيسي -->
-      <div class="col-span-1">
-        <label class="block text-xs font-bold text-slate-700 mb-1">الشخص المسؤول *</label>
-        <input formControlName="contactPerson" type="text" placeholder="أحمد حسن"
-               class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500" />
+      <!-- الشخص المسؤول والجهة -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">الشخص المسؤول</label>
+          <input formControlName="contactPerson" type="text" placeholder="اسم المسؤول"
+                 class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">رقم الهاتف</label>
+          <input formControlName="phone" type="text" placeholder="01000000000"
+                 [ngClass]="{'border-red-500': isFieldInvalid('phone')}"
+                 class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          @if (isFieldInvalid('phone')) {
+            <span class="text-xs text-red-500 mt-1 block">يرجى إدخال رقم هاتف صحيح</span>
+          }
+        </div>
       </div>
 
-      <!-- الهاتف -->
-      <div class="col-span-1">
-        <label class="block text-xs font-bold text-slate-700 mb-1">رقم الهاتف *</label>
-        <input formControlName="phone" type="text" placeholder="01012345678"
-               class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500" />
-      </div>
+      <!-- البريد الإلكتروني والحد الائتماني -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">البريد الإلكتروني</label>
+          <input formControlName="email" type="email" placeholder="company@domain.com"
+                 [ngClass]="{'border-red-500': isFieldInvalid('email')}"
+                 class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          @if (isFieldInvalid('email')) {
+            <span class="text-xs text-red-500 mt-1 block">البريد الإلكتروني غير صحيح</span>
+          }
+        </div>
 
-      <!-- البريد الإلكتروني -->
-      <div class="col-span-1">
-        <label class="block text-xs font-bold text-slate-700 mb-1">البريد الإلكتروني</label>
-        <input formControlName="email" type="email" placeholder="info@company.com"
-               class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500" />
-      </div>
-
-      <!-- الحد الائتماني Credit Limit -->
-      <div class="col-span-1">
-        <label class="block text-xs font-bold text-slate-700 mb-1">الحد الائتماني (EGP) *</label>
-        <input formControlName="creditLimit" type="number" min="0"
-               class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500" />
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">الحد الائتماني (Credit Limit)</label>
+          <input formControlName="creditLimit" type="number" placeholder="0"
+                 [ngClass]="{'border-red-500': isFieldInvalid('creditLimit')}"
+                 class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          @if (isFieldInvalid('creditLimit')) {
+            <span class="text-xs text-red-500 mt-1 block">يجب أن تكون القيمة 0 أو أكثر</span>
+          }
+        </div>
       </div>
 
       <!-- الرقم الضريبي -->
-      <div class="col-span-1">
+      <div>
         <label class="block text-xs font-bold text-slate-700 mb-1">الرقم الضريبي</label>
-        <input formControlName="taxNumber" type="text" placeholder="TAX-10001"
-               class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500" />
+        <input formControlName="taxNumber" type="text" placeholder="xxx-xxx-xxx"
+               class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
       </div>
 
-      <!-- العقد -->
-      <div class="col-span-2">
-        <label class="block text-xs font-bold text-slate-700 mb-1">تفاصيل العقد والاتفاقية</label>
-        <textarea formControlName="contractDetails" rows="2" class="w-full px-3 py-2 border rounded-xl text-sm"></textarea>
+      <!-- تفاصيل العقد / ملاحظات -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">تفاصيل العقد / الشروط</label>
+        <textarea formControlName="contractDetails" rows="2" placeholder="أي تفاصيل خاصة بالاتفاق..."
+                  class="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
       </div>
 
-      <div class="col-span-2 flex justify-end gap-2 pt-2 border-t">
-        <button type="button" (click)="closeModal.emit()" class="px-4 py-2 border rounded-xl text-sm font-bold text-slate-600">إلغاء</button>
-        <button type="submit" [disabled]="isSubmitting" class="px-5 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold disabled:bg-slate-300">
-          {{ isSubmitting ? 'جاري الحفظ...' : 'حفظ الشركة' }}
+      <!-- الأزرار -->
+      <div class="flex justify-end gap-2 pt-3 border-t mt-4">
+        <button type="button" (click)="onClose()" 
+                class="px-4 py-2 border rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+          إلغاء
+        </button>
+        
+        <button type="submit" 
+                [disabled]="isSubmitting()" 
+                class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm transition-colors cursor-pointer disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center gap-2">
+          <lucide-icon [img]="SaveIcon" class="w-4 h-4"></lucide-icon>
+          <span>{{ isSubmitting() ? 'جاري الحفظ...' : 'حفظ الشركة' }}</span>
         </button>
       </div>
 

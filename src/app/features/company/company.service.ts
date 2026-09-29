@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Company, CreateCompanyDto, CompanyStatusDto } from './Icompany';
+import { Company, CreateCompanyDto, UpdateCompanyDto, ChangeCompanyStatusDto } from './Icompany';
 import { environment } from '../../core/environments/environment';
 
 @Injectable({
@@ -11,7 +11,7 @@ export class CompanyService {
   private http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/api/Company`;
 
-  // 1. عرض قائمة الشركات المصفحة (للوحة التحكم/الإدارة)
+  // 1. جلب قائمة الشركات مع Pagination
   getCompanies(pageNumber: number = 1, pageSize: number = 10): Observable<Company[]> {
     const params = new HttpParams()
       .set('pageNumber', pageNumber.toString())
@@ -20,7 +20,7 @@ export class CompanyService {
     return this.http.get<Company[]>(this.baseUrl, { params });
   }
 
-  // 2. البحث عن الشركات أثناء اختيار Corporate Customer (Type-ahead search)
+  // 2. البحث عن شركات
   searchCompanies(searchTerm: string, pageNumber: number = 1, pageSize: number = 10): Observable<Company[]> {
     const params = new HttpParams()
       .set('searchTerm', searchTerm)
@@ -35,38 +35,28 @@ export class CompanyService {
     return this.http.get<Company>(`${this.baseUrl}/${id}`);
   }
 
-  // 4. إنشاء شركة جديدة
+  // 4. إضافة شركة جديدة
   createCompany(dto: CreateCompanyDto): Observable<{ data: number }> {
     return this.http.post<{ data: number }>(this.baseUrl, dto);
   }
 
-  // 5. تعديل بيانات شركة
-  updateCompany(id: number, dto: CreateCompanyDto): Observable<{ data: boolean }> {
+  // 5. تعديل بيانات الشركة
+  updateCompany(id: number, dto: UpdateCompanyDto): Observable<{ data: boolean }> {
     return this.http.put<{ data: boolean }>(`${this.baseUrl}/${id}`, dto);
   }
 
-  // 6. تغيير حالة التفعيل (Active/Inactive) دون الحذف
-  updateCompanyStatus(id: number, isActive: boolean): Observable<{ data: boolean }> {
-    const body: CompanyStatusDto = { isActive };
-    return this.http.patch<{ data: boolean }>(`${this.baseUrl}/${id}/status`, body);
+  // 6. تغيير حالة الشركة (تنشيط / إيقاف)
+  changeStatus(dto: ChangeCompanyStatusDto): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${dto.id}/status`, dto);
   }
 
-  // 7. الحذف المؤقت (Soft Delete)
-  deleteCompany(id: number): Observable<{ data: boolean }> {
-    return this.http.delete<{ data: boolean }>(`${this.baseUrl}/${id}`);
+  // 7. حذف شركة (Soft delete)
+  deleteCompany(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
-  // 8. استعادة شركة محذوفة
-  restoreCompany(id: number): Observable<{ data: boolean }> {
-    return this.http.patch<{ data: boolean }>(`${this.baseUrl}/${id}/restore`, {});
-  }
-
-  // 9. جلب العملاء/الموظفين المربوطين بحساب هذه الشركة
-  getCompanyCustomers(id: number, pageNumber: number = 1, pageSize: number = 10): Observable<any> {
-    const params = new HttpParams()
-      .set('pageNumber', pageNumber.toString())
-      .set('pageSize', pageSize.toString());
-
-    return this.http.get<any>(`${this.baseUrl}/${id}/customers`, { params });
+  // 8. استعادة شركة
+  restoreCompany(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${id}/restore`, {});
   }
 }

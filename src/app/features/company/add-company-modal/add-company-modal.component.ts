@@ -1,37 +1,70 @@
-import { Component, OnInit, Output, EventEmitter, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit, input, output, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CompanyService } from '../company.service';
-import { CreateCompanyDto } from '../Icompany';
+import { Company, CreateCompanyDto, UpdateCompanyDto } from '../Icompany';
+import { LucideAngularModule, X, Building2, Save } from 'lucide-angular';
 
 @Component({
   selector: 'app-add-company-modal',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
   templateUrl: './add-company-modal.component.html'
 })
 export class AddCompanyModalComponent implements OnInit {
   private fb = inject(FormBuilder);
   private companyService = inject(CompanyService);
 
-  @Output() companyCreated = new EventEmitter<{ id: number; name: string }>(); 
-  @Output() closeModal = new EventEmitter<void>();
+  companyToEdit = input<Company | null>(null);
+  closeModal = output<void>();
+  companySaved = output<any | void>(); // تقبل أي قيمة أو void لتجنب خطأ الـ TypeScript
+
+  isSubmitting = signal<boolean>(false);
+  errorMessage = signal<string>('');
+
+  readonly CloseIcon = X;
+  readonly BuildingIcon = Building2;
+  readonly SaveIcon = Save;
 
   companyForm!: FormGroup;
-  isSubmitting = false;
-  errorMessage = '';
 
   ngOnInit() {
+    this.initForm();
+    
+    const editData = this.companyToEdit();
+    if (editData) {
+      this.companyForm.patchValue({
+        name: editData.name,
+        contactPerson: editData.contactPerson || '',
+        phone: editData.phone || '',
+        email: editData.email || '',
+        taxNumber: editData.taxNumber || '',
+        taxInformation: editData.taxInformation || '',
+        contractDetails: editData.contractDetails || '',
+        pricingPlanId: editData.pricingPlanId || null,
+        creditLimit: editData.creditLimit || null
+      });
+    }
+  }
+
+  private initForm() {
     this.companyForm = this.fb.group({
-      name: ['', [Validators.required, Validators.maxLength(150)]],
-      contactPerson: ['', [Validators.required, Validators.maxLength(150)]],
-      phone: ['', [Validators.required, Validators.pattern(/^01[0125][0-9]{8}$/)]],
-      email: ['', [Validators.email, Validators.maxLength(150)]],
-      taxNumber: ['', [Validators.maxLength(50)]],
-      taxInformation: ['', [Validators.maxLength(500)]],
-      contractDetails: ['', [Validators.maxLength(1000)]],
+      name: ['', [Validators.required, Validators.minLength(2)]],
+      contactPerson: [''],
+      phone: ['', [Validators.pattern('^[0-9+ ]*$')]],
+      email: ['', [Validators.email]],
+      taxNumber: [''],
+      taxInformation: [''],
+      contractDetails: [''],
       pricingPlanId: [null],
-      creditLimit: [0, [Validators.required, Validators.min(0)]]
+      creditLimit: [null, [Validators.min(0)]]
     });
+  }
+
+  // دالة مساعدة لفحص صحة الحقول في الـ HTML
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.companyForm.get(fieldName);
+    return !!(field && field.invalid && (field.touched || field.dirty));
   }
 
   onSubmit() {
@@ -40,24 +73,47 @@ export class AddCompanyModalComponent implements OnInit {
       return;
     }
 
-    this.isSubmitting = true;
-    this.errorMessage = '';
+    this.isSubmitting.set(true);
+    this.errorMessage.set('');
 
-    const payload: CreateCompanyDto = this.companyForm.value;
+    const formValue = this.companyForm.value;
+    const editData = this.companyToEdit();
 
-    this.companyService.createCompany(payload).subscribe({
-      next: (res) => {
-        this.isSubmitting = false;
-        this.companyCreated.emit({ id: res.data, name: payload.name });
-      },
-      error: (err) => {
-        this.isSubmitting = false;
-        if (err.status === 409) {
-          this.errorMessage = 'توجد شركة أخرى بنفس الاسم مسجلة بالنظام.';
-        } else {
-          this.errorMessage = 'حدث خطأ في النظام، يرجى مراجعة البيانات والتحقق من الحقول.';
+    if (editData) {
+      const updateDto: UpdateCompanyDto = {
+        id: editData.id,
+        ...formValue
+      };
+
+      this.companyService.updateCompany(editData.id, updateDto).subscribe({
+        next: () => {
+          this.isSubmitting.set(false);
+          this.companySaved.emit(updateDto);
+        },
+        error: () => {
+          this.errorMessage.set('حدث خطأ أثناء تعديل بيانات الشركة.');
+          this.isSubmitting.set(false);
         }
-      }
-    });
+      });
+    } else {
+      const createDto: CreateCompanyDto = {
+        ...formValue
+      };
+
+      this.companyService.createCompany(createDto).subscribe({
+        next: (res: any) => {
+          this.isSubmitting.set(false);
+          this.companySaved.emit(res);
+        },
+        error: () => {
+          this.errorMessage.set('حدث خطأ أثناء إضافة الشركة الجديدة.');
+          this.isSubmitting.set(false);
+        }
+      });
+    }
+  }
+
+  onClose() {
+    this.closeModal.emit();
   }
 }

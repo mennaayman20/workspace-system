@@ -1,1 +1,110 @@
-<p>company works!</p>
+<div class="p-4 sm:p-8 space-y-6 sm:space-y-8 dir-rtl max-w-7xl mx-auto">
+  
+  <!-- Header Section -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
+        <lucide-icon [img]="BuildingIcon" class="w-6 h-6"></lucide-icon>
+      </div>
+      <div>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">إدارة الشركات</h1>
+        <p class="text-sm text-slate-500 mt-1">عرض وإضافة وتعديل بيانات الشركات المربوطة بالسستم</p>
+      </div>
+    </div>
+
+    <button type="button" (click)="openAddModal()"
+      class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-indigo-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+      <lucide-icon [img]="PlusIcon" class="w-4 h-4 transition-transform duration-200 group-hover:rotate-90"></lucide-icon>
+      <span>إضافة شركة جديدة</span>
+    </button>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+    <div class="w-full sm:w-80">
+      <input #searchInput type="text" 
+             (input)="onSearch(searchInput.value)" 
+             placeholder="ابحث باسم الشركة أو رقم الهاتف..."
+             class="w-full px-4 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white" />
+    </div>
+  </div>
+
+  <!-- Loading & Error States -->
+  @if (isLoading()) {
+    <div class="text-center py-12 text-slate-500">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
+      <p class="mt-2 text-sm">جاري تحميل البيانات...</p>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Companies Table -->
+  @if (!isLoading() && !errorMessage()) {
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-right border-collapse">
+          <thead>
+            <tr class="bg-slate-50 text-slate-600 text-xs uppercase border-b border-slate-200">
+              <th class="py-3 px-4 font-bold">اسم الشركة</th>
+              <th class="py-3 px-4 font-bold">الشخص المسؤول</th>
+              <th class="py-3 px-4 font-bold">رقم الهاتف</th>
+              <th class="py-3 px-4 font-bold">الرقم الضريبي</th>
+              <th class="py-3 px-4 font-bold">الحد الائتماني</th>
+              <th class="py-3 px-4 font-bold">الحالة</th>
+              <th class="py-3 px-4 font-bold text-center">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-sm">
+            @for (company of companies(); track company.id) {
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3 px-4 font-semibold text-slate-800">{{ company.name }}</td>
+                <td class="py-3 px-4 text-slate-600">{{ company.contactPerson || '-' }}</td>
+                <td class="py-3 px-4 text-slate-600 dir-ltr text-right">{{ company.phone || '-' }}</td>
+                <td class="py-3 px-4 text-slate-600">{{ company.taxNumber || '-' }}</td>
+                <td class="py-3 px-4 text-slate-600">{{ company.creditLimit ? (company.creditLimit | currency:'EGP':'symbol':'1.0-2') : '-' }}</td>
+                <td class="py-3 px-4">
+                  <button (click)="onToggleStatus(company)" 
+                          [class]="company.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'"
+                          class="px-2.5 py-1 rounded-full text-xs font-bold transition-opacity hover:opacity-80">
+                    {{ company.isActive ? 'نشط' : 'غير نشط' }}
+                  </button>
+                </td>
+                <td class="py-3 px-4 text-center space-x-2 space-x-reverse">
+                  <button (click)="openEditModal(company)" 
+                          class="px-3 py-1 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg text-xs font-bold transition-colors">
+                    تعديل
+                  </button>
+                  <button (click)="onDelete(company.id)" 
+                          class="px-3 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-bold transition-colors">
+                    حذف
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="py-10 text-center text-slate-400">
+                  لا يوجد شركات مطابقة للبحث
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- Modal Call -->
+  @if (isModalOpen()) {
+    <app-add-company-modal
+      [companyToEdit]="editingCompany()"
+      (closeModal)="closeModal()"
+      (companySaved)="refreshAfterSave()">
+    </app-add-company-modal>
+  }
+
+</div>

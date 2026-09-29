@@ -1,15 +1,17 @@
-import { Component, OnInit, Output, EventEmitter, inject, Input } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit, input, output, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CustomerService } from '../customer.service';
 import { CompanyService } from '../../company/company.service';
-import { Company } from '../../company/Icompany';
-import { AddCompanyModalComponent } from '../../company/add-company-modal/add-company-modal.component';
 import { Customer, CustomerType } from '../Icustomer';
+import { Company } from '../../company/Icompany';
+import { LucideAngularModule, X, User, Save } from 'lucide-angular';
+import { AddCompanyModalComponent } from '../../company/add-company-modal/add-company-modal.component';
 
 @Component({
   selector: 'app-add-customer-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, AddCompanyModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, AddCompanyModalComponent],
   templateUrl: './add-customer-modal.component.html'
 })
 export class AddCustomerModalComponent implements OnInit {
@@ -17,91 +19,95 @@ export class AddCustomerModalComponent implements OnInit {
   private customerService = inject(CustomerService);
   private companyService = inject(CompanyService);
 
-  @Input() customerToEdit: Customer | null = null;
-  @Output() customerCreated = new EventEmitter<number>();
-  @Output() closeModal = new EventEmitter<void>();
+  customerToEdit = input<Customer | null>(null);
+  closeModal = output<void>();
+  customerCreated = output<void>();
+
+  isSubmitting = signal<boolean>(false);
+  errorMessage = signal<string>('');
+  successMessage = signal<string>(''); // signal لرسائل النجاح
+  companies = signal<Company[]>([]);
+  showCompanyModal = signal<boolean>(false);
+
+  readonly CloseIcon = X;
+  readonly UserIcon = User;
+  readonly SaveIcon = Save;
 
   customerForm!: FormGroup;
-  isSubmitting = false;
-  errorMessage = '';
-
-  companiesList: Company[] = [];
-  showCompanyModal = false;
-
-  readonly customerTypes: CustomerType[] = ['Individual', 'Corporate', 'Member', 'WalkIn'];
 
   ngOnInit() {
     this.initForm();
-    this.listenToCustomerTypeChanges();
-    this.populateFormIfEdit();
+    this.loadCompanies();
+
+    const editData = this.customerToEdit();
+    if (editData) {
+      this.customerForm.patchValue({
+        fullName: editData.fullName,
+        mobileNumber: editData.mobileNumber,
+        email: editData.email,
+        customerType: editData.customerType,
+        companyId: editData.companyId || null
+      });
+    }
+
+    this.customerForm.get('customerType')?.valueChanges.subscribe((type: CustomerType) => {
+      const companyIdControl = this.customerForm.get('companyId');
+      if (type === 'Corporate') {
+        companyIdControl?.setValidators([Validators.required]);
+      } else {
+        companyIdControl?.clearValidators();
+        companyIdControl?.setValue(null);
+      }
+      companyIdControl?.updateValueAndValidity();
+    });
   }
 
   private initForm() {
     this.customerForm = this.fb.group({
-      fullName: ['', [Validators.required, Validators.maxLength(150)]],
-      mobileNumber: ['', [Validators.required, Validators.pattern(/^01[0125][0-9]{8}$/)]],
+      fullName: ['', [Validators.required]],
+      mobileNumber: ['', [Validators.required]],
       email: ['', [Validators.email]],
-      customerType: ['Individual' as CustomerType, [Validators.required]],
-      companyId: [null],
-      notes: ['', [Validators.maxLength(500)]]
+      customerType: ['WalkIn', [Validators.required]],
+      companyId: [null]
     });
   }
-
-  // تعبئة البيانات في حالة التعديل
-  private populateFormIfEdit() {
-    if (this.customerToEdit) {
-      this.customerForm.patchValue({
-        fullName: this.customerToEdit.fullName,
-        mobileNumber: this.customerToEdit.mobileNumber,
-        email: this.customerToEdit.email,
-        customerType: this.customerToEdit.customerType,
-        companyId: this.customerToEdit.companyId,
-        notes: this.customerToEdit.notes
-      });
-
-      // جلب الشركة لـ Dropdown إذا كان العميل مجدول كـ Corporate وله companyId
-      if (this.customerToEdit.companyId) {
-        this.companyService.getCompanyById(this.customerToEdit.companyId).subscribe({
-          next: (company) => {
-            this.companiesList = [company];
-          }
-        });
+loadCompanies(selectCreatedCompanyId?: number | string) {
+  // استخدام pageSize مقبولة من السيرفر (مثلاً 100 أو 50)
+  this.companyService.getCompanies(1, 100).subscribe({
+    next: (res: any) => {
+      let list: Company[] = [];
+      if (Array.isArray(res)) {
+        list = res;
+      } else if (res?.items) {
+        list = res.items;
+      } else if (res?.data) {
+        list = Array.isArray(res.data) ? res.data : res.data.items || [];
       }
+      
+      this.companies.set(list);
+
+      if (selectCreatedCompanyId) {
+        this.customerForm.patchValue({ companyId: selectCreatedCompanyId });
+      }
+    },
+    error: (err) => {
+      console.error('Error loading companies:', err);
+      this.errorMessage.set('حدث خطأ أثناء تحميل قائمة الشركات.');
     }
-  }
+  });
+}
+onCompanyCreated(res?: any) {
+  this.showCompanyModal.set(false);
 
-  // التحكم الديناميكي بإلزام حقل الشركة وتفريغه
-  private listenToCustomerTypeChanges() {
-    this.customerForm.get('customerType')?.valueChanges.subscribe((type: CustomerType) => {
-      const companyControl = this.customerForm.get('companyId');
+  // استخراج ID الشركة الجديدة إن وجد في استجابة الـ API
+  const newId = res?.id || res?.data?.id || res;
 
-      if (type === 'Corporate') {
-        companyControl?.setValidators([Validators.required]);
-      } else {
-        companyControl?.clearValidators();
-        companyControl?.setValue(null); // مسح companyId للأنواع غير الشركات
-      }
-      companyControl?.updateValueAndValidity();
-    });
-  }
+  this.successMessage.set('تمت إضافة الشركة بنجاح واختيارها تلقائياً.');
+  setTimeout(() => this.successMessage.set(''), 3000);
 
-  // البحث عن الشركة بمجرد كتابة الاسم
-  onCompanySearch(term: string) {
-    if (!term || term.trim().length === 0) return;
-
-    this.companyService.searchCompanies(term).subscribe({
-      next: (res) => this.companiesList = res,
-      error: () => this.companiesList = []
-    });
-  }
-
-  // معالجة عند إنشاء شركة جديدة من المودال المباشر
-  onCompanyCreated(newCompany: { id: number; name: string }) {
-    this.showCompanyModal = false;
-    // إضافة الشركة للـ Dropdown وتحديدها فوراً
-    this.companiesList = [{ id: newCompany.id, name: newCompany.name } as Company, ...this.companiesList];
-    this.customerForm.patchValue({ companyId: newCompany.id });
-  }
+  // إعادة تحميل قائمة الشركات واختيار الشركة الجديدة مباشرة
+  this.loadCompanies(newId);
+}
 
   onSubmit() {
     if (this.customerForm.invalid) {
@@ -109,36 +115,45 @@ export class AddCustomerModalComponent implements OnInit {
       return;
     }
 
-    this.isSubmitting = true;
-    this.errorMessage = '';
+    this.isSubmitting.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
 
-    if (this.customerToEdit) {
-      // 1. حالة التعديل PUT
-      this.customerService.updateCustomer(this.customerToEdit.id, this.customerForm.value).subscribe({
+    const formValue = this.customerForm.value;
+    const editData = this.customerToEdit();
+
+    if (editData) {
+      this.customerService.updateCustomer(editData.id, { id: editData.id, ...formValue }).subscribe({
         next: () => {
-          this.isSubmitting = false;
-          this.customerCreated.emit(this.customerToEdit!.id);
+          this.isSubmitting.set(false);
+          this.successMessage.set('تم تعديل بيانات العميل بنجاح!');
+          setTimeout(() => {
+            this.customerCreated.emit();
+          }, 1000);
         },
-        error: (err) => this.handleError(err)
+        error: () => {
+          this.errorMessage.set('حدث خطأ أثناء تعديل بيانات العميل.');
+          this.isSubmitting.set(false);
+        }
       });
     } else {
-      // 2. حالة الإنشاء POST
-      this.customerService.createCustomer(this.customerForm.value).subscribe({
-        next: (res) => {
-          this.isSubmitting = false;
-          this.customerCreated.emit(res.data); // إرجاع customerId الناتج مباشرة
+      this.customerService.createCustomer(formValue).subscribe({
+        next: () => {
+          this.isSubmitting.set(false);
+          this.successMessage.set('تم إضافة العميل بنجاح!');
+          setTimeout(() => {
+            this.customerCreated.emit();
+          }, 1000);
         },
-        error: (err) => this.handleError(err)
+        error: () => {
+          this.errorMessage.set('حدث خطأ أثناء إضافة العميل.');
+          this.isSubmitting.set(false);
+        }
       });
     }
   }
 
-  private handleError(err: any) {
-    this.isSubmitting = false;
-    if (err.status === 409) {
-      this.errorMessage = 'رقم الموبايل مسجل لعميل آخر.';
-    } else {
-      this.errorMessage = 'يرجى مراجعة وتصحيح البيانات المدخلة.';
-    }
+  onClose() {
+    this.closeModal.emit();
   }
 }
