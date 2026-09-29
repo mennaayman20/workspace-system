@@ -16,16 +16,16 @@ export class PricingRuleService {
   private readonly rulesUrl = `${environment.apiUrl}/api/PricingRule`;
   private readonly plansUrl = `${environment.apiUrl}/api/PricingPlan`;
 
-  /** كل قواعد الخطة (مش paginated). بترجّع array مباشرة في data. */
 getByPlan(planId: number): Observable<PricingRule[]> {
-    // استخدم HttpParams لتمرير الـ planId كمعامل بحث
-    let params = new HttpParams().set('planId', planId.toString()); // تأكد من اسم البارامتر الصحيح من الباك إند
-
-    return this.http
-      .get<ApiResponse<PricingRule[]>>(this.rulesUrl, { params }) // استخدم this.rulesUrl بدلاً من this.plansUrl
-      .pipe(map((res) => res.data));
-  }
-
+  // بدلاً من /api/PricingRule?planId=1
+  // نستخدم الأند بوينت المخصصة: /api/PricingPlan/1/rules
+  return this.http.get<any>(`${environment.apiUrl}/api/PricingPlan/${planId}/rules`).pipe(
+    map((res) => {
+      const rules = Array.isArray(res) ? res : res?.data?.items || res?.data || res?.items || [];
+      return rules;
+    })
+  );
+}
   /**
    * بينفّذ الحذف الأول ثم الإنشاء/التعديل، عشان لو المستخدم بدّل
    * RoundUp ← RoundDown ميحصلش تعارض بين القاعدتين.
