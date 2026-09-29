@@ -12,20 +12,20 @@
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-up">
     <div class="flex items-center gap-4">
-      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-blue-600/25">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 10h.01M15 10h.01"/></svg>
-      </div>
+<div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+  <lucide-icon [img]="BuildingIcon" class="w-6 h-6"></lucide-icon>
+</div>
       <div>
         <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">إدارة المساحات</h1>
         <p class="text-sm text-slate-500 mt-1">عرض وتحديث حالات القاعات والمكاتب المسجلة في النظام</p>
       </div>
     </div>
 
-    <button type="button" (click)="openAddModal()"
-      class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-l from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
-      <svg class="w-4 h-4 transition-transform duration-200 group-hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
-      إضافة مساحة جديدة
-    </button>
+<button type="button" (click)="openAddModal()"
+  class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+  <lucide-icon [img]="PlusIcon" class="w-4 h-4 transition-transform duration-200 group-hover:rotate-90"></lucide-icon>
+  <span>إضافة مساحة جديدة</span>
+</button>
   </div>
 
   <!-- Loading skeleton -->

@@ -1,0 +1,31 @@
+<section class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+  <button type="button" (click)="toggle()" [attr.aria-expanded]="isOpen()"
+    class="w-full flex items-center justify-between gap-3 p-4 sm:p-5 text-start hover:bg-slate-50/70 transition-colors">
+
+    <div class="flex items-center gap-3 min-w-0">
+      <div class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 font-extrabold flex items-center justify-center">
+        {{ workspaceType().name.charAt(0) }}
+      </div>
+      <div class="min-w-0">
+        <h3 class="font-bold text-slate-900 truncate">{{ workspaceType().name }}</h3>
+        <p class="text-xs text-slate-500 mt-0.5">{{ summary() }}</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3 shrink-0">
+      <span
+        [class]="isReady() ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-amber-50 text-amber-700 ring-amber-600/20'"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset">
+        <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+        {{ isReady() ? 'جاهز للـ checkout' : 'ناقص سعر الساعة' }}
+      </span>
+      <mat-icon class="text-slate-400 transition-transform duration-200" [class.rotate-180]="isOpen()">expand_more</mat-icon>
+    </div>
+  </button>
+
+  @if (isOpen()) {
+    <div class="border-t border-slate-100 p-4 sm:p-5">
+      <app-type-pricing-form [config]="config()" [isSaving]="isSaving()" (save)="onSave($event)" />
+    </div>
+  }
+</section>

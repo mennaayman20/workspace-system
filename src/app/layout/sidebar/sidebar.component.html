@@ -1,45 +1,52 @@
-<aside class="w-64 h-[calc(100vh-4rem)] bg-white border-l border-slate-200 flex flex-col justify-between p-4 sticky top-16 select-none">
+<aside class="w-64 h-[calc(100vh-4rem)] bg-white/90 backdrop-blur-md border-l border-slate-200/80 flex flex-col justify-between p-4 sticky top-16 select-none shrink-0 transition-all">
   
-  <!-- Top Section: Navigation Links -->
+  <!-- القسم العلوي: محول الفرع والقائمة الرئيسية -->
   <div class="space-y-6">
     
-    <!-- Workspace Switcher / Status -->
-    <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-2xl flex items-center justify-between cursor-pointer hover:border-blue-200 transition-colors">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+    <!-- محول الفرع (Workspace Switcher) مع تأثير matRipple -->
+    <div 
+      matRipple 
+      [matRippleColor]="'rgba(0, 0, 0, 0.04)'"
+      class="p-3 bg-slate-50/80 hover:bg-slate-100/70 border border-slate-200/80 rounded-2xl flex items-center justify-between cursor-pointer transition-all group shadow-2xs">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-xs shadow-md shadow-blue-500/15 shrink-0">
           HQ
         </div>
-        <div class="flex flex-col">
-          <span class="text-xs font-bold text-slate-800 leading-tight">الفرع الرئيسي</span>
-          <span class="text-[10px] text-slate-500">بني سويف - الاباصيري</span>
+        <div class="flex flex-col min-w-0">
+          <span class="text-xs font-bold text-slate-900 leading-tight truncate">الفرع الرئيسي</span>
+          <span class="text-[10px] font-medium text-slate-500 truncate mt-0.5">بني سويف - الإباصيري</span>
         </div>
       </div>
-      <span class="text-xs text-slate-400">⇅</span>
+      <mat-icon class="!w-4 !h-4 !text-base text-slate-400 group-hover:text-slate-600 transition-colors shrink-0">unfold_more</mat-icon>
     </div>
 
-    <!-- Main Navigation Menu -->
+    <!-- القائمة الرئيسية (Main Navigation) -->
     <nav class="space-y-1">
-      <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">القائمة الرئيسية</p>
+      <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2.5">القائمة الرئيسية</p>
 
-      <!-- Dynamic Navigation Links -->
+      <!-- الروابط الديناميكية مع matRipple -->
       <a 
         *ngFor="let item of navItems"
         [routerLink]="item.route"
-        routerLinkActive="bg-blue-50 text-blue-700 font-bold border-blue-100"
+        routerLinkActive="bg-blue-50/80 text-blue-700 font-bold border-blue-200/80 shadow-2xs"
         [routerLinkActiveOptions]="{ exact: false }"
-        class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-xs border border-transparent transition-all"
+        matRipple
+        [matRippleColor]="'rgba(59, 130, 246, 0.08)'"
+        class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-semibold text-sm border border-transparent transition-all group"
       >
-        <div class="flex items-center gap-3">
-      
-          <span>{{ item.label }}</span>
+        <div class="flex items-center gap-3 min-w-0">
+          <!-- أيقونة Material Icon -->
+          <mat-icon *ngIf="item.icon" class="!w-5 !h-5 !text-lg text-slate-400 group-hover:text-slate-700 transition-colors shrink-0 flex items-center justify-center">
+            {{ item.icon }}
+          </mat-icon>
+          <span class="truncate">{{ item.label }}</span>
         </div>
 
-        <!-- Reusable Badge Component -->
+        <!-- الشارة (Badge) -->
         @if (item.badge) {
           <app-badge 
-            [variant]="item.badge.variant" 
-            [size]="item.badge.variant === 'slate' ? 'md' : 'sm'"
-          >
+            [variant]="'slate'" 
+            [size]="item.badge.variant === 'slate' ? 'md' : 'sm'">
             {{ item.badge.text }}
           </app-badge>
         }
@@ -48,33 +55,42 @@
 
   </div>
 
-  <!-- Bottom Section: Settings & System Status -->
+  <!-- القسم السفلي: إعدادات النظام والدعم الفني -->
   <div class="space-y-3 pt-4 border-t border-slate-100">
     <a 
       routerLink="settings"
-      routerLinkActive="bg-blue-50 text-blue-700 font-bold border-blue-100"
-      class="flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-xs border border-transparent transition-all"
+      routerLinkActive="bg-blue-50/80 text-blue-700 font-bold border-blue-200/80 shadow-2xs"
+      matRipple
+      [matRippleColor]="'rgba(0, 0, 0, 0.04)'"
+      class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-semibold text-xs border border-transparent transition-all group"
     >
-      <span class="text-base">⚙️</span>
+      <mat-icon class="!w-4 !h-4 !text-base text-slate-400 group-hover:text-slate-700 transition-colors flex items-center justify-center">settings</mat-icon>
       <span>إعدادات النظام</span>
     </a>
 
-    <!-- System Help / Support Card -->
-    <div class="p-3 bg-gradient-to-br from-slate-900 to-blue-950 text-white rounded-2xl flex flex-col gap-2">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-blue-200">الدعم الفني</span>
+    <!-- بطاقة الدعم الفني (Support Card) -->
+    <div class="p-4 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-2xl flex flex-col gap-2.5 shadow-lg shadow-slate-900/10 border border-slate-800 relative overflow-hidden">
+      <!-- خلفية جمالية خفيفة -->
+      <div class="absolute -right-4 -top-4 w-16 h-16 bg-blue-500/10 rounded-full blur-xl pointer-events-none"></div>
+
+      <div class="flex items-center justify-between relative z-10">
+        <span class="text-xs font-bold text-blue-300 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+          الدعم الفني
+        </span>
       </div>
-      <p class="text-[11px] text-slate-300 leading-relaxed">هل واجهتك مشكلة أثناء تنظيم الحجوزات؟</p>
-      
-      <!-- Reusable Button Component -->
-      <app-button 
-        variant="primary" 
-        size="sm" 
-        [fullWidth]="true"
-        (onClick)="onContactSupport()"
-      >
+      <p class="text-[11px] text-slate-300 leading-relaxed relative z-10 font-medium">
+        هل واجهتك مشكلة أثناء تنظيم الحجوزات أو إدارة الجلسات؟
+      </p>
+
+      <!-- زر Material محسن بـ Tailwind -->
+      <button 
+        mat-flat-button 
+        color="primary"
+        (click)="onContactSupport()"
+        class="!w-full !rounded-xl !py-1.5 !text-xs !font-bold mt-1 relative z-10 !bg-blue-600 hover:!bg-blue-500">
         تواصل معنا
-      </app-button>
+      </button>
     </div>
   </div>
 

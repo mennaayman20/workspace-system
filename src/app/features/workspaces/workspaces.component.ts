@@ -8,11 +8,11 @@ import { WorkspaceService } from '../../core/services/workspace.service';
 import { Workspace, WorkspaceType, WorkspaceStatus } from '../../core/interfaces/Iworkspace';
 import { CreateWorkspaceModalComponent } from './add-workspace-modal/add-workspace-modal.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-
+import { LucideAngularModule, Building2, Plus } from 'lucide-angular';
 @Component({
   selector: 'app-workspaces',
   standalone: true,
-  imports: [CreateWorkspaceModalComponent, MatSnackBarModule, MatDialogModule ],
+  imports: [CreateWorkspaceModalComponent, MatSnackBarModule, MatDialogModule ,LucideAngularModule] ,
   templateUrl: './workspaces.component.html'
 })
 export class WorkspacesComponent implements OnInit {
@@ -21,7 +21,14 @@ export class WorkspacesComponent implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
 
-  readonly statusOptions: { value: WorkspaceStatus; label: string }[] = [
+
+  //icons
+readonly BuildingIcon = Building2;
+readonly PlusIcon = Plus;
+  
+
+
+readonly statusOptions: { value: WorkspaceStatus; label: string }[] = [
     { value: 'Available', label: 'متاحة' },
     { value: 'Occupied', label: 'مشغولة' },
     { value: 'Reserved', label: 'محجوزة' },

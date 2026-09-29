@@ -1,0 +1,93 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+
+  <!-- الأسعار -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    @for (field of priceFields; track field.control) {
+      <div>
+        <label [for]="'field-' + field.control" class="block text-sm font-bold text-slate-700 mb-1.5">
+          {{ field.label }}
+          @if (field.required) { <span class="text-rose-500">*</span> }
+        </label>
+
+        <div class="relative">
+          <input
+            [id]="'field-' + field.control"
+            type="number"
+            min="0"
+            step="any"
+            inputmode="decimal"
+            [formControlName]="field.control"
+            [class.border-rose-400]="isInvalid(field.control)"
+            class="w-full h-11 ps-3 pe-20 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all" />
+          <span class="absolute top-1/2 -translate-y-1/2 end-3 text-xs font-semibold text-slate-400 pointer-events-none">
+            {{ field.unit }}
+          </span>
+        </div>
+
+        @if (isInvalid(field.control)) {
+          <p class="text-xs text-rose-600 mt-1.5">{{ errorText(field.control) }}</p>
+        } @else {
+          <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">{{ field.hint }}</p>
+        }
+      </div>
+    }
+  </div>
+
+  @if (maxBelowMin) {
+    <p role="alert" class="text-xs text-rose-600 -mt-3">أقصى مبلغ لا يمكن أن يكون أقل من أقل مبلغ.</p>
+  }
+
+  <!-- التقريب -->
+  <fieldset class="space-y-3">
+    <legend class="text-sm font-bold text-slate-700">تقريب مدة الجلسة</legend>
+
+    <div class="flex flex-wrap gap-2">
+      @for (option of roundingOptions; track option.value) {
+        <label
+          [class]="form.controls.roundingMode.value === option.value
+            ? 'border-blue-500 bg-blue-50 text-blue-700'
+            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'"
+          class="flex items-center gap-2 px-4 h-10 rounded-xl border text-sm font-semibold cursor-pointer transition-colors">
+          <input type="radio" formControlName="roundingMode" [value]="option.value" class="sr-only" />
+          {{ option.label }}
+        </label>
+      }
+    </div>
+
+    @if (form.controls.roundingMode.value !== 'none') {
+      <div class="max-w-xs">
+        <label for="field-roundingMinutes" class="block text-xs font-bold text-slate-600 mb-1.5">
+          التقريب لأقرب (بالدقائق)
+        </label>
+        <div class="relative">
+          <input
+            id="field-roundingMinutes"
+            type="number"
+            min="1"
+            step="1"
+            inputmode="numeric"
+            formControlName="roundingMinutes"
+            placeholder="30"
+            [class.border-rose-400]="roundingMinutesInvalid"
+            class="w-full h-11 ps-3 pe-16 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all" />
+          <span class="absolute top-1/2 -translate-y-1/2 end-3 text-xs font-semibold text-slate-400 pointer-events-none">دقيقة</span>
+        </div>
+        @if (roundingMinutesInvalid) {
+          <p class="text-xs text-rose-600 mt-1.5">أدخل عدد دقائق صحيح أكبر من صفر</p>
+        } @else {
+          <p class="text-xs text-slate-400 mt-1.5">
+            مثال: جلسة 65 دقيقة بتقريب 30 تُحسب
+            {{ form.controls.roundingMode.value === 'up' ? '90' : '60' }} دقيقة.
+          </p>
+        }
+      </div>
+    }
+  </fieldset>
+
+  <div class="flex items-center justify-end pt-1">
+    <button type="submit" [disabled]="isSaving() || form.pristine"
+      class="px-6 h-11 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none text-white rounded-xl text-sm font-bold transition-colors">
+      {{ isSaving() ? 'جارٍ الحفظ...' : 'حفظ التسعير' }}
+    </button>
+  </div>
+</form>

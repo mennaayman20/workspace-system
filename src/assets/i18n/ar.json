@@ -1,0 +1,18 @@
+{
+  "COMMON": {
+    "SAVE": "حفظ",
+    "CANCEL": "إلغاء",
+    "SEARCH": "بحث..."
+  },
+  "SIDEBAR": {
+    "MAIN_MENU": "القائمة الرئيسية",
+    "DASHBOARD": "لوحة التحكّم",
+    "WORKSPACES": "مساحات العمل",
+    "CUSTOMERS": "دخول عميل",
+    "POS": "المشروبات والـ POS",
+    "PAYMENTS": "الخزينة والتقارير",
+    "SETTINGS": "إعدادات النظام",
+    "SUPPORT": "الدعم الفني",
+    "CONTACT_US": "تواصل معنا"
+  }
+}

@@ -1,59 +1,69 @@
-<header class="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm px-4 lg:px-10 h-16 flex items-center select-none">
-  <div class="w-full max-w-8xl mx-auto flex items-center justify-between gap-5">
-    
+<header class="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05)] px-4 lg:px-10 h-16 flex items-center select-none transition-all duration-300">
+  <div class="w-full max-w-screen-2xl mx-auto flex items-center justify-between gap-6">
+
     <!-- Left Section: Brand & Quick Action -->
-    <div class="flex items-center gap-4">
-      <div class="flex items-center gap-2.5 font-extrabold text-xl text-slate-900 cursor-pointer group">
-        
-        <span class="tracking-tight">WorkSpace</span>
+    <div class="flex items-center gap-5">
+      <!-- Logo -->
+      <div class="flex items-center gap-3 cursor-pointer group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 group-hover:shadow-blue-500/30 transition-all duration-300">
+          <span class="font-black text-lg tracking-wider">W</span>
+        </div>
+        <div class="flex flex-col">
+          <span class="font-black text-xl text-slate-900 tracking-tight leading-none group-hover:text-blue-600 transition-colors">WorkSpace</span>
+          <span class="text-[10px] font-semibold text-slate-400 tracking-widest uppercase">Platform</span>
+        </div>
       </div>
 
-      <!-- Reusable Secondary Button for Quick Check-in -->
-      <app-button 
-        variant="secondary" 
-        size="sm" 
+      <!-- Quick Action Button -->
+      <app-button
+        variant="secondary"
+        size="sm"
         (onClick)="openCheckInModal()"
-        class="hidden sm:block"
+        class="hidden sm:inline-flex items-center gap-2 bg-slate-100/80 hover:bg-blue-50 text-slate-700 hover:text-blue-600 font-semibold text-xs px-4 py-2 rounded-xl border border-slate-200/60 hover:border-blue-200 shadow-sm transition-all duration-200 active:scale-95"
       >
-        <span>Check-in سريع</span>
+        <span class="text-sm">⚡</span>
+        <span>تسجيل دخول سريع</span>
       </app-button>
     </div>
 
-    <!-- Center Section: Quick Global Search via Reusable Input -->
+    <!-- Center Section: Global Search -->
     <div class="hidden md:block flex-1 max-w-md">
-      <app-input
-       
-        placeholder="ابحث عن عميل، مساحة عمل، أو حجز... (Ctrl + K)"
-        [ngModel]="searchQuery()"
-        (ngModelChange)="onSearch($event)"
-      ></app-input>
+      <div class="relative group">
+        <app-input
+          placeholder="بحث سريع عن المقاعد، الغرف، أو الأعضاء..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="onSearch($event)"
+          class="w-full bg-slate-50/80 hover:bg-slate-100/80 focus-within:bg-white border-slate-200/80 rounded-2xl text-xs transition-all duration-200 shadow-inner"
+        ></app-input>
+      </div>
     </div>
 
     <!-- Right Section: Indicators & User Profile -->
     <div class="flex items-center gap-3">
-      
-      <!-- Active Sessions Status Indicator -->
-      <div class="flex items-center gap-2 bg-emerald-50/80 border border-emerald-200/80 px-3 py-1.5 rounded-full text-xs text-emerald-700 shadow-sm">
-        <span class="pulse-dot"></span>
-        <span class="font-medium text-[11px]">الجلسات:</span>
-        <strong class="font-bold text-xs">{{ activeSessionsCount() }}</strong>
+
+      <!-- Active Sessions Pill -->
+      <div class="hidden sm:flex items-center gap-2.5 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20 px-3.5 py-1.5 rounded-full text-xs text-emerald-700 shadow-sm backdrop-blur-sm">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+        </span>
+        <span class="font-semibold text-[11px] text-slate-600">الجلسات النشطة:</span>
+        <span class="font-extrabold text-xs px-1.5 py-0.5 bg-emerald-500 text-white rounded-md shadow-xs">{{ activeSessionsCount() }}</span>
       </div>
 
-      <!-- Reusable Outline Button for Language Switcher -->
-      <app-button 
-        variant="outline" 
-        size="sm" 
-        (onClick)="toggleLanguage()"
-      >
-        <span>{{ currentLang() }}</span>
-      </app-button>
+      <div class="h-5 w-[1px] bg-slate-200 mx-1 hidden sm:block"></div>
 
       <!-- Notifications -->
-      <button class="relative w-9 h-9 flex items-center justify-center bg-slate-50 border border-slate-200 rounded-xl text-slate-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-all cursor-pointer">
-        <span class="text-sm">🔔</span>
+      <button
+        type="button"
+        aria-label="الإشعارات"
+        class="relative w-10 h-10 flex items-center justify-center bg-slate-50 hover:bg-blue-50/80 border border-slate-200/80 hover:border-blue-200 rounded-xl text-slate-600 hover:text-blue-600 transition-all duration-200 shadow-xs cursor-pointer group active:scale-95"
+      >
+        <span class="text-base group-hover:rotate-12 transition-transform duration-200">🔔</span>
         @if (unreadNotifications() > 0) {
-          <span class="absolute -top-1 -left-1">
-            <app-badge variant="rose" size="sm">
+          <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+            <app-badge variant="rose" size="sm" class="relative rounded-full text-[10px] font-bold px-1.5 ring-2 ring-white shadow-xs">
               {{ unreadNotifications() }}
             </app-badge>
           </span>
@@ -61,35 +71,74 @@
       </button>
 
       <!-- User Profile -->
-      <div class="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-100/70 cursor-pointer transition-colors border border-transparent hover:border-slate-200">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-sky-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
-          <span>{{ currentUser().initials }}</span>
+      <div class="flex items-center gap-3 p-1.5 pr-2.5 rounded-2xl hover:bg-slate-100/80 cursor-pointer transition-all duration-200 border border-transparent hover:border-slate-200/80 group">
+        <div class="relative">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center font-black text-xs shadow-md shadow-blue-500/20 ring-2 ring-white">
+            <span>{{ currentUser().initials }}</span>
+          </div>
+          <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
         </div>
-        <div class="hidden sm:flex flex-col text-right">
-          <span class="text-xs font-bold text-slate-800 leading-tight">{{ currentUser().name }}</span>
-          <span class="text-[10px] font-medium text-slate-500">{{ currentUser().role }}</span>
+        <div class="hidden sm:flex flex-col text-start">
+          <span class="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors leading-tight">{{ currentUser().name }}</span>
+          <span class="text-[10px] font-medium text-slate-400 mt-0.5">{{ currentUser().role }}</span>
         </div>
-        <span class="text-[10px] text-slate-400">▾</span>
+        <span class="text-[10px] text-slate-400 group-hover:translate-y-0.5 transition-transform duration-200">▼</span>
       </div>
 
     </div>
-
   </div>
 </header>
 
-<!-- Reusable Quick Check-in Modal -->
-<app-modal 
-  [isOpen]="isCheckInModalOpen()" 
-  title="تسجيل دخول سريع (Quick Check-in)"
+<!-- Quick Check-in Modal -->
+<app-modal
+  [isOpen]="isCheckInModalOpen()"
+  title="تسجيل دخول سريع"
   (onClose)="closeCheckInModal()"
+  class="backdrop-blur-md"
 >
-  <div class="space-y-4">
-    <app-input label="رقم الهاتف أو اسم العميل" placeholder="أدخل رقم الهاتف للبحث السريع..." icon="📞"></app-input>
-    <app-input label="اختر مساحة العمل" placeholder="اختر الغرفة أو الميزانين..." icon="🚪"></app-input>
+  <div class="p-2 space-y-5">
+    <div class="bg-blue-50/60 border border-blue-100 rounded-2xl p-3.5 flex items-start gap-3">
+      <span class="text-lg">✨</span>
+      <p class="text-xs text-blue-900 leading-relaxed">
+        قم بتسجيل الدخول السريع عن طريق أدخال رقم الهاتف وتحديد الغرفة أو المساحة المطلوبة.
+      </p>
+    </div>
+
+    <div class="space-y-4">
+      <app-input
+        label="رقم الهاتف"
+        placeholder="مثال: 05X XXX XXXX"
+        icon="📞"
+        [ngModel]="checkInPhone()"
+        (ngModelChange)="checkInPhone.set($event)"
+        class="focus-within:ring-2 focus-within:ring-blue-500/20 rounded-xl"
+      ></app-input>
+
+      <app-input
+        label="المساحة / الغرفة"
+        placeholder="اختر أو اكتب اسم المساحة..."
+        icon="🚪"
+        [ngModel]="checkInSpace()"
+        (ngModelChange)="checkInSpace.set($event)"
+        class="focus-within:ring-2 focus-within:ring-blue-500/20 rounded-xl"
+      ></app-input>
+    </div>
   </div>
 
-  <div modal-footer class="flex gap-2">
-    <app-button variant="outline" (onClick)="closeCheckInModal()">إلغاء</app-button>
-    <app-button variant="primary" (onClick)="closeCheckInModal()">تأكيد الدخول</app-button>
+  <div modal-footer class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+    <app-button 
+      variant="outline" 
+      (onClick)="closeCheckInModal()"
+      class="px-5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs transition-all"
+    >
+      إلغاء
+    </app-button>
+    <app-button 
+      variant="primary" 
+      (onClick)="confirmCheckIn()"
+      class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-xs shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 active:scale-95 transition-all"
+    >
+      تأكيد الدخول
+    </app-button>
   </div>
 </app-modal>

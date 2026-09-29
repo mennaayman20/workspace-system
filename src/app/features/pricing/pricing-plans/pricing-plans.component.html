@@ -1,0 +1,131 @@
+<div class="p-4 sm:p-8 space-y-6 max-w-7xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+        <mat-icon>payments</mat-icon>
+      </div>
+      <div>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">خطط التسعير</h1>
+        <p class="text-sm text-slate-500 mt-1">أنشئ قوائم الأسعار وحدّد سعر كل نوع مساحة داخل كل خطة</p>
+      </div>
+    </div>
+
+    <button type="button" (click)="openForm()"
+      class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+      <mat-icon class="!w-5 !h-5 !text-xl">add</mat-icon>
+      <span>إضافة خطة جديدة</span>
+    </button>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white p-2.5 sm:p-3 rounded-xl border border-slate-200/80">
+    <div class="relative flex-1 max-w-xs">
+      <mat-icon class="!w-4 !h-4 !text-base text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none">search</mat-icon>
+      <input
+        type="search"
+        (input)="onSearch($any($event.target).value)"
+        placeholder="ابحث بالاسم أو الوصف..."
+        class="w-full ps-9 pe-3 py-1.5 bg-slate-50 border border-slate-200/90 rounded-lg text-xs placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+    </div>
+
+    <div class="flex items-center gap-1">
+      @for (option of statusOptions; track option.value) {
+        <button type="button" (click)="onFilterStatus(option.value)"
+          [class]="statusFilter() === option.value ? 'bg-slate-900 text-white' : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200/70'"
+          class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
+          {{ option.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Content -->
+  @if (isLoading()) {
+    <div class="space-y-3" aria-busy="true">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <div class="h-20 rounded-2xl bg-slate-100 animate-pulse"></div>
+      }
+    </div>
+  } @else if (errorMessage()) {
+    <div role="alert" class="p-5 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-2xl flex items-center justify-between gap-3">
+      <span class="font-medium">{{ errorMessage() }}</span>
+      <button type="button" (click)="load()"
+        class="px-4 py-2 bg-white border border-rose-200 rounded-xl font-bold hover:bg-rose-100 transition-colors">
+        إعادة المحاولة
+      </button>
+    </div>
+  } @else if (!plans() || plans().length === 0) {
+    <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center space-y-4">
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
+        <mat-icon class="!w-8 !h-8 !text-3xl">payments</mat-icon>
+      </div>
+      @if (hasFilters()) {
+        <p class="text-base font-bold text-slate-800">لا توجد نتائج مطابقة</p>
+      } @else {
+        <p class="text-base font-bold text-slate-800">لا توجد خطط تسعير حتى الآن</p>
+        <p class="text-sm text-slate-500">ابدأ بخطة أساسية مثل "Standard Plan" ثم حدّد أسعار الأنواع</p>
+        <button type="button" (click)="openForm()"
+          class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors">
+          + أضف أول خطة
+        </button>
+      }
+    </div>
+  } @else {
+    <ul class="divide-y divide-slate-100 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+      @for (plan of plans(); track plan.id) {
+        <li class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 sm:p-5 hover:bg-blue-50/40 transition-colors"
+            [class.opacity-50]="deletingId() === plan.id"
+            [class.pointer-events-none]="deletingId() === plan.id">
+
+          <a [routerLink]="['/pricing', plan.id]" class="group flex items-center gap-3 min-w-0 flex-1">
+            <div class="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 font-extrabold flex items-center justify-center text-lg">
+              {{ plan.name.charAt(0) }}
+            </div>
+            <div class="min-w-0">
+              <p class="font-bold text-slate-900 truncate group-hover:text-blue-700 transition-colors">{{ plan.name }}</p>
+              <p class="text-sm text-slate-500 truncate">{{ plan.description || 'بدون وصف' }}</p>
+            </div>
+          </a>
+
+          <span
+            [class]="plan.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-100 text-slate-600 ring-slate-500/20'"
+            class="inline-flex items-center gap-1.5 self-start sm:self-auto px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+            {{ plan.isActive ? 'نشطة' : 'غير نشطة' }}
+          </span>
+
+          <div class="flex items-center gap-2 shrink-0">
+            <a [routerLink]="['/pricing', plan.id]"
+              class="inline-flex items-center gap-1.5 px-4 h-10 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white text-sm font-bold transition-colors">
+              إدارة الأسعار
+            </a>
+            <button type="button" (click)="openForm(plan)" title="تعديل" aria-label="تعديل"
+              class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+              <mat-icon class="!w-5 !h-5 !text-xl">edit</mat-icon>
+            </button>
+            <button type="button" (click)="onDelete(plan)" title="حذف" aria-label="حذف"
+              class="w-10 h-10 rounded-xl flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white transition-colors">
+              <mat-icon class="!w-5 !h-5 !text-xl">delete</mat-icon>
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+
+    @if (totalPages() > 1) {
+      <div class="flex items-center justify-between gap-3">
+        <button type="button" (click)="goToPage(pageNumber() - 1)" [disabled]="pageNumber() === 1"
+          class="px-4 h-10 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none transition-colors">
+          السابق
+        </button>
+        <span class="text-sm font-semibold text-slate-500">صفحة {{ pageNumber() }} من {{ totalPages() }}</span>
+        <button type="button" (click)="goToPage(pageNumber() + 1)" [disabled]="pageNumber() === totalPages()"
+          class="px-4 h-10 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none transition-colors">
+          التالي
+        </button>
+      </div>
+    }
+  }
+</div>

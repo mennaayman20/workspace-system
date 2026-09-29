@@ -1,1 +1,111 @@
-<p>customers works!</p>
+<div class="p-4 sm:p-8 space-y-6 sm:space-y-8 dir-rtl max-w-7xl mx-auto">
+  
+<!-- Header Section -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+  <div class="flex items-center gap-4">
+    <!-- أيقونة العملاء مع خلفية التدرج اللونى -->
+    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+      <lucide-icon [img]="UsersIcon" class="w-6 h-6"></lucide-icon>
+    </div>
+    <div>
+      <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">إدارة العملاء</h1>
+      <p class="text-sm text-slate-500 mt-1">عرض وإضافة وتعديل بيانات العملاء والشركات المربوطة بهم</p>
+    </div>
+  </div>
+
+  <!-- زر إضافة عميل جديد بنفس الستايل والتأثيرات -->
+  <button type="button" (click)="openAddModal()"
+    class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+    <lucide-icon [img]="PlusIcon" class="w-4 h-4 transition-transform duration-200 group-hover:rotate-90"></lucide-icon>
+    <span>إضافة عميل جديد</span>
+  </button>
+</div>
+
+  <!-- Search & Filter Bar -->
+  <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+    <div class="w-full sm:w-80">
+      <input #searchInput type="text" 
+             (input)="onSearch(searchInput.value)" 
+             placeholder="ابحث باسم العميل أو رقم الموبايل..."
+             class="w-full px-4 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+    </div>
+  </div>
+
+  <!-- Loading & Error States -->
+  @if (isLoading()) {
+    <div class="text-center py-12 text-slate-500">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
+      <p class="mt-2 text-sm">جاري تحميل البيانات...</p>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Customers Table -->
+  @if (!isLoading() && !errorMessage()) {
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-right border-collapse">
+          <thead>
+            <tr class="bg-slate-50 text-slate-600 text-xs uppercase border-b border-slate-200">
+              <th class="py-3 px-4 font-bold">الاسم</th>
+              <th class="py-3 px-4 font-bold">رقم الموبايل</th>
+              <th class="py-3 px-4 font-bold">النوع</th>
+              <th class="py-3 px-4 font-bold">الشركة التابع لها</th>
+              <th class="py-3 px-4 font-bold">الإيميل</th>
+              <th class="py-3 px-4 font-bold text-center">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-sm">
+            @for (customer of customers(); track customer.id) {
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3 px-4 font-semibold text-slate-800">{{ customer.fullName }}</td>
+                <td class="py-3 px-4 text-slate-600 dir-ltr text-right">{{ customer.mobileNumber }}</td>
+                <td class="py-3 px-4">
+                  <span [class]="getCustomerTypeBadgeClass(customer.customerType)" 
+      class="px-2.5 py-1 rounded-full text-xs font-bold">
+  {{ customer.customerType }}
+</span>
+                </td>
+               <td class="py-3 px-4 text-slate-600">
+  {{ customer.companyName }}
+</td>
+                <td class="py-3 px-4 text-slate-500 text-xs">{{ customer.email || '-' }}</td>
+                <td class="py-3 px-4 text-center space-x-2 space-x-reverse">
+                  <button (click)="openEditModal(customer)" 
+                          class="px-3 py-1 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg text-xs font-bold transition-colors">
+                    تعديل
+                  </button>
+                  <button (click)="onDelete(customer.id)" 
+                          class="px-3 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-bold transition-colors">
+                    حذف
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="py-10 text-center text-slate-400">
+                  لا يوجد عملاء مطابقين للبحث
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- Modal Component (الاستدعاء الصحيح) -->
+  @if (isModalOpen()) {
+    <app-add-customer-modal
+      [customerToEdit]="editingCustomer()"
+      (closeModal)="closeModal()"
+      (customerCreated)="refreshAfterSave()">
+    </app-add-customer-modal>
+  }
+
+</div>

@@ -1,0 +1,18 @@
+{
+  "COMMON": {
+    "SAVE": "Save",
+    "CANCEL": "Cancel",
+    "SEARCH": "Search..."
+  },
+  "SIDEBAR": {
+    "MAIN_MENU": "Main Menu",
+    "DASHBOARD": "Dashboard",
+    "WORKSPACES": "Workspaces",
+    "CUSTOMERS": "Check-in",
+    "POS": "Drinks & POS",
+    "PAYMENTS": "Finance & Reports",
+    "SETTINGS": "System Settings",
+    "SUPPORT": "Support",
+    "CONTACT_US": "Contact Us"
+  }
+}
