@@ -63,8 +63,7 @@ export class PricingPlansComponent implements OnInit {
   ngOnInit(): void {
     this.load();
   }
-
-  // ---------- Loading ----------
+// ---------- Loading ----------
 load(): void {
   const status = this.statusFilter();
   this.isLoading.set(true);
@@ -79,11 +78,13 @@ load(): void {
     })
     .pipe(takeUntilDestroyed(this.destroyRef))
     .subscribe({
-      next: (items) => {
-        // نضع المصفوفة القادمة مباشرة
-        const plansList = Array.isArray(items) ? items : [];
+      next: (result) => {
+        // result هنا هو كائن PagedResult الذي يحتوي على items و totalCount
+        const plansList = result?.items || [];
+        const count = result?.totalCount || 0;
+
         this.plans.set(plansList);
-        this.totalCount.set(plansList.length);
+        this.totalCount.set(count);
         this.isLoading.set(false);
       },
       error: (err) => {
