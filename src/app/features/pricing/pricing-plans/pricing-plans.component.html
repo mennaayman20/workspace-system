@@ -1,7 +1,16 @@
-<div class="p-4 sm:p-8 space-y-6 max-w-7xl mx-auto">
+<style>
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp .35s ease-out both; }
+  @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
+</style>
+
+<div class="p-4 sm:p-8 space-y-6 max-w-7xl mx-auto fade-up">
 
   <!-- Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-up">
     <div class="flex items-center gap-4">
       <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
         <mat-icon>payments</mat-icon>
@@ -20,7 +29,7 @@
   </div>
 
   <!-- Toolbar -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white p-2.5 sm:p-3 rounded-xl border border-slate-200/80">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white p-2.5 sm:p-3 rounded-xl border border-slate-200/80 fade-up">
     <div class="relative flex-1 max-w-xs">
       <mat-icon class="!w-4 !h-4 !text-base text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none">search</mat-icon>
       <input

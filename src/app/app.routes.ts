@@ -21,9 +21,18 @@ export const routes: Routes = [
         loadComponent: () => import('./features/dashboard/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       { 
+        path: 'live-sessions', 
+        loadComponent: () => import('./features/sessions/live-sessions/live-sessions.component').then(m => m.LiveSessionsComponent)
+      },
+      { 
         path: 'Workspaces', 
         loadComponent: () => import('./features/workspaces/workspaces.component').then(m => m.WorkspacesComponent)
       },
+            { 
+        path: 'employee', 
+        loadComponent: () => import('./features/employee/employee.component').then(m => m.EmployeeComponent)
+      },
+
       { 
         path: 'customers', 
         loadComponent: () => import('./features/customers/customers.component').then(m => m.CustomersComponent)

@@ -1,0 +1,85 @@
+<div class="p-4 sm:p-8 space-y-6 dir-rtl max-w-7xl mx-auto">
+  
+  <!-- Header -->
+  <div class="flex items-center justify-between border-b border-slate-200 pb-5">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
+        <lucide-icon [img]="ClockIcon" class="w-6 h-6"></lucide-icon>
+      </div>
+      <div>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900">الجلسات النشطة (Live Sessions)</h1>
+        <p class="text-sm text-slate-500 mt-1">عرض وإدارة الحضور المباشر وحساب الوقت في الوقت الفعلي</p>
+      </div>
+    </div>
+
+    <button (click)="isStartModalOpen.set(true)" class="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all">
+      <lucide-icon [img]="PlayIcon" class="w-4 h-4"></lucide-icon>
+      <span>بدء جلسة جديدة</span>
+    </button>
+  </div>
+
+  <!-- Cards Grid -->
+  @if (isLoading()) {
+    <div class="text-center py-12 text-slate-500">جاري تحميل الجلسات النشطة...</div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (session of activeSessions(); track session.id) {
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col justify-between">
+          
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                جلسة نشطة
+              </span>
+              <span class="text-xs text-slate-400">#{{ session.id }}</span>
+            </div>
+
+            <h3 class="text-lg font-bold text-slate-800">{{ session.customerName }}</h3>
+            <p class="text-xs text-slate-500 mt-0.5">{{ session.workspaceName }}</p>
+
+            <!-- Live Timer -->
+            <div class="my-5 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+              <span class="text-xs text-slate-400 block mb-1">المدة المنقضية الحالية</span>
+              <span class="text-2xl font-extrabold text-blue-600 font-mono tracking-wider">
+                {{ getElapsedTime(session.startTime) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Actions Footer Buttons -->
+          <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100">
+            <button (click)="onChangeWorkspace(session.id)" class="px-2 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
+              <lucide-icon [img]="MoveIcon" class="w-3.5 h-3.5"></lucide-icon>
+              <span>نقل المكان</span>
+            </button>
+
+            <button class="px-2 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
+              <lucide-icon [img]="PlusIcon" class="w-3.5 h-3.5"></lucide-icon>
+              <span>منتج POS</span>
+            </button>
+
+            <button (click)="onEndSession(session.id)" class="px-2 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
+              <lucide-icon [img]="StopIcon" class="w-3.5 h-3.5"></lucide-icon>
+              <span>إنهاء (Checkout)</span>
+            </button>
+          </div>
+
+        </div>
+      } @empty {
+        <div class="col-span-full py-12 text-center text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200">
+          لا توجد جلسات نشطة حالياً.
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Start Session Modal -->
+  @if (isStartModalOpen()) {
+    <app-start-session-modal
+      (closeModal)="isStartModalOpen.set(false)"
+      (sessionStarted)="loadActiveSessions()">
+    </app-start-session-modal>
+  }
+
+</div>
