@@ -1,7 +1,17 @@
-<div class="p-4 sm:p-8 space-y-6 sm:space-y-8 dir-rtl max-w-7xl mx-auto">
+<style>
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp .35s ease-out both; }
+  @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
+</style>
+
+
+<div class="p-4 sm:p-8 space-y-6 sm:space-y-8 dir-rtl max-w-7xl mx-auto fade-up">
   
 <!-- Header Section -->
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5 fade-up">
   <div class="flex items-center gap-4">
     <!-- أيقونة العملاء مع خلفية التدرج اللونى -->
     <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
@@ -18,7 +28,7 @@
     <!-- زر الانتقال للشركات -->
 <button type="button" 
         (click)="goToCompanies()"
-        class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+        class=" fade-up group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
   <lucide-icon [img]="BuildingIcon" class="w-4 h-4 transition-transform duration-200 group-hover:scale-110"></lucide-icon>
   <span>إدارة الشركات</span>
 </button>
@@ -58,7 +68,7 @@
 
   <!-- Customers Table -->
   @if (!isLoading() && !errorMessage()) {
-    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm fade-up">
       <div class="overflow-x-auto">
         <table class="w-full text-right border-collapse">
           <thead>
