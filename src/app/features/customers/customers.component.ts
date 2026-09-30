@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { CustomerService } from './customer.service';
 import { Customer, CustomerType } from './Icustomer';
 import { AddCustomerModalComponent } from './add-customer-modal/add-customer-modal.component';
-import { LucideAngularModule, Plus, Users } from 'lucide-angular';
-
+import { LucideAngularModule, Plus, Users , BuildingIcon} from 'lucide-angular';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-customers',
   standalone: true,
@@ -13,8 +13,10 @@ import { LucideAngularModule, Plus, Users } from 'lucide-angular';
 })
 export class CustomersComponent implements OnInit {
   private customerService = inject(CustomerService);
+private router = inject(Router);
 
-  
+BuildingIcon = BuildingIcon;
+
   // State Management using Signals
   customers = signal<Customer[]>([]);
   isLoading = signal<boolean>(false);
@@ -58,6 +60,10 @@ next: (res: any) => {
     }
   });
 }
+
+goToCompanies(): void {
+    this.router.navigate(['/company']); // تأكدي أن المسار في app.routes.ts مكتوب 'company'
+  }
 
   // 2. البحث التفاعلي (Search)
   onSearch(term: string) {

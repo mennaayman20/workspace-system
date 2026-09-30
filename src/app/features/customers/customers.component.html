@@ -13,12 +13,23 @@
     </div>
   </div>
 
-  <!-- زر إضافة عميل جديد بنفس الستايل والتأثيرات -->
-  <button type="button" (click)="openAddModal()"
-    class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
-    <lucide-icon [img]="PlusIcon" class="w-4 h-4 transition-transform duration-200 group-hover:rotate-90"></lucide-icon>
-    <span>إضافة عميل جديد</span>
-  </button>
+  <!-- الأزرار -->
+  <div class="flex items-center gap-3">
+    <!-- زر الانتقال للشركات -->
+<button type="button" 
+        (click)="goToCompanies()"
+        class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+  <lucide-icon [img]="BuildingIcon" class="w-4 h-4 transition-transform duration-200 group-hover:scale-110"></lucide-icon>
+  <span>إدارة الشركات</span>
+</button>
+
+    <!-- زر إضافة عميل جديد -->
+    <button type="button" (click)="openAddModal()"
+      class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+      <lucide-icon [img]="PlusIcon" class="w-4 h-4 transition-transform duration-200 group-hover:rotate-90"></lucide-icon>
+      <span>إضافة عميل جديد</span>
+    </button>
+  </div>
 </div>
 
   <!-- Search & Filter Bar -->
