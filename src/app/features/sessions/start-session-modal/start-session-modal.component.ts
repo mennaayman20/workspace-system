@@ -1,34 +1,39 @@
-import { Component, OnInit, EventEmitter, Output, inject, signal } from '@angular/core';
+import {
+  Component, OnInit, EventEmitter, Output, HostListener, DestroyRef, inject, signal
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LucideAngularModule, X, UserPlus, Play, Search, Loader2 } from 'lucide-angular';
-import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { Observable, Subject, catchError, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
 
 import { SessionsService } from '../sessions.service';
 import { CustomerService } from '../../customers/customer.service';
 import { WorkspaceService } from '../../../core/services/workspace.service';
 import { PricingPlanService } from '../../pricing/pricing-plan.service';
+import { EmployeeService } from '../../employee/employee.service';
 
 import { StartSessionCommand } from '../Isessions';
 import { Customer, CreateCustomerDto } from '../../customers/Icustomer';
 import { Workspace } from '../../../core/interfaces/Iworkspace';
 import { PricingPlan } from '../../pricing/Ipricing';
-import { EmployeeService } from '../../employee/employee.service';
 import { Employee } from '../../employee/Iimployee';
 
 @Component({
   selector: 'app-start-session-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
   templateUrl: './start-session-modal.component.html'
 })
 export class StartSessionModalComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
   private sessionsService = inject(SessionsService);
   private customerService = inject(CustomerService);
   private workspaceService = inject(WorkspaceService);
   private pricingPlanService = inject(PricingPlanService);
-private employeeService = inject(EmployeeService);
+  private employeeService = inject(EmployeeService);
+
   @Output() closeModal = new EventEmitter<void>();
   @Output() sessionStarted = new EventEmitter<void>();
 
@@ -36,175 +41,209 @@ private employeeService = inject(EmployeeService);
   readonly UserPlusIcon = UserPlus;
   readonly PlayIcon = Play;
   readonly SearchIcon = Search;
+  readonly LoaderIcon = Loader2;
 
+  // حالات التحميل منفصلة
+  isSubmitting = signal(false);
+  isSavingCustomer = signal(false);
+  isSearchingCustomers = signal(false);
 
-  isLoading = signal<boolean>(false);
-  isSearchingCustomers = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
-employeesList = signal<Employee[]>([]);
-  // قوائم البيانات الفعلية من الـ APIs
+  quickError = signal<string | null>(null);
+
   customersList = signal<Customer[]>([]);
+  employeesList = signal<Employee[]>([]);
   workspacesList = signal<Workspace[]>([]);
   pricingPlansList = signal<PricingPlan[]>([]);
 
-  // التحكم بفتح مودال العميل السريع
-  isQuickAddCustomerOpen = signal<boolean>(false);
-
-  // Subject للبحث الديناميكي عن العملاء عبر الـ API
+  isQuickAddCustomerOpen = signal(false);
+  searchTerm = signal('');
   private searchSubject = new Subject<string>();
 
-sessionForm: FormGroup = this.fb.group({
-  customerId: [null, [Validators.required]],
-  employeeId: [null, [Validators.required]], // <-- تأكد من إضافة هذا الحقل هنا
-  bookingId: [null],
-  workspaceId: [null, [Validators.required]],
-  pricingPlanId: [null, [Validators.required]],
-  numberOfPeople: [1, [Validators.required, Validators.min(1)]]
-});
+  sessionForm: FormGroup = this.fb.group({
+    customerId: [null, [Validators.required]],
+    employeeId: [null, [Validators.required]],
+    bookingId: [null],
+    workspaceId: [null, [Validators.required]],
+    pricingPlanId: [null, [Validators.required]],
+    numberOfPeople: [1, [Validators.required, Validators.min(1)]]
+  });
+
   quickCustomerForm: FormGroup = this.fb.group({
-    fullName: ['', [Validators.required]],
-    mobileNumber: ['', [Validators.required]],
-    email: [''],
+    fullName: ['', [Validators.required, Validators.minLength(3)]],
+    mobileNumber: ['', [Validators.required, Validators.pattern(/^\+?\d{10,15}$/)]],
+    email: ['', [Validators.email]],
     customerType: ['Individual', [Validators.required]]
   });
+
+  // ===== Getters للتمبلت =====
+  get selectedWorkspace(): Workspace | undefined {
+    const id = Number(this.sessionForm.value.workspaceId);
+    return this.workspacesList().find(w => Number(w.id) === id);
+  }
+
+  get people(): number {
+    return Number(this.sessionForm.value.numberOfPeople) || 1;
+  }
+
+  invalid(form: FormGroup, name: string): boolean {
+    const c = form.get(name);
+    return !!c && c.invalid && (c.touched || c.dirty);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    this.closeModal.emit();
+  }
 
   ngOnInit(): void {
     this.loadInitialData();
     this.setupCustomerSearch();
   }
 
-private loadInitialData(): void {
+  // يفك الـ wrapper سواء المصفوفة جاية مباشرة أو جوه data/items
+  private unwrapList<T>(res: any): T[] {
+    return Array.isArray(res) ? res : (res?.data?.items || res?.data || res?.items || []);
+  }
 
-  this.employeeService.getEmployees().subscribe({
-    next: (res: any) => {
-      const employees = Array.isArray(res) ? res : (res?.data?.items || res?.data || res?.items || []);
-      console.log('Employees loaded:', employees); // طباعة البيانات للتأكد
-      this.employeesList.set(employees);
-    },
-    error: (err) => {
-      console.error('Error loading employees:', err);
-      this.employeesList.set([]);
-    }
-  });
-  // 1. جلب العملاء بشكل آمن
-  this.customerService.getCustomers(1, 10).subscribe({
-    next: (res: any) => {
-      const customers = Array.isArray(res) ? res : (res?.data?.items || res?.data || res?.items || []);
-      this.customersList.set(customers);
-    },
-    error: () => this.customersList.set([])
-  });
+  private loadInitialData(): void {
+    this.employeeService.getEmployees().subscribe({
+      next: (res: any) => this.employeesList.set(this.unwrapList<Employee>(res)),
+      error: () => this.employeesList.set([])
+    });
 
-  // 2. جلب أماكن العمل بشكل آمن
-  this.workspaceService.getWorkspaces().subscribe({
-    next: (res: any) => {
-      const workspaces = Array.isArray(res) ? res : (res?.data?.items || res?.data || res?.items || []);
-      this.workspacesList.set(workspaces);
-    },
-    error: () => this.workspacesList.set([])
-  });
+    this.customerService.getCustomers(1, 10).subscribe({
+      next: (res: any) => this.customersList.set(this.unwrapList<Customer>(res)),
+      error: () => this.customersList.set([])
+    });
 
-  // 3. جلب خطط التسعير بشكل آمن
-  this.pricingPlanService.getPlans().subscribe({
-    next: (res: any) => {
-      const plans = Array.isArray(res) ? res : (res?.data?.items || res?.data || res?.items || []);
-      this.pricingPlansList.set(plans);
-    },
-    error: () => this.pricingPlansList.set([])
-  });
-}
+    this.workspaceService.getWorkspaces().subscribe({
+      next: (res: any) => this.workspacesList.set(this.unwrapList<Workspace>(res)),
+      error: () => this.workspacesList.set([])
+    });
 
-private setupCustomerSearch(): void {
-  this.searchSubject.pipe(
-    debounceTime(300),
-    distinctUntilChanged(),
-    switchMap((term: string) => {
-      this.isSearchingCustomers.set(true);
-      if (!term.trim()) {
-        return this.customerService.getCustomers(1, 10);
-      }
-      return this.customerService.searchCustomers(term, 1, 10);
-    })
-  ).subscribe({
-    next: (res: any) => {
-      const customers = Array.isArray(res) ? res : (res?.data?.items || res?.data || res?.items || []);
-      this.customersList.set(customers);
+    this.pricingPlanService.getPlans().subscribe({
+      next: (res: any) => this.pricingPlansList.set(this.unwrapList<PricingPlan>(res)),
+      error: () => this.pricingPlansList.set([])
+    });
+  }
+
+  private setupCustomerSearch(): void {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((term: string) => {
+        this.isSearchingCustomers.set(true);
+        const req$: Observable<any> = term.trim()
+          ? this.customerService.searchCustomers(term.trim(), 1, 10)
+          : this.customerService.getCustomers(1, 10);
+        // catchError هنا عشان الـ stream مايموتش بعد أول error
+        return req$.pipe(catchError(() => of([])));
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((res: any) => {
+      this.customersList.set(this.unwrapList<Customer>(res));
       this.isSearchingCustomers.set(false);
-    },
-    error: () => {
-      this.customersList.set([]);
-      this.isSearchingCustomers.set(false);
-    }
-  });
-}
+    });
+  }
 
   onSearchCustomer(event: Event): void {
     const term = (event.target as HTMLInputElement).value;
+    this.searchTerm.set(term);
     this.searchSubject.next(term);
   }
 
   toggleQuickAddCustomer(): void {
+    this.quickError.set(null);
     this.isQuickAddCustomerOpen.update(v => !v);
   }
 
-  // حفظ العميل الجديد سريعا واختياره تلقائيا
+  // ===== إضافة عميل سريع واختياره =====
   saveQuickCustomer(): void {
     if (this.quickCustomerForm.invalid) {
       this.quickCustomerForm.markAllAsTouched();
       return;
     }
+    if (this.isSavingCustomer()) return;
 
-    const dto: CreateCustomerDto = this.quickCustomerForm.value;
-    this.isLoading.set(true);
+    const dto: CreateCustomerDto = this.quickCustomerForm.getRawValue();
+    this.isSavingCustomer.set(true);
+    this.quickError.set(null);
 
     this.customerService.createCustomer(dto).subscribe({
-      next: (res) => {
-        const newCustomerId = res.data;
-        this.isLoading.set(false);
+      next: (res: any) => {
+        // الـ API بترجّع الـ id في res.data (أو object فيه id)
+        const created = res?.data ?? res;
+        const newId = Number(typeof created === 'object' ? created?.id : created);
+
+        this.isSavingCustomer.set(false);
+
+        if (!newId) {
+          this.quickError.set('تم الحفظ لكن لم نستطع تحديد العميل، ابحث عنه بالاسم.');
+          return;
+        }
+
+        // نبني العميل محلياً بدل طلب تاني
+        const customer = { ...dto, id: newId } as unknown as Customer;
+
+        // 1) الأول نضيفه للقايمة  2) بعدين نختاره
+        this.customersList.update(list => [customer, ...list.filter(c => Number(c.id) !== newId)]);
+        this.sessionForm.patchValue({ customerId: newId });
+        this.sessionForm.get('customerId')?.markAsDirty();
+
+        this.searchTerm.set('');
+        this.quickCustomerForm.reset({ fullName: '', mobileNumber: '', email: '', customerType: 'Individual' });
         this.isQuickAddCustomerOpen.set(false);
-
-        // جلب بيانات العميل المضاف لتحديث القائمة واختياره فوراً
-        this.customerService.getCustomerById(newCustomerId).subscribe(customer => {
-          this.customersList.update(list => [customer, ...list]);
-          this.sessionForm.patchValue({ customerId: customer.id });
-        });
-
-        this.quickCustomerForm.reset({ customerType: 'Individual' });
       },
       error: (err) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(err?.error?.message || 'حدث خطأ أثناء إضافة العميل.');
+        this.isSavingCustomer.set(false);
+        this.quickError.set(err?.error?.message || 'حدث خطأ أثناء إضافة العميل.');
       }
     });
   }
 
-  // إرسال أمر بدء الجلسة StartSessionCommand
+  // ===== عدد الأشخاص =====
+  changePeople(delta: number): void {
+    const max = Number(this.selectedWorkspace?.capacity) || Infinity;
+    const next = Math.min(max, Math.max(1, this.people + delta));
+    this.sessionForm.patchValue({ numberOfPeople: next });
+  }
+
+  // ===== بدء الجلسة =====
   onSubmit(): void {
     if (this.sessionForm.invalid) {
       this.sessionForm.markAllAsTouched();
       return;
     }
+    if (this.isSubmitting()) return;
 
-    this.isLoading.set(true);
+    const capacity = Number(this.selectedWorkspace?.capacity);
+    if (capacity && this.people > capacity) {
+      this.errorMessage.set(`عدد الأشخاص أكبر من سعة المكان (${capacity}).`);
+      return;
+    }
+
+    this.isSubmitting.set(true);
     this.errorMessage.set(null);
 
-const command: StartSessionCommand = {
-  customerId: Number(this.sessionForm.value.customerId),
-  employeeId: Number(this.sessionForm.value.employeeId), // <-- أضيفي هذا السطر
-  bookingId: this.sessionForm.value.bookingId ? Number(this.sessionForm.value.bookingId) : null,
-  workspaceId: Number(this.sessionForm.value.workspaceId),
-  pricingPlanId: Number(this.sessionForm.value.pricingPlanId),
-  numberOfPeople: Number(this.sessionForm.value.numberOfPeople)
-};
+    const v = this.sessionForm.value;
+    const command: StartSessionCommand = {
+      customerId: Number(v.customerId),
+      employeeId: Number(v.employeeId),
+      bookingId: v.bookingId ? Number(v.bookingId) : null,
+      workspaceId: Number(v.workspaceId),
+      pricingPlanId: Number(v.pricingPlanId),
+      numberOfPeople: Number(v.numberOfPeople)
+    };
 
     this.sessionsService.startSession(command).subscribe({
       next: () => {
-        this.isLoading.set(false);
+        this.isSubmitting.set(false);
         this.sessionStarted.emit();
         this.closeModal.emit();
       },
       error: (err) => {
-        this.isLoading.set(false);
+        this.isSubmitting.set(false);
         this.errorMessage.set(err?.error?.message || 'حدث خطأ أثناء بدء الجلسة.');
       }
     });

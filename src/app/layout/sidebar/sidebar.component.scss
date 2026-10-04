@@ -1,25 +1,31 @@
-/* Custom Styles for Sidebar */
-:host {
-  display: block;
+/* الأنماط الأساسية للروابط مع تحسين انسيابية التنقل */
+.nav-link {
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-/* تخصيص الـ Scrollbar القائمة عند الحاجة */
-aside {
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
-    border-radius: 10px;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: #cbd5e1;
-  }
+/* حركة ناعمة للأيقونات */
+.nav-link mat-icon {
+  transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* حالة الـ Active: خلفية أزرق صريح + كلام وأيقونة أبيض ناصع */
+.nav-link.active {
+  background-color: #2563eb !important; /* لون أزرق غامق صريح (Tailwind blue-600) */
+  color: #ffffff !important;            /* النص بالكامل أبيض */
+  border-color: #2563eb !important;
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3), 0 4px 6px -4px rgba(37, 99, 235, 0.2);
+  transform: translateX(-4px);         /* إزاحة ناعمة للأمام */
+}
+
+/* تحويل الأيقونة للون الأبيض وتكبير خفيف أثناء الـ Active */
+.nav-link.active mat-icon {
+  color: #ffffff !important;
+  transform: scale(1.1);
+}

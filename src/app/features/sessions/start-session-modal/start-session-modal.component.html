@@ -1,113 +1,214 @@
-<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-up">
-  <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100">
-    
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-up"
+     (click)="closeModal.emit()">
+
+  <div dir="rtl"
+       class="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-100"
+       (click)="$event.stopPropagation()">
+
     <!-- Header -->
-    <div class="flex items-center justify-between p-6 border-b border-slate-100">
-      <h2 class="text-xl font-extrabold text-slate-800">بدء جلسة جديدة (Check-in)</h2>
-      <button type="button" (click)="closeModal.emit()" class="text-slate-400 hover:text-slate-600 transition-colors">
-        <lucide-icon [img]="XIcon" class="w-6 h-6"></lucide-icon>
+    <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100 shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+          <lucide-icon [img]="PlayIcon" class="w-5 h-5"></lucide-icon>
+        </div>
+        <div>
+          <h2 class="text-lg font-extrabold text-slate-800">بدء جلسة جديدة</h2>
+          <p class="text-xs text-slate-400">تسجيل حضور (Check-in)</p>
+        </div>
+      </div>
+      <button type="button" (click)="closeModal.emit()"
+        class="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+        <lucide-icon [img]="XIcon" class="w-5 h-5"></lucide-icon>
       </button>
     </div>
 
-    <!-- Form Content -->
-    <form [formGroup]="sessionForm" (ngSubmit)="onSubmit()" class="p-6 space-y-4 dir-rtl">
-      
-      @if (errorMessage()) {
-        <div class="p-3 bg-red-50 text-red-600 rounded-xl text-xs font-semibold">
-          {{ errorMessage() }}
-        </div>
-      }
+    <form [formGroup]="sessionForm" (ngSubmit)="onSubmit()" class="flex flex-col min-h-0 flex-1">
 
-      <!-- اختيار العميل مع بحث وإضافة سريعة -->
-      <div>
-        <div class="flex items-center justify-between mb-1">
-          <label class="block text-xs font-bold text-slate-700">العميل *</label>
-          <button type="button" (click)="toggleQuickAddCustomer()" class="text-xs text-blue-600 hover:underline flex items-center gap-1 font-semibold">
-            <lucide-icon [img]="UserPlusIcon" class="w-3.5 h-3.5"></lucide-icon>
-            <span>+ إضافة عميل سريع</span>
-          </button>
-        </div>
+      <!-- Body -->
+      <div class="p-6 space-y-5 overflow-y-auto">
 
-        <div class="space-y-2">
-          <div class="relative">
-            <input type="text" (input)="onSearchCustomer($event)" placeholder="ابحث باسم العميل أو الموبايل..." class="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs bg-slate-50 focus:bg-white" />
-            <lucide-icon [img]="SearchIcon" class="w-3.5 h-3.5 absolute left-2.5 top-2 text-slate-400"></lucide-icon>
+        @if (errorMessage()) {
+          <div class="p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-xs font-semibold">
+            {{ errorMessage() }}
           </div>
+        }
 
-          <select formControlName="customerId" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 bg-white">
-            <option [ngValue]="null" disabled>اختر العميل من القائمة...</option>
-            @for (c of customersList(); track c.id) {
-              <option [value]="c.id">{{ c.fullName }} ({{ c.mobileNumber }})</option>
-            }
-          </select>
-        </div>
-      </div>
-
-      <!-- مودال إضافة عميل سريع -->
-      @if (isQuickAddCustomerOpen()) {
-        <div [formGroup]="quickCustomerForm" class="p-4 bg-blue-50/50 border border-blue-200 rounded-2xl space-y-3">
-          <h4 class="text-xs font-bold text-blue-900">إضافة عميل جديد سريعة</h4>
-          <input type="text" formControlName="fullName" placeholder="الاسم بالكامل *" class="w-full px-3 py-2 border rounded-lg text-xs bg-white" />
-          <input type="text" formControlName="mobileNumber" placeholder="رقم الموبايل *" class="w-full px-3 py-2 border rounded-lg text-xs bg-white" />
-          <input type="email" formControlName="email" placeholder="البريد الإلكتروني (اختياري)" class="w-full px-3 py-2 border rounded-lg text-xs bg-white" />
-          
-          <div class="flex justify-end gap-2 pt-1">
-            <button type="button" (click)="toggleQuickAddCustomer()" class="px-3 py-1 bg-slate-200 text-slate-700 text-xs rounded-lg font-semibold">إلغاء</button>
-            <button type="button" (click)="saveQuickCustomer()" [disabled]="isLoading()" class="px-3 py-1 bg-blue-600 text-white text-xs rounded-lg font-semibold flex items-center gap-1">
-              <span>حفظ واختيار</span>
+        <!-- العميل -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-xs font-bold text-slate-700">العميل <span class="text-red-500">*</span></label>
+            <button type="button" (click)="toggleQuickAddCustomer()"
+              class="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-semibold transition-colors">
+              <lucide-icon [img]="UserPlusIcon" class="w-3.5 h-3.5"></lucide-icon>
+              <span>{{ isQuickAddCustomerOpen() ? 'إخفاء الإضافة السريعة' : 'إضافة عميل جديد' }}</span>
             </button>
           </div>
+
+          <div class="space-y-2">
+            <div class="relative">
+              <lucide-icon [img]="SearchIcon" class="w-4 h-4 absolute start-3 top-1/2 -translate-y-1/2 text-slate-400"></lucide-icon>
+              <input type="text" [value]="searchTerm()" (input)="onSearchCustomer($event)"
+                placeholder="ابحث باسم العميل أو الموبايل..."
+                class="w-full ps-9 pe-9 py-2 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all" />
+              @if (isSearchingCustomers()) {
+                <lucide-icon [img]="LoaderIcon" class="w-4 h-4 absolute end-3 top-1/2 -translate-y-1/2 text-blue-500 animate-spin"></lucide-icon>
+              }
+            </div>
+
+            <select formControlName="customerId"
+              [class.border-red-400]="invalid(sessionForm, 'customerId')"
+              class="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all">
+              <option [ngValue]="null" disabled>اختر العميل من القائمة...</option>
+              @for (c of customersList(); track c.id) {
+                <option [ngValue]="c.id">{{ c.fullName }} ({{ c.mobileNumber }})</option>
+              } @empty {
+                <option disabled value="">لا توجد نتائج مطابقة</option>
+              }
+            </select>
+            @if (invalid(sessionForm, 'customerId')) {
+              <p class="text-xs text-red-500">من فضلك اختر العميل</p>
+            }
+          </div>
         </div>
-      }
 
-      <!-- اختيار الموظف المسؤول -->
-<div>
-  <label class="block text-xs font-bold text-slate-700 mb-1">الموظف المسؤول (Employee) *</label>
-  <select formControlName="employeeId" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 bg-white">
-    <option [ngValue]="null" disabled>اختر الموظف المسؤول...</option>
-    @for (emp of employeesList(); track emp.id) {
-      <option [value]="emp.id">{{ emp.fullName }}</option>
-    }
-  </select>
-</div>
+        <!-- إضافة عميل سريع -->
+        @if (isQuickAddCustomerOpen()) {
+          <div [formGroup]="quickCustomerForm"
+               (keydown.enter)="$event.preventDefault(); saveQuickCustomer()"
+               class="p-4 bg-blue-50/60 border border-blue-100 rounded-2xl space-y-3">
+            <h4 class="text-xs font-bold text-blue-900">إضافة عميل جديد</h4>
 
-      <!-- اختيار Workspace -->
-      <div>
-        <label class="block text-xs font-bold text-slate-700 mb-1">المكان (Workspace) *</label>
-        <select formControlName="workspaceId" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 bg-white">
-          <option [ngValue]="null" disabled>اختر المكان...</option>
-          @for (w of workspacesList(); track w.id) {
-            <option [value]="w.id">{{ w.name }} (السعة: {{ w.capacity }})</option>
+            @if (quickError()) {
+              <div class="p-2.5 bg-red-50 text-red-600 rounded-lg text-xs font-semibold">{{ quickError() }}</div>
+            }
+
+            <div>
+              <input type="text" formControlName="fullName" placeholder="الاسم بالكامل *"
+                [class.border-red-400]="invalid(quickCustomerForm, 'fullName')"
+                class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+              @if (invalid(quickCustomerForm, 'fullName')) {
+                <p class="text-[11px] text-red-500 mt-1">الاسم مطلوب (3 حروف على الأقل)</p>
+              }
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <input type="tel" dir="ltr" formControlName="mobileNumber" placeholder="رقم الموبايل *"
+                  [class.border-red-400]="invalid(quickCustomerForm, 'mobileNumber')"
+                  class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white text-right focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                @if (invalid(quickCustomerForm, 'mobileNumber')) {
+                  <p class="text-[11px] text-red-500 mt-1">رقم موبايل غير صحيح</p>
+                }
+              </div>
+              <div>
+                <input type="email" dir="ltr" formControlName="email" placeholder="البريد (اختياري)"
+                  [class.border-red-400]="invalid(quickCustomerForm, 'email')"
+                  class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white text-right focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                @if (invalid(quickCustomerForm, 'email')) {
+                  <p class="text-[11px] text-red-500 mt-1">بريد غير صحيح</p>
+                }
+              </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-1">
+              <button type="button" (click)="toggleQuickAddCustomer()"
+                class="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 text-xs rounded-lg font-semibold hover:bg-slate-50 transition-colors">
+                إلغاء
+              </button>
+              <button type="button" (click)="saveQuickCustomer()" [disabled]="isSavingCustomer()"
+                class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-xs rounded-lg font-semibold flex items-center gap-1.5 transition-colors">
+                @if (isSavingCustomer()) {
+                  <lucide-icon [img]="LoaderIcon" class="w-3.5 h-3.5 animate-spin"></lucide-icon>
+                }
+                <span>{{ isSavingCustomer() ? 'جاري الحفظ...' : 'حفظ واختيار' }}</span>
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- الموظف + المكان -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">الموظف المسؤول <span class="text-red-500">*</span></label>
+            <select formControlName="employeeId"
+              [class.border-red-400]="invalid(sessionForm, 'employeeId')"
+              class="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all">
+              <option [ngValue]="null" disabled>اختر الموظف...</option>
+              @for (emp of employeesList(); track emp.id) {
+                <option [ngValue]="emp.id">{{ emp.fullName }}</option>
+              }
+            </select>
+            @if (invalid(sessionForm, 'employeeId')) {
+              <p class="text-xs text-red-500 mt-1">اختر الموظف المسؤول</p>
+            }
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">المكان (Workspace) <span class="text-red-500">*</span></label>
+            <select formControlName="workspaceId"
+              [class.border-red-400]="invalid(sessionForm, 'workspaceId')"
+              class="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all">
+              <option [ngValue]="null" disabled>اختر المكان...</option>
+              @for (w of workspacesList(); track w.id) {
+                <option [ngValue]="w.id">{{ w.name }} (السعة: {{ w.capacity }})</option>
+              }
+            </select>
+            @if (invalid(sessionForm, 'workspaceId')) {
+              <p class="text-xs text-red-500 mt-1">اختر المكان</p>
+            }
+          </div>
+        </div>
+
+        <!-- خطة التسعير + عدد الأشخاص -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">خطة التسعير <span class="text-red-500">*</span></label>
+            <select formControlName="pricingPlanId"
+              [class.border-red-400]="invalid(sessionForm, 'pricingPlanId')"
+              class="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all">
+              <option [ngValue]="null" disabled>اختر الخطة...</option>
+              @for (p of pricingPlansList(); track p.id) {
+                <option [ngValue]="p.id">{{ p.name }}</option>
+              }
+            </select>
+            @if (invalid(sessionForm, 'pricingPlanId')) {
+              <p class="text-xs text-red-500 mt-1">اختر خطة التسعير</p>
+            }
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">عدد الأشخاص <span class="text-red-500">*</span></label>
+            <div class="flex items-center gap-2">
+              <button type="button" (click)="changePeople(-1)" [disabled]="people <= 1"
+                class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-bold text-lg transition-colors">−</button>
+              <input type="number" formControlName="numberOfPeople" min="1"
+                class="w-full min-w-0 px-2 py-2.5 border border-slate-300 rounded-xl text-sm text-center font-bold bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all" />
+              <button type="button" (click)="changePeople(1)"
+                class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-lg transition-colors">+</button>
+            </div>
+            @if (selectedWorkspace; as ws) {
+              <p class="text-[11px] text-slate-400 mt-1">أقصى سعة للمكان: {{ ws.capacity }}</p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/60 shrink-0">
+        <button type="button" (click)="closeModal.emit()"
+          class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-100 transition-colors">
+          إلغاء
+        </button>
+        <button type="submit" [disabled]="isSubmitting()"
+          class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all">
+          @if (isSubmitting()) {
+            <lucide-icon [img]="LoaderIcon" class="w-4 h-4 animate-spin"></lucide-icon>
+          } @else {
+            <lucide-icon [img]="PlayIcon" class="w-4 h-4"></lucide-icon>
           }
-        </select>
-      </div>
-
-      <!-- اختيار Pricing Plan -->
-      <div>
-        <label class="block text-xs font-bold text-slate-700 mb-1">خطّة التسعير (Pricing Plan) *</label>
-        <select formControlName="pricingPlanId" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 bg-white">
-          <option [ngValue]="null" disabled>اختر خطة التسعير...</option>
-          @for (p of pricingPlansList(); track p.id) {
-            <option [value]="p.id">{{ p.name }}</option>
-          }
-        </select>
-      </div>
-
-      <!-- عدد الأشخاص -->
-      <div>
-        <label class="block text-xs font-bold text-slate-700 mb-1">عدد الأشخاص *</label>
-        <input type="number" formControlName="numberOfPeople" min="1" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 bg-white" />
-      </div>
-
-      <!-- Footer Actions -->
-      <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-        <button type="button" (click)="closeModal.emit()" class="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors">إلغاء</button>
-        <button type="submit" [disabled]="isLoading()" class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all">
-          <lucide-icon [img]="PlayIcon" class="w-4 h-4"></lucide-icon>
-          <span>{{ isLoading() ? 'جاري بدء الجلسة...' : 'بدء الجلسة الآن' }}</span>
+          <span>{{ isSubmitting() ? 'جاري بدء الجلسة...' : 'بدء الجلسة الآن' }}</span>
         </button>
       </div>
-
     </form>
   </div>
 </div>
