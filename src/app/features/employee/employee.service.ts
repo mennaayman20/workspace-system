@@ -15,10 +15,10 @@ export class EmployeeService {
   private baseUrl = `${environment.apiUrl}/api/Employees`;
   private authUrl = `${environment.apiUrl}/api/Authentication`;
 
-  /** جلب الموظفين (شامل المحذوفين لو الـ API بيدعم الباراميتر ده) وتوحيد شكل الداتا */
+  /** جلب كل الموظفين وتوحيد شكل الداتا */
   getEmployees(): Observable<Employee[]> {
     return this.http
-      .get<any>(this.baseUrl, { params: { includeDeleted: true } })
+      .get<any>(this.baseUrl) // تم إزالة params إذا كان الـ Backend لا يدعم includeDeleted
       .pipe(
         map(res => {
           const list: any[] = Array.isArray(res)
@@ -65,7 +65,7 @@ export class EmployeeService {
     return this.http.patch<void>(`${this.baseUrl}/${employeeId}/workspace`, { workspaceId });
   }
 
-  /** يوحّد أسماء الحقول (phoneNumber/mobileNumber و firstName+lastName/fullName) */
+  /** يوحّد أسماء الحقول */
   private normalize(raw: any): Employee {
     const fullName =
       raw?.fullName ?? [raw?.firstName, raw?.lastName].filter(Boolean).join(' ');
@@ -73,7 +73,8 @@ export class EmployeeService {
       id: raw.id,
       fullName: fullName || '-',
       email: raw.email,
-mobileNumber: raw.mobileNumber ?? raw.phoneNumber ?? raw.phone,      assignedWorkspaceId: raw.assignedWorkspaceId,
+      mobileNumber: raw.mobileNumber ?? raw.phoneNumber ?? raw.phone,
+      assignedWorkspaceId: raw.assignedWorkspaceId,
       status: raw.status ?? 'Active',
       isDeleted: raw.isDeleted ?? false
     };
