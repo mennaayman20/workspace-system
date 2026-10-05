@@ -13,6 +13,7 @@ import { Observable, of, switchMap, tap } from 'rxjs';
 
 import { WorkspaceService } from '../../../core/services/workspace.service';
 import { CreateWorkspaceCommand, Workspace, WorkspaceType } from '../../../core/interfaces/Iworkspace';
+import { Building2, ChevronDown, LucideAngularModule, Minus, Plus, X } from 'lucide-angular';
 
 // ---------- Custom validators ----------
 /** Rejects values that are only whitespace (Validators.required accepts "   "). */
@@ -26,13 +27,20 @@ const integer: ValidatorFn = (c: AbstractControl): ValidationErrors | null =>
 @Component({
   selector: 'app-add-workspace-modal',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, LucideAngularModule],
   templateUrl: './add-workspace-modal.component.html',
   host: { '(document:keydown.escape)': 'onEscape()' }
 })
 export class CreateWorkspaceModalComponent implements OnInit {
   readonly NEW_TYPE_VALUE = '__new__';
+// Icons
+readonly BuildingIcon = Building2;
+readonly ChevronIcon = ChevronDown;
+readonly MinusIcon = Minus;
+readonly PlusIcon = Plus;
+readonly CloseIcon = X;
 
+readonly capacityPresets = [2, 4, 8, 12, 20];
   workspaceTypes = input<WorkspaceType[]>([]);
   workspaceToEdit = input<Workspace | null>(null);
 
@@ -221,4 +229,17 @@ export class CreateWorkspaceModalComponent implements OnInit {
   onEscape(): void {
     this.onClose();
   }
+
+
+
+changeCapacity(delta: number): void {
+  const current = Number(this.form.controls.capacity.value) || 1;
+  this.setCapacity(current + delta);
+}
+
+setCapacity(value: number): void {
+  const ctrl = this.form.controls.capacity;
+  ctrl.setValue(Math.min(1000, Math.max(1, value)));
+  ctrl.markAsDirty();
+}
 }
