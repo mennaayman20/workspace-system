@@ -24,15 +24,10 @@ import {
   Trash2,
   RotateCcw
 } from 'lucide-angular';
-import { Observable, switchMap, of, catchError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { EmployeeService } from './employee.service';
-import { WorkspaceService } from '../../core/services/workspace.service'; // تأكدي من مسار الـ WorkspaceService لديك
-import {
-  CreateEmployeeDto,
-  Employee,
-  EmployeeStatus,
-  UpdateEmployeeDto
-} from './Iimployee';
+import { WorkspaceService } from '../../core/services/workspace.service';
+import { Employee, EmployeeStatus } from './Iimployee';
 
 type StatusFilter = 'all' | EmployeeStatus;
 interface Toast {
@@ -62,7 +57,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
 
   // Data state
   employees = signal<Employee[]>([]);
-  workspaces = signal<{ id: number; name: string }[]>([]); // قائمة المساحات
+  workspaces = signal<{ id: number; name: string }[]>([]);
   isLoading = signal(false);
   isSubmitting = signal(false);
   errorMessage = signal<string | null>(null);
@@ -96,8 +91,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     lastName: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
     mobileNumber: ['', [Validators.required, Validators.pattern(/^[0-9+\-\s]{8,15}$/)]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
-    workspaceId: [null, [Validators.required]] // أضيف حقل مكان العمل
+    password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
   // ---------- Computed ----------
@@ -173,8 +167,16 @@ export class EmployeeComponent implements OnInit, OnDestroy {
   loadWorkspaces(): void {
     this.workspaceService.getWorkspaces().subscribe({
       next: (res: any) => {
-        const list = Array.isArray(res) ? res : res?.data ?? [];
-        this.workspaces.set(list);
+        const raw = Array.isArray(res)
+          ? res
+          : Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res?.data?.items)
+              ? res.data.items
+              : Array.isArray(res?.items)
+                ? res.items
+                : [];
+        this.workspaces.set(raw.map((w: any) => ({ ...w, id: Number(w.id) })));
       },
       error: err => console.error('Error fetching workspaces:', err)
     });
@@ -222,11 +224,8 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     this.formError.set(null);
     this.employeeForm.reset();
 
-    // نضع الـ Validators للكلمة السر والـ Workspace عند الإضافة
     this.employeeForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
-    this.employeeForm.get('workspaceId')?.setValidators([Validators.required]);
     this.employeeForm.get('password')?.updateValueAndValidity();
-    this.employeeForm.get('workspaceId')?.updateValueAndValidity();
 
     this.isModalOpen.set(true);
   }
@@ -242,15 +241,12 @@ export class EmployeeComponent implements OnInit, OnDestroy {
       lastName: parts.slice(1).join(' '),
       email: emp.email ?? '',
       mobileNumber: emp.mobileNumber ?? '',
-      password: '',
-      workspaceId: emp.assignedWorkspaceId ?? null
+      password: ''
     });
 
-    // عند التعديل، لا نلزم كلمة السر والـ Workspace
+    // عند التعديل لا نلزم كلمة السر
     this.employeeForm.get('password')?.clearValidators();
-    this.employeeForm.get('workspaceId')?.clearValidators();
     this.employeeForm.get('password')?.updateValueAndValidity();
-    this.employeeForm.get('workspaceId')?.updateValueAndValidity();
 
     this.isModalOpen.set(true);
   }
@@ -284,83 +280,55 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     return 'قيمة غير صالحة';
   }
 
-saveEmployee(): void {
-  if (this.employeeForm.invalid) {
-    this.employeeForm.markAllAsTouched();
-    return;
-  }
-
-  this.isSubmitting.set(true);
-  this.formError.set(null);
-  const v = this.employeeForm.value;
-  const editingId = this.isEditMode() ? this.selectedEmployeeId() : null;
-
-  const common = {
-    firstName: v.firstName.trim(),
-    lastName: v.lastName.trim(),
-    email: v.email.trim(),
-    phoneNumber: v.mobileNumber.trim()
-  };
-
-  let request$: Observable<any>;
-
-  if (editingId !== null) {
-    request$ = this.employeeService.updateEmployee(editingId, common);
-  } else {
-    request$ = this.employeeService.createEmployee({
-      ...common,
-      password: v.password,
-      confirmPassword: v.password,
-      role: 'Employee'
-    }).pipe(
-      switchMap((res: any) => {
-        const selectedWorkspaceId = v.workspaceId ? Number(v.workspaceId) : null;
-        let newEmpId = res?.data?.id ?? res?.id ?? res?.userId;
-
-        if (typeof newEmpId !== 'number' && !isNaN(Number(newEmpId))) {
-          newEmpId = Number(newEmpId);
-        }
-
-        // إذا وجدنا ID رقمي نرسل طلب التعيين
-        if (typeof newEmpId === 'number' && !isNaN(newEmpId) && selectedWorkspaceId) {
-          return this.employeeService.assignToWorkspace(newEmpId, selectedWorkspaceId);
-        }
-
-        // إذا لم يعُد الـ register بـ ID، نجلب قائمة الموظفين لنبحث عن الموظف بالـ Email ونربطه
-        return this.employeeService.getEmployees().pipe(
-          switchMap(employees => {
-            const createdEmp = employees.find(e => e.email?.toLowerCase() === common.email.toLowerCase());
-            if (createdEmp?.id && selectedWorkspaceId) {
-              return this.employeeService.assignToWorkspace(createdEmp.id, selectedWorkspaceId);
-            }
-            return of(res);
-          }),
-          catchError(err => {
-            console.error('Error fetching/assigning workspace fallback:', err);
-            return of(res); // نضمن استمرار السلسلة حتى لو فشل الربط التلقائي
-          })
-        );
-      })
-    );
-  }
-
-  request$.subscribe({
-    next: () => {
-      this.isSubmitting.set(false);
-      this.closeModal();
-      this.showToast(
-        'success',
-        editingId !== null ? 'تم تعديل بيانات الموظف' : 'تمت إضافة الموظف بنجاح'
-      );
-      this.refreshSilently();
-    },
-    error: err => {
-      console.error('Error saving employee:', err);
-      this.isSubmitting.set(false);
-      this.formError.set(this.extractError(err, 'تعذر حفظ البيانات، حاول مرة أخرى.'));
+  saveEmployee(): void {
+    if (this.employeeForm.invalid) {
+      this.employeeForm.markAllAsTouched();
+      return;
     }
-  });
-}
+
+    this.isSubmitting.set(true);
+    this.formError.set(null);
+    const v = this.employeeForm.value;
+    const editingId = this.isEditMode() ? this.selectedEmployeeId() : null;
+
+    const common = {
+      firstName: v.firstName.trim(),
+      lastName: v.lastName.trim(),
+      email: v.email.trim(),
+      phoneNumber: v.mobileNumber.trim()
+    };
+
+    let request$: Observable<any>;
+
+    if (editingId !== null) {
+      request$ = this.employeeService.updateEmployee(editingId, common);
+    } else {
+      request$ = this.employeeService.createEmployee({
+        ...common,
+        password: v.password,
+        confirmPassword: v.password,
+        role: 'Employee'
+      });
+    }
+
+    request$.subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.closeModal();
+        this.showToast(
+          'success',
+          editingId !== null ? 'تم تعديل بيانات الموظف' : 'تمت إضافة الموظف بنجاح'
+        );
+        this.refreshSilently();
+      },
+      error: err => {
+        console.error('Error saving employee:', err);
+        this.isSubmitting.set(false);
+        this.formError.set(this.extractError(err, 'تعذر حفظ البيانات، حاول مرة أخرى.'));
+      }
+    });
+  }
+
   // ---------- Row actions ----------
   onStatusChange(emp: Employee, event: Event): void {
     const selectEl = event.target as HTMLSelectElement;
@@ -381,6 +349,33 @@ saveEmployee(): void {
         selectEl.value = emp.status;
         this.setBusy(emp.id, false);
         this.showToast('error', this.extractError(err, 'تعذر تغيير الحالة.'));
+      }
+    });
+  }
+
+  onWorkspaceChange(emp: Employee, event: Event): void {
+    const selectEl = event.target as HTMLSelectElement;
+    const newWsId = Number(selectEl.value);
+    if (!newWsId || newWsId === emp.assignedWorkspaceId) return;
+
+    this.setBusy(emp.id, true);
+    this.employeeService.assignToWorkspace(emp.id, newWsId).subscribe({
+      next: () => {
+        const ws = this.workspaces().find(w => w.id === newWsId);
+        this.employees.update(list =>
+          list.map(e =>
+            e.id === emp.id
+              ? { ...e, assignedWorkspaceId: newWsId, assignedWorkspaceName: ws?.name ?? null }
+              : e
+          )
+        );
+        this.setBusy(emp.id, false);
+        this.showToast('success', 'تم تغيير مكان العمل');
+      },
+      error: err => {
+        selectEl.value = emp.assignedWorkspaceId != null ? String(emp.assignedWorkspaceId) : '';
+        this.setBusy(emp.id, false);
+        this.showToast('error', this.extractError(err, 'تعذر تغيير مكان العمل.'));
       }
     });
   }

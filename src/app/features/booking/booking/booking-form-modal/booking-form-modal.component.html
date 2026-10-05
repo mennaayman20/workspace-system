@@ -1,0 +1,229 @@
+<style>
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp .35s ease-out both; }
+  @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
+</style>
+
+<div dir="rtl"
+     class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 fade-up"
+     (click)="onBackdropClick($event)">
+  <div role="dialog" aria-modal="true" aria-labelledby="booking-modal-title"
+       class="bg-white rounded-3xl max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-100">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between gap-3 px-6 sm:px-8 pt-6 sm:pt-8 pb-5 border-b border-slate-100">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+          <lucide-icon [img]="CalendarPlusIcon" class="w-6 h-6"></lucide-icon>
+        </div>
+        <div>
+          <h3 id="booking-modal-title" class="text-lg font-bold text-slate-900 leading-tight">
+            {{ isEdit ? 'تعديل الحجز' : 'حجز جديد' }}
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">
+            {{ isEdit ? 'عدّلي بيانات الحجز ثم احفظي' : 'اختاري العميل والمساحة والموعد' }}
+          </p>
+        </div>
+      </div>
+      <button type="button" (click)="close()" aria-label="إغلاق"
+        class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
+        <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
+      </button>
+    </div>
+
+    <div class="px-6 sm:px-8 py-6 space-y-5">
+
+      @if (formError()) {
+        <div role="alert" class="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl font-medium">
+          {{ formError() }}
+        </div>
+      }
+
+      <!-- ملخص الحجز -->
+      @if (summary(); as s) {
+        <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-blue-50/70 border border-blue-100 text-blue-800 fade-up">
+          <lucide-icon [img]="ClockIcon" class="w-4 h-4 shrink-0 text-blue-500"></lucide-icon>
+          <span class="text-sm font-semibold">{{ s }}</span>
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="save()" class="space-y-5" novalidate>
+
+        <!-- العميل + المساحة -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="customerId" class="block text-xs font-bold text-slate-700 mb-1.5">العميل</label>
+            <div class="relative">
+              <select id="customerId" formControlName="customerId"
+                [class.border-rose-400]="showError('customerId')"
+                class="w-full h-11 pr-4 pl-10 appearance-none bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
+                <option [ngValue]="null" disabled>اختر العميل...</option>
+                @for (c of customers; track c.id) {
+                  <option [ngValue]="c.id">{{ c.name }}</option>
+                }
+              </select>
+              <lucide-icon [img]="ChevronIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"></lucide-icon>
+            </div>
+            @if (showError('customerId')) {
+              <p class="text-xs text-rose-600 mt-1">{{ errorOf('customerId') }}</p>
+            }
+          </div>
+
+          <div>
+            <label for="workspaceId" class="block text-xs font-bold text-slate-700 mb-1.5">مساحة العمل</label>
+            <div class="relative">
+              <select id="workspaceId" formControlName="workspaceId"
+                [class.border-rose-400]="showError('workspaceId')"
+                class="w-full h-11 pr-4 pl-10 appearance-none bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
+                <option [ngValue]="null" disabled>اختر مكان العمل...</option>
+                @for (w of workspaces; track w.id) {
+                  <option [ngValue]="w.id">{{ w.name }}</option>
+                }
+              </select>
+              <lucide-icon [img]="ChevronIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"></lucide-icon>
+            </div>
+            @if (showError('workspaceId')) {
+              <p class="text-xs text-rose-600 mt-1">{{ errorOf('workspaceId') }}</p>
+            }
+          </div>
+        </div>
+
+        <!-- التاريخ -->
+        <div>
+          <label for="bookingDate" class="block text-xs font-bold text-slate-700 mb-1.5">تاريخ الحجز</label>
+          <div class="flex flex-wrap items-center gap-2">
+            <input id="bookingDate" type="date" formControlName="bookingDate" [attr.min]="isEdit ? null : today"
+              [class.border-rose-400]="showError('bookingDate')"
+              class="flex-1 min-w-[11rem] h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+
+            <button type="button" (click)="setDateOffset(0)"
+              [class]="isDateOffset(0)
+                ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
+                : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'"
+              class="px-4 h-11 rounded-xl border text-xs font-bold transition-all duration-200">
+              اليوم
+            </button>
+            <button type="button" (click)="setDateOffset(1)"
+              [class]="isDateOffset(1)
+                ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
+                : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'"
+              class="px-4 h-11 rounded-xl border text-xs font-bold transition-all duration-200">
+              بكرة
+            </button>
+          </div>
+          @if (showError('bookingDate')) {
+            <p class="text-xs text-rose-600 mt-1">{{ errorOf('bookingDate') }}</p>
+          }
+        </div>
+
+        <!-- الوقت -->
+        <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 space-y-4">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="startTime" class="block text-xs font-bold text-slate-700 mb-1.5">وقت البداية</label>
+              <input id="startTime" type="time" step="900" formControlName="startTime"
+                [class.border-rose-400]="showError('startTime')"
+                class="w-full h-11 px-4 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+              @if (showError('startTime')) {
+                <p class="text-xs text-rose-600 mt-1">{{ errorOf('startTime') }}</p>
+              }
+            </div>
+
+            <div>
+              <label for="expectedEndTime" class="block text-xs font-bold text-slate-700 mb-1.5">
+                وقت النهاية <span class="font-normal text-slate-400">(اختياري)</span>
+              </label>
+              <input id="expectedEndTime" type="time" step="900" formControlName="expectedEndTime"
+                [class.border-rose-400]="form.hasError('endBeforeStart')"
+                class="w-full h-11 px-4 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+              @if (form.hasError('endBeforeStart')) {
+                <p class="text-xs text-rose-600 mt-1">لازم يكون بعد وقت البداية</p>
+              }
+            </div>
+          </div>
+
+          <!-- بداية سريعة -->
+          <div class="space-y-2">
+            <span class="block text-[11px] font-bold text-slate-500">بداية سريعة</span>
+            <div class="flex flex-wrap gap-2">
+              @for (t of startSlots; track t) {
+                <button type="button" (click)="setStart(t)"
+                  [class]="form.value.startTime === t
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'"
+                  class="px-3.5 h-8 rounded-full border text-xs font-bold transition-all duration-200">
+                  {{ fmt12(t) }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- مدة سريعة -->
+          <div class="space-y-2">
+            <span class="block text-[11px] font-bold text-slate-500">مدة سريعة</span>
+            <div class="flex flex-wrap gap-2">
+              @for (d of durations; track d.hours) {
+                <button type="button" (click)="setDuration(d.hours)"
+                  [disabled]="isDurationDisabled(d.hours)"
+                  [class]="isDuration(d.hours)
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'"
+                  class="px-3.5 h-8 rounded-full border text-xs font-bold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-slate-200 disabled:hover:text-slate-600">
+                  {{ d.label }}
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- عدد الأشخاص -->
+        <div>
+          <label for="numberOfPeople" class="block text-xs font-bold text-slate-700 mb-1.5">عدد الأشخاص</label>
+          <div class="inline-flex items-center gap-1 p-1 bg-slate-50 border border-slate-200 rounded-xl"
+               [class.border-rose-400]="showError('numberOfPeople')">
+            <button type="button" (click)="changePeople(-1)" aria-label="تقليل"
+              [disabled]="(form.value.numberOfPeople ?? 1) <= 1"
+              class="w-9 h-9 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none">
+              <lucide-icon [img]="MinusIcon" class="w-4 h-4"></lucide-icon>
+            </button>
+            <input id="numberOfPeople" type="number" min="1" formControlName="numberOfPeople" dir="ltr"
+              class="w-14 h-9 text-center bg-transparent text-sm font-bold text-slate-900 focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
+            <button type="button" (click)="changePeople(1)" aria-label="زيادة"
+              class="w-9 h-9 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-200">
+              <lucide-icon [img]="PlusIcon" class="w-4 h-4"></lucide-icon>
+            </button>
+          </div>
+          @if (showError('numberOfPeople')) {
+            <p class="text-xs text-rose-600 mt-1">{{ errorOf('numberOfPeople') }}</p>
+          }
+        </div>
+
+        <!-- ملاحظات -->
+        <div>
+          <label for="notes" class="block text-xs font-bold text-slate-700 mb-1.5">
+            ملاحظات <span class="font-normal text-slate-400">(اختياري)</span>
+          </label>
+          <textarea id="notes" rows="3" formControlName="notes"
+            placeholder="أي تفاصيل إضافية عن الحجز..."
+            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"></textarea>
+        </div>
+
+        <!-- الأزرار -->
+        <div class="flex items-center justify-end gap-3 pt-5 border-t border-slate-100">
+          <button type="button" (click)="close()" [disabled]="isSubmitting()"
+            class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
+            إلغاء
+          </button>
+          <button type="submit" [disabled]="isSubmitting()"
+            class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:hover:translate-y-0">
+            {{ isSubmitting() ? 'جاري الحفظ...' : (isEdit ? 'حفظ التعديلات' : 'حفظ الحجز') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

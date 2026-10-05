@@ -43,10 +43,12 @@ export class SidebarComponent {
   // public langService = inject(LanguageService);
   navItems: NavItem[] = [
     { label: 'لوحة التحكّم', route: 'control-panel', icon: 'dashboard' },
+    { label: 'مساحات العمل', route: 'Workspaces', icon: 'meeting_room' },
 
         { label: 'الجلسات الحيه', route: 'live-sessions', icon: 'dashboard' },
+        { label: ' الحجوزات و المواعيد', route: 'bookings', icon: 'dashboard' },
+
  { label: 'دخول عميل', route: 'customers', icon: 'person_add' },
-    { label: 'مساحات العمل', route: 'Workspaces', icon: 'meeting_room' },
    
     { label: 'التسعير', route: '/pricing', icon: 'payments' },
     { label: ' الموظفين', route: 'employee', icon: 'dashboard' },

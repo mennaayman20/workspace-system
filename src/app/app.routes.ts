@@ -1,3 +1,4 @@
+import { BookingComponent } from './features/booking/booking/booking.component';
 import { Routes } from '@angular/router';
 import { LoginComponent } from './features/login/login.component';
 import { authGuard } from './core/guards/auth.guard';
@@ -28,6 +29,11 @@ export const routes: Routes = [
         path: 'Workspaces', 
         loadComponent: () => import('./features/workspaces/workspaces.component').then(m => m.WorkspacesComponent)
       },
+      {
+  path: 'bookings',
+  loadComponent: () =>
+    import('./features/booking/booking/booking.component').then(m => m.BookingComponent)
+},
             { 
         path: 'employee', 
         loadComponent: () => import('./features/employee/employee.component').then(m => m.EmployeeComponent)

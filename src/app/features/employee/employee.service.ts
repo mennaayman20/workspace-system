@@ -45,9 +45,13 @@ export class EmployeeService {
     return this.http.post<unknown>(`${this.authUrl}/register`, data);
   }
 
-  updateEmployee(id: number, data: UpdateEmployeeDto): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/${id}`, data);
-  }
+updateEmployee(id: number, data: UpdateEmployeeDto): Observable<void> {
+  const { phoneNumber, ...rest } = data as any;
+  return this.http.put<void>(`${this.baseUrl}/${id}`, {
+    ...rest,
+    phone: phoneNumber
+  });
+}
 
   deleteEmployee(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
@@ -61,22 +65,22 @@ export class EmployeeService {
     return this.http.patch<void>(`${this.baseUrl}/${id}/restore`, {});
   }
 
-  assignToWorkspace(employeeId: number, workspaceId: number): Observable<void> {
-    return this.http.patch<void>(`${this.baseUrl}/${employeeId}/workspace`, { workspaceId });
-  }
+assignToWorkspace(employeeId: number, workspaceId: number): Observable<void> {
+  return this.http.patch<void>(`${this.baseUrl}/${employeeId}/workspace`, { workspaceId });
+}
 
-  /** يوحّد أسماء الحقول */
-  private normalize(raw: any): Employee {
-    const fullName =
-      raw?.fullName ?? [raw?.firstName, raw?.lastName].filter(Boolean).join(' ');
-    return {
-      id: raw.id,
-      fullName: fullName || '-',
-      email: raw.email,
-      mobileNumber: raw.mobileNumber ?? raw.phoneNumber ?? raw.phone,
-      assignedWorkspaceId: raw.assignedWorkspaceId,
-      status: raw.status ?? 'Active',
-      isDeleted: raw.isDeleted ?? false
-    };
-  }
+private normalize(raw: any): Employee {
+  const fullName =
+    raw?.fullName ?? [raw?.firstName, raw?.lastName].filter(Boolean).join(' ');
+  return {
+    id: raw.id,
+    fullName: fullName || '-',
+    email: raw.email,
+    mobileNumber: raw.mobileNumber ?? raw.phoneNumber ?? raw.phone,
+    assignedWorkspaceId: raw.assignedWorkspaceId ?? raw.workspaceId ?? null,
+    assignedWorkspaceName: raw.workspaceName ?? null,
+    status: raw.status ?? 'Active',
+    isDeleted: raw.isDeleted ?? false
+  };
+}
 }

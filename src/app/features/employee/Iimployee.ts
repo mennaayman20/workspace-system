@@ -6,6 +6,7 @@ export interface Employee {
   email?: string;
   mobileNumber?: string;
   assignedWorkspaceId?: number;
+  assignedWorkspaceName?: string | null;
   status: EmployeeStatus;
   isDeleted?: boolean;
 }
