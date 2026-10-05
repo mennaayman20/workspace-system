@@ -37,40 +37,41 @@
       </div>
     </div>
 
-    <!-- Right Section: Indicators & User Profile -->
-    <div class="flex items-center gap-3">
+  <div class="flex items-center gap-3">
 
-      <!-- Active Sessions Pill -->
-      <div class="hidden sm:flex items-center gap-2 bg-emerald-50 border border-emerald-200/60 px-3 py-1.5 rounded-xl text-xs text-emerald-800">
-        <span class="relative flex h-2 w-2">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-        </span>
-        <span class="font-medium text-[11px] text-slate-600">الجلسات النشطة:</span>
-        <span class="font-bold text-xs px-1.5 py-0.5 bg-emerald-600 text-white rounded-md">{{ activeSessionsCount() }}</span>
+  <!-- Active Sessions Pill -->
+  <div class="hidden sm:flex items-center gap-2 bg-emerald-50 border border-emerald-200/60 px-3 py-1.5 rounded-xl text-xs text-emerald-800">
+    <span class="relative flex h-2 w-2">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+    </span>
+    <span class="font-medium text-[11px] text-slate-600">الجلسات النشطة:</span>
+    <span class="font-bold text-xs px-2 py-0.5 bg-emerald-600 text-white rounded-md">
+      @if (isLoading()) {
+        ...
+      } @else {
+        {{ sessionsCount() }}
+      }
+    </span>
+  </div>
+
+  <div class="h-5 w-[1px] bg-slate-200 mx-1 hidden sm:block"></div>
+
+  <!-- User Profile -->
+  <div class="flex items-center gap-3 p-1.5 px-2.5 rounded-xl hover:bg-slate-100/80 cursor-pointer transition-all duration-200 border border-transparent hover:border-slate-200/80 group">
+    <div class="relative">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+        <span>{{ currentUser().initials }}</span>
       </div>
-
-      <div class="h-5 w-[1px] bg-slate-200 mx-1 hidden sm:block"></div>
-
-
-
- 
-
-      <!-- User Profile -->
-      <div class="flex items-center gap-3 p-1.5 px-2.5 rounded-xl hover:bg-slate-100/80 cursor-pointer transition-all duration-200 border border-transparent hover:border-slate-200/80 group">
-        <div class="relative">
-          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center font-bold text-xs shadow-sm">
-            <span>{{ currentUser().initials }}</span>
-          </div>
-          <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
-        </div>
-        <div class="hidden sm:flex flex-col text-start">
-          <span class="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors leading-tight">{{ currentUser().name }}</span>
-          <span class="text-[10px] font-medium text-slate-400 mt-0.5">{{ currentUser().role }}</span>
-        </div>
-      </div>
-
+      <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
     </div>
+    <div class="hidden sm:flex flex-col text-start">
+      <span class="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors leading-tight">{{ currentUser().name }}</span>
+      <span class="text-[10px] font-medium text-slate-400 mt-0.5">{{ currentUser().role }}</span>
+    </div>
+  </div>
+
+</div>
   </div>
 </header>
 
