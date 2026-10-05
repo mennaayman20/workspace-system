@@ -19,7 +19,7 @@ import { ModalComponent } from '../../shared/components/modal/modal.component';
     // TranslatePipe,
     ButtonComponent,
     InputComponent,
-    BadgeComponent,
+    // BadgeComponent,
     ModalComponent,
   ],
   templateUrl: './navbar.component.html',
