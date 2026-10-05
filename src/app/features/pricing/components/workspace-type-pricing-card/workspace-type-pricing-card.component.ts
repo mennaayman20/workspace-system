@@ -1,6 +1,8 @@
 import { Component, DestroyRef, computed, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MatIconModule } from '@angular/material/icon';
+
+// استيراد Lucide Icons
+import { LucideAngularModule, ChevronDown } from 'lucide-angular';
 
 import { PricingRuleService } from '../../pricing-rule.service';
 import { NotifyService } from '../../notify.service';
@@ -14,10 +16,12 @@ import { TypePricingFormComponent } from '../type-pricing-form/type-pricing-form
 @Component({
   selector: 'app-workspace-type-pricing-card',
   standalone: true,
-  imports: [TypePricingFormComponent, MatIconModule],
+  imports: [TypePricingFormComponent, LucideAngularModule],
   templateUrl: './workspace-type-pricing-card.component.html',
 })
 export class WorkspaceTypePricingCardComponent {
+  readonly ChevronDownIcon = ChevronDown;
+
   private readonly ruleService = inject(PricingRuleService);
   private readonly notify = inject(NotifyService);
   private readonly destroyRef = inject(DestroyRef);
@@ -44,13 +48,13 @@ export class WorkspaceTypePricingCardComponent {
     this.manualToggle.set(!this.isOpen());
   }
 
-onSave(config: TypePricingConfig): void {
+  onSave(config: TypePricingConfig): void {
     const operations = configToOperations(this.planId(), this.workspaceType().id, this.rules(), config);
     if (operations.length === 0) return;
 
     this.isSaving.set(true);
     this.ruleService
-      .applyOperations(operations) // إزالة التهميش من السطر هنا
+      .applyOperations(operations)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -58,10 +62,9 @@ onSave(config: TypePricingConfig): void {
           this.notify.show('تم حفظ التسعير بنجاح');
           this.changed.emit();
         },
-        error: (err: unknown) => { // تحديد نوع الخطأ لتجنب خطأ Implicit Any
+        error: (err: unknown) => {
           this.isSaving.set(false);
           this.notify.show(apiErrorMessage(err, 'تعذر حفظ التسعير، حاول مرة أخرى'));
-          // بعض العمليات ممكن تكون نجحت قبل الفشل، فنزامن الحالة مع السيرفر
           this.changed.emit();
         },
       });

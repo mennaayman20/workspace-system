@@ -2,8 +2,10 @@ import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angula
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
 import { filter, forkJoin } from 'rxjs';
+
+// استيراد Lucide Icons
+import { LucideAngularModule, ArrowRight, Pencil } from 'lucide-angular';
 
 import { PricingPlanService } from '../../pricing/pricing-plan.service';
 import { PricingRuleService } from '../../pricing/pricing-rule.service';
@@ -25,10 +27,15 @@ const NO_RULES: PricingRule[] = [];
 @Component({
   selector: 'app-pricing-plan-details',
   standalone: true,
-  imports: [RouterLink, MatIconModule, WorkspaceTypePricingCardComponent],
+  // استبدال MatIconModule بـ LucideAngularModule
+  imports: [RouterLink, LucideAngularModule, WorkspaceTypePricingCardComponent],
   templateUrl: './pricing-plan-details.component.html',
 })
 export class PricingPlanDetailsComponent implements OnInit {
+  // تعريف الأيقونات للاستخدام في الـ Template
+  readonly ArrowBackIcon = ArrowRight; // تم استخدام ArrowRight لتتناسب مع اتجاه العودة للواجهات العربية (RTL)
+  readonly EditIcon = Pencil;
+
   private readonly route = inject(ActivatedRoute);
   private readonly planService = inject(PricingPlanService);
   private readonly ruleService = inject(PricingRuleService);
@@ -67,61 +74,59 @@ export class PricingPlanDetailsComponent implements OnInit {
     this.load();
   }
 
-load(): void {
-  if (!Number.isInteger(this.planId) || this.planId <= 0) {
-    this.errorMessage.set('رابط الخطة غير صحيح.');
-    return;
+  load(): void {
+    if (!Number.isInteger(this.planId) || this.planId <= 0) {
+      this.errorMessage.set('رابط الخطة غير صحيح.');
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+
+    forkJoin({
+      plan: this.planService.getById(this.planId),
+      rules: this.ruleService.getByPlan(this.planId),
+      types: this.workspaceService.getWorkspaceTypes(true),
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ plan, rules, types }: any) => {
+          const planData = plan?.data || plan;
+          this.plan.set(planData);
+
+          const rulesList = Array.isArray(rules)
+            ? rules
+            : rules?.data?.items || rules?.data || rules?.items || [];
+          this.rules.set(rulesList);
+
+          const typesList = Array.isArray(types)
+            ? types
+            : types?.data?.items || types?.data || types?.items || [];
+          this.workspaceTypes.set(typesList);
+
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          this.errorMessage.set(apiErrorMessage(err, 'تعذر تحميل بيانات الخطة، حاول مرة أخرى.'));
+        },
+      });
   }
 
-  this.isLoading.set(true);
-  this.errorMessage.set(null);
-
-  forkJoin({
-    plan: this.planService.getById(this.planId),
-    rules: this.ruleService.getByPlan(this.planId),
-    types: this.workspaceService.getWorkspaceTypes(true),
-  })
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe({
-      next: ({ plan, rules, types }: any) => {
-        // 1. استخراج الخطة
-        const planData = plan?.data || plan;
-        this.plan.set(planData);
-
-        // 2. استخراج الـ rules بشكل مضمون (سواء كانت Array مباشرة أو داخل data/items)
-        const rulesList = Array.isArray(rules)
-          ? rules
-          : rules?.data?.items || rules?.data || rules?.items || [];
-        this.rules.set(rulesList);
-
-        // 3. استخراج أنواع المساحات
-        const typesList = Array.isArray(types)
-          ? types
-          : types?.data?.items || types?.data || types?.items || [];
-        this.workspaceTypes.set(typesList);
-
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(apiErrorMessage(err, 'تعذر تحميل بيانات الخطة، حاول مرة أخرى.'));
-      },
-    });
-}
-refreshRules(): void {
-  this.ruleService
-    .getByPlan(this.planId)
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe({
-      next: (rules: any) => {
-        const rulesList = Array.isArray(rules)
-          ? rules
-          : rules?.data?.items || rules?.data || rules?.items || [];
-        this.rules.set(rulesList);
-      },
-      error: () => this.notify.show('تعذر تحديث الأسعار، حدّث الصفحة'),
-    });
-}
+  refreshRules(): void {
+    this.ruleService
+      .getByPlan(this.planId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (rules: any) => {
+          const rulesList = Array.isArray(rules)
+            ? rules
+            : rules?.data?.items || rules?.data || rules?.items || [];
+          this.rules.set(rulesList);
+        },
+        error: () => this.notify.show('تعذر تحديث الأسعار، حدّث الصفحة'),
+      });
+  }
 
   editPlan(): void {
     const plan = this.plan();

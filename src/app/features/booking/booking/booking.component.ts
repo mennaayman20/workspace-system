@@ -13,7 +13,8 @@ import {
   Clock,
   Users,
   Building2,
-  StickyNote
+  StickyNote,
+  ChevronDown
 } from 'lucide-angular';
 import { BookingService } from './booking.service';
 import { Booking, BookingStatus, LookupItem } from './Ibooking';
@@ -54,7 +55,7 @@ export class BookingComponent implements OnInit {
   readonly PeopleIcon = Users;
   readonly BuildingIcon = Building2;
   readonly NoteIcon = StickyNote;
-
+readonly ChevronDownIcon=ChevronDown;
   // State
   bookings = signal<Booking[]>([]);
   customers = signal<LookupItem[]>([]);

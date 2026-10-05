@@ -2,8 +2,10 @@ import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angula
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
 import { Subject, debounceTime, distinctUntilChanged, filter } from 'rxjs';
+
+// استيراد Lucide
+import { LucideAngularModule, Plus, Search, Pencil, Trash2, CreditCard } from 'lucide-angular';
 
 import { PricingPlanService } from '../../pricing/pricing-plan.service';
 import { NotifyService } from '../../pricing/notify.service';
@@ -21,10 +23,18 @@ type StatusFilter = 'all' | 'active' | 'inactive';
 @Component({
   selector: 'app-pricing-plans',
   standalone: true,
-  imports: [RouterLink, MatIconModule],
+  // إضافة LucideAngularModule هنا
+  imports: [RouterLink, LucideAngularModule],
   templateUrl: './pricing-plans.component.html',
 })
 export class PricingPlansComponent implements OnInit {
+  // تعريف الأيقونات للاستخدام في الـ Template
+  readonly PlusIcon = Plus;
+  readonly SearchIcon = Search;
+  readonly EditIcon = Pencil;
+  readonly DeleteIcon = Trash2;
+  readonly CardIcon = CreditCard;
+
   private readonly planService = inject(PricingPlanService);
   private readonly dialog = inject(MatDialog);
   private readonly notify = inject(NotifyService);
@@ -63,39 +73,37 @@ export class PricingPlansComponent implements OnInit {
   ngOnInit(): void {
     this.load();
   }
-// ---------- Loading ----------
-load(): void {
-  const status = this.statusFilter();
-  this.isLoading.set(true);
-  this.errorMessage.set(null);
 
-  this.planService
-    .getPlans({
-      pageNumber: this.pageNumber(),
-      pageSize: this.pageSize,
-      search: this.searchTerm().trim() || undefined,
-      isActive: status === 'all' ? undefined : status === 'active',
-    })
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe({
-      next: (result) => {
-        // result هنا هو كائن PagedResult الذي يحتوي على items و totalCount
-        const plansList = result?.items || [];
-        const count = result?.totalCount || 0;
+  load(): void {
+    const status = this.statusFilter();
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
 
-        this.plans.set(plansList);
-        this.totalCount.set(count);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        this.plans.set([]);
-        this.errorMessage.set(apiErrorMessage(err, 'تعذر تحميل خطط التسعير، حاول مرة أخرى.'));
-      },
-    });
-}
+    this.planService
+      .getPlans({
+        pageNumber: this.pageNumber(),
+        pageSize: this.pageSize,
+        search: this.searchTerm().trim() || undefined,
+        isActive: status === 'all' ? undefined : status === 'active',
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) => {
+          const plansList = result?.items || [];
+          const count = result?.totalCount || 0;
 
-  // ---------- Filters & paging ----------
+          this.plans.set(plansList);
+          this.totalCount.set(count);
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          this.plans.set([]);
+          this.errorMessage.set(apiErrorMessage(err, 'تعذر تحميل خطط التسعير، حاول مرة أخرى.'));
+        },
+      });
+  }
+
   onSearch(value: string): void {
     this.search$.next(value);
   }
@@ -110,7 +118,6 @@ load(): void {
     this.load();
   }
 
-  // ---------- Create / Edit ----------
   openForm(plan?: PricingPlan): void {
     this.dialog
       .open<PlanFormDialogComponent, PlanFormDialogData, PlanFormResult>(PlanFormDialogComponent, {
@@ -125,7 +132,6 @@ load(): void {
       )
       .subscribe((result) => {
         if (result.isNew) {
-          // خطة من غير أسعار ملهاش قيمة، فننقل المستخدم مباشرة لتحديد الأسعار
           this.notify.show('تم إنشاء الخطة، حدّد الآن أسعار أنواع المساحات');
           void this.router.navigate(['/pricing', result.id]);
         } else {
@@ -135,7 +141,6 @@ load(): void {
       });
   }
 
-  // ---------- Delete ----------
   onDelete(plan: PricingPlan): void {
     this.dialog
       .open(ConfirmDialogComponent, {
@@ -160,13 +165,11 @@ load(): void {
         next: () => {
           this.deletingId.set(null);
           this.notify.show('تم حذف الخطة بنجاح');
-          // لو كانت آخر عنصر في الصفحة نرجع صفحة لورا
           if (this.plans().length === 1 && this.pageNumber() > 1) this.pageNumber.update((p) => p - 1);
           this.load();
         },
         error: (err) => {
           this.deletingId.set(null);
-          // 409: الخطة عليها أسعار أو مربوطة بشركة → نعرض رسالة الـ API
           this.notify.show(apiErrorMessage(err, 'تعذر حذف الخطة'));
         },
       });

@@ -19,7 +19,7 @@
         <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
         {{ isReady() ? 'جاهز للـ checkout' : 'ناقص سعر الساعة' }}
       </span>
-      <mat-icon class="text-slate-400 transition-transform duration-200" [class.rotate-180]="isOpen()">expand_more</mat-icon>
+      <lucide-icon [img]="ChevronDownIcon" class="w-5 h-5 text-slate-400 transition-transform duration-200" [class.rotate-180]="isOpen()"></lucide-icon>
     </div>
   </button>
 
