@@ -34,6 +34,14 @@ export const routes: Routes = [
   loadComponent: () =>
     import('./features/booking/booking/booking.component').then(m => m.BookingComponent)
 },
+
+{
+        path: 'products',
+        loadChildren: () => import('./features/products/product.route').then(m => m.PRODUCT_ROUTES)
+      },
+
+
+
             { 
         path: 'employee', 
         loadComponent: () => import('./features/employee/employee.component').then(m => m.EmployeeComponent)
@@ -55,10 +63,7 @@ export const routes: Routes = [
   loadChildren: () =>
     import('./features/pricing/pricing.routes').then((m) => m.PRICING_ROUTES),
 },
-      { 
-        path: 'pos', 
-        loadComponent: () => import('./features/pos/pos/pos.component').then(m => m.PosComponent)
-      },
+
       { 
         path: 'payments', 
         loadComponent: () => import('./features/payments/payments/payments.component').then(m => m.PaymentsComponent)

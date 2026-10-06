@@ -50,10 +50,10 @@ export class SidebarComponent {
 
  { label: 'دخول عميل', route: 'customers', icon: 'person_add' },
    
-    { label: 'التسعير', route: '/pricing', icon: 'payments' },
-    { label: ' الموظفين', route: 'employee', icon: 'dashboard' },
+    { label: 'خطط التسعير ', route: '/pricing', icon: 'payments' },
+    { label: '  ادارة الموظفين', route: 'employee', icon: 'dashboard' },
+    { label: ' POS ', route: 'products', icon: 'dashboard' },
 
-    { label: 'المشروبات والـ POS', route: 'pos', icon: 'local_cafe' },
     { label: 'الخزينة والتقارير', route: 'payments', icon: 'account_balance_wallet' },
   ];
 

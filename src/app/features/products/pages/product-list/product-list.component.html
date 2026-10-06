@@ -1,0 +1,260 @@
+<style>
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp .35s ease-out both; }
+  @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
+</style>
+
+<div class="w-full mb-6">
+  <div class="max-w-7xl mx-auto px-1 sm:px-2">
+    <!-- حاوية التبويبات بخلفية شفافة وبوردر هادئ -->
+    <nav class="inline-flex items-center gap-1.5 p-1.5 bg-slate-200/40 backdrop-blur-md rounded-2xl border border-slate-200/60 overflow-x-auto no-scrollbar" aria-label="Tabs">
+      
+      <!-- Tab 1: المنتجات -->
+      <a [routerLink]="['/products/list']"
+         routerLinkActive="bg-white text-blue-600 shadow-sm border-slate-200/80 font-bold"
+         [routerLinkActiveOptions]="{ exact: true }"
+         class="group inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 border border-transparent transition-all duration-200 shrink-0 cursor-pointer select-none">
+        <lucide-icon [img]="PackageIcon" class="w-4 h-4 text-slate-400 group-[.font-bold]:text-blue-600 transition-colors"></lucide-icon>
+        <span>قائمة المنتجات</span>
+      </a>
+
+      <!-- Tab 2: التصنيفات -->
+      <a [routerLink]="['/products/categories']"
+         routerLinkActive="bg-white text-blue-600 shadow-sm border-slate-200/80 font-bold"
+         class="group inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 border border-transparent transition-all duration-200 shrink-0 cursor-pointer select-none">
+        <lucide-icon [img]="FolderTreeIcon" class="w-4 h-4 text-slate-400 group-[.font-bold]:text-blue-600 transition-colors"></lucide-icon>
+        <span>تصنيفات المنتجات</span>
+      </a>
+
+    </nav>
+  </div>
+</div>
+
+
+<div dir="rtl" class="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
+
+  <!-- Header مع زر الإضافة الخارجي -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-up">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+        <lucide-icon [img]="PackageIcon" class="w-6 h-6"></lucide-icon>
+      </div>
+      <div>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">إدارة المنتجات</h1>
+        <p class="text-sm text-slate-500 mt-1">إضافة، تعديل ومتابعة المنتجات والأسعار بالنظام</p>
+      </div>
+    </div>
+
+    <!-- زر إضافة منتج جديد (يظهر بره دائماً) -->
+    @if (!isFormOpen) {
+      <button type="button" (click)="openAddForm()"
+        class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+        <lucide-icon [img]="PlusIcon" class="w-4 h-4"></lucide-icon>
+        <span>إضافة منتج جديد</span>
+      </button>
+    }
+  </div>
+
+  <!-- Form Section Card (تظهر فقط عند الضغط على إضافة أو تعديل) -->
+  @if (isFormOpen) {
+    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs fade-up space-y-6">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+        <div class="flex items-center gap-2">
+          <h2 class="text-lg font-bold text-slate-900">
+            {{ selectedProduct ? 'تعديل بيانات المنتج' : 'إضافة منتج جديد' }}
+          </h2>
+        </div>
+        
+        <!-- زر الإلغاء/الإغلاق -->
+        <button type="button" (click)="resetForm()"
+          class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+          title="إغلاق">
+          <lucide-icon [img]="XIcon" class="w-5 h-5"></lucide-icon>
+        </button>
+      </div>
+
+      <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-3 gap-5" novalidate>
+
+        <!-- Category Select -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">التصنيف (Category)</label>
+          <select formControlName="productCategoryId"
+            class="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-3 text-sm text-slate-700 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
+            <option [ngValue]="null" disabled>اختر التصنيف</option>
+            @for (cat of categoryService.categories(); track cat.id) {
+              <option [ngValue]="cat.id">{{ cat.name }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- English Name -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">اسم المنتج</label>
+          <input type="text" formControlName="englishName" placeholder="Product Name"
+            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+        </div>
+
+        <!-- SKU -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">رمز المنتج (SKU)</label>
+          <input type="text" formControlName="sku" placeholder="SKU-123" dir="ltr"
+            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-right font-mono focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+        </div>
+
+        <!-- Selling Price -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">سعر البيع</label>
+          <input type="number" formControlName="sellingPrice" placeholder="0.00" dir="ltr"
+            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-right font-mono focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+        </div>
+
+        <!-- Cost Price -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">سعر التكلفة</label>
+          <input type="number" formControlName="costPrice" placeholder="0.00" dir="ltr"
+            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-right font-mono focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+        </div>
+
+        <!-- Toggle Active Status -->
+        <div class="flex items-center pt-2 md:pt-6">
+          <label class="relative inline-flex items-center cursor-pointer gap-3 select-none">
+            <input type="checkbox" formControlName="isActive" class="sr-only peer" />
+            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            <span class="text-xs font-bold text-slate-700">تفعيل المنتج بالنظام</span>
+          </label>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="md:col-span-3 flex justify-end gap-3 pt-4 border-t border-slate-100">
+          <button type="button" (click)="resetForm()"
+            class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors">
+            إلغاء
+          </button>
+          
+          <button type="submit" [disabled]="productForm.invalid"
+            class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none">
+            <lucide-icon [img]="selectedProduct ? SaveIcon : PlusIcon" class="w-4 h-4"></lucide-icon>
+            <span>{{ selectedProduct ? 'تحديث المنتج' : 'حفظ المنتج' }}</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (productService.products().length === 0) {
+    <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center space-y-4 fade-up">
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
+        <lucide-icon [img]="PackageIcon" class="w-8 h-8"></lucide-icon>
+      </div>
+      <p class="text-base font-bold text-slate-800">لا توجد منتجات مضافة حتى الآن</p>
+    </div>
+  } @else {
+
+    <!-- Desktop Table -->
+    <div class="hidden md:block bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs fade-up">
+      <div class="overflow-x-auto">
+        <table class="w-full text-right border-collapse min-w-[800px]">
+          <thead>
+            <tr class="bg-slate-50/80 text-xs font-bold text-slate-500 tracking-wide">
+              <th scope="col" class="py-4 px-6">المنتج</th>
+              <th scope="col" class="py-4 px-6">SKU</th>
+              <th scope="col" class="py-4 px-6">سعر البيع</th>
+              <th scope="col" class="py-4 px-6"> التصنيف</th>
+
+              <th scope="col" class="py-4 px-6">الحالة</th>
+              <th scope="col" class="py-4 px-6 text-center">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-sm text-slate-600">
+            @for (p of productService.products(); track p.id; let i = $index) {
+              <tr class="fade-up group hover:bg-blue-50/40 transition-colors duration-200"
+                  [style.animation-delay.ms]="i * 40">
+
+                <td class="py-4 px-6 font-bold text-slate-900 text-[15px]">
+                  {{ p.englishName }}
+                </td>
+
+                <td class="py-4 px-6 font-mono text-[13px] text-slate-500" dir="ltr">
+                  {{ p.sku || '-' }}
+                </td>
+
+                <td class="py-4 px-6 font-mono text-[13px] font-bold text-slate-800" dir="ltr">
+                  {{ p.sellingPrice | currency:'EGP' }}
+                </td>
+            <td class="py-4 px-6 font-mono text-[13px] font-bold text-slate-800" dir="ltr">
+                  {{ p.productCategoryName }}
+                </td>
+
+                <td class="py-4 px-6">
+                  <span [class]="p.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-rose-50 text-rose-700 ring-rose-600/20'"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset">
+                    <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                    {{ p.isActive ? 'نشط' : 'غير نشط' }}
+                  </span>
+                </td>
+
+                <td class="py-4 px-6">
+                  <div class="flex items-center justify-center gap-2">
+                    <button type="button" (click)="editProduct(p)" title="تعديل" aria-label="تعديل"
+                      class="w-10 h-10 rounded-xl flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white hover:scale-105 transition-all duration-200">
+                      <lucide-icon [img]="EditIcon" class="w-4 h-4"></lucide-icon>
+                    </button>
+
+                    <button type="button" (click)="deleteProduct(p.id)" title="حذف" aria-label="حذف"
+                      class="w-10 h-10 rounded-xl flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white hover:scale-105 transition-all duration-200">
+                      <lucide-icon [img]="TrashIcon" class="w-4 h-4"></lucide-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Mobile Cards View -->
+    <div class="block md:hidden space-y-4">
+      @for (p of productService.products(); track p.id; let i = $index) {
+        <div class="fade-up bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4"
+             [style.animation-delay.ms]="i * 50">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="font-bold text-slate-900 text-base truncate">{{ p.englishName }}</h3>
+            <span [class]="p.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-rose-50 text-rose-700 ring-rose-600/20'"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset shrink-0">
+              <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+              {{ p.isActive ? 'نشط' : 'غير نشط' }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 rounded-xl p-3">
+            <div>
+              <span class="text-slate-400 block mb-0.5">رمز المنتج (SKU)</span>
+              <span class="font-semibold text-slate-700 font-mono" dir="ltr">{{ p.sku || '-' }}</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block mb-0.5">سعر البيع</span>
+              <span class="font-bold text-slate-900 font-mono" dir="ltr">{{ p.sellingPrice | currency:'EGP' }}</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button type="button" (click)="editProduct(p)"
+              class="h-10 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-xs font-bold transition-colors">
+              تعديل
+            </button>
+            <button type="button" (click)="deleteProduct(p.id)"
+              class="h-10 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-colors">
+              حذف
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>

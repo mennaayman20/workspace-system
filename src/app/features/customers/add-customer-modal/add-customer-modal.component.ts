@@ -5,7 +5,7 @@ import { CustomerService } from '../customer.service';
 import { CompanyService } from '../../company/company.service';
 import { Customer, CustomerType } from '../Icustomer';
 import { Company } from '../../company/Icompany';
-import { LucideAngularModule, X, User, Save } from 'lucide-angular';
+import { LucideAngularModule, X, User, Save, ChevronDown, Plus } from 'lucide-angular';
 import { AddCompanyModalComponent } from '../../company/add-company-modal/add-company-modal.component';
 
 @Component({
@@ -25,13 +25,15 @@ export class AddCustomerModalComponent implements OnInit {
 
   isSubmitting = signal<boolean>(false);
   errorMessage = signal<string>('');
-  successMessage = signal<string>(''); // signal لرسائل النجاح
+  successMessage = signal<string>('');
   companies = signal<Company[]>([]);
   showCompanyModal = signal<boolean>(false);
 
   readonly CloseIcon = X;
   readonly UserIcon = User;
   readonly SaveIcon = Save;
+  readonly ChevronIcon = ChevronDown;
+  readonly PlusIcon = Plus;
 
   customerForm!: FormGroup;
 
@@ -71,8 +73,8 @@ export class AddCustomerModalComponent implements OnInit {
       companyId: [null]
     });
   }
+
 loadCompanies(selectCreatedCompanyId?: number | string) {
-  // استخدام pageSize مقبولة من السيرفر (مثلاً 100 أو 50)
   this.companyService.getCompanies(1, 100).subscribe({
     next: (res: any) => {
       let list: Company[] = [];
@@ -92,64 +94,80 @@ loadCompanies(selectCreatedCompanyId?: number | string) {
     },
     error: (err) => {
       console.error('Error loading companies:', err);
-      this.errorMessage.set('حدث خطأ أثناء تحميل قائمة الشركات.');
+      // استخراج الرسالة من الـ Response أو إرجاع النص الافتراضي
+      const apiError = err?.error?.message || err?.error || 'حدث خطأ أثناء تحميل قائمة الشركات.';
+      this.errorMessage.set(typeof apiError === 'string' ? apiError : 'حدث خطأ أثناء تحميل قائمة الشركات.');
     }
   });
 }
-onCompanyCreated(res?: any) {
-  this.showCompanyModal.set(false);
 
-  // استخراج ID الشركة الجديدة إن وجد في استجابة الـ API
-  const newId = res?.id || res?.data?.id || res;
+onSubmit() {
+  if (this.customerForm.invalid) {
+    this.customerForm.markAllAsTouched();
+    return;
+  }
 
-  this.successMessage.set('تمت إضافة الشركة بنجاح واختيارها تلقائياً.');
-  setTimeout(() => this.successMessage.set(''), 3000);
+  this.isSubmitting.set(true);
+  this.errorMessage.set('');
+  this.successMessage.set('');
 
-  // إعادة تحميل قائمة الشركات واختيار الشركة الجديدة مباشرة
-  this.loadCompanies(newId);
+  const formValue = this.customerForm.value;
+  const editData = this.customerToEdit();
+
+  // دالة مساعدة صغيرة لاستخراج الرسالة من كائن الخطأ
+  const extractErrorMessage = (err: any, fallbackText: string): string => {
+    if (typeof err?.error === 'string') return err.error;
+    if (err?.error?.message && typeof err.error.message === 'string') return err.error.message;
+    if (err?.error?.title && typeof err.error.title === 'string') return err.error.title; // حالة ASP.NET Validation problem details
+    if (err?.message && typeof err.message === 'string') return err.message;
+    return fallbackText;
+  };
+
+  if (editData) {
+    this.customerService.updateCustomer(editData.id, { id: editData.id, ...formValue }).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.successMessage.set('تم تعديل بيانات العميل بنجاح!');
+        setTimeout(() => {
+          this.customerCreated.emit();
+        }, 1000);
+      },
+      error: (err) => {
+        const msg = extractErrorMessage(err, 'حدث خطأ أثناء تعديل بيانات العميل.');
+        this.errorMessage.set(msg);
+        this.isSubmitting.set(false);
+      }
+    });
+  } else {
+    this.customerService.createCustomer(formValue).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.successMessage.set('تم إضافة العميل بنجاح!');
+        setTimeout(() => {
+          this.customerCreated.emit();
+        }, 1000);
+      },
+      error: (err) => {
+        const msg = extractErrorMessage(err, 'حدث خطأ أثناء إضافة العميل.');
+        this.errorMessage.set(msg);
+        this.isSubmitting.set(false);
+      }
+    });
+  }
 }
+  onCompanyCreated(res?: any) {
+    this.showCompanyModal.set(false);
+    const newId = res?.id || res?.data?.id || res;
 
-  onSubmit() {
-    if (this.customerForm.invalid) {
-      this.customerForm.markAllAsTouched();
-      return;
-    }
+    this.successMessage.set('تمت إضافة الشركة بنجاح واختيارها تلقائياً.');
+    setTimeout(() => this.successMessage.set(''), 3000);
 
-    this.isSubmitting.set(true);
-    this.errorMessage.set('');
-    this.successMessage.set('');
+    this.loadCompanies(newId);
+  }
 
-    const formValue = this.customerForm.value;
-    const editData = this.customerToEdit();
-
-    if (editData) {
-      this.customerService.updateCustomer(editData.id, { id: editData.id, ...formValue }).subscribe({
-        next: () => {
-          this.isSubmitting.set(false);
-          this.successMessage.set('تم تعديل بيانات العميل بنجاح!');
-          setTimeout(() => {
-            this.customerCreated.emit();
-          }, 1000);
-        },
-        error: () => {
-          this.errorMessage.set('حدث خطأ أثناء تعديل بيانات العميل.');
-          this.isSubmitting.set(false);
-        }
-      });
-    } else {
-      this.customerService.createCustomer(formValue).subscribe({
-        next: () => {
-          this.isSubmitting.set(false);
-          this.successMessage.set('تم إضافة العميل بنجاح!');
-          setTimeout(() => {
-            this.customerCreated.emit();
-          }, 1000);
-        },
-        error: () => {
-          this.errorMessage.set('حدث خطأ أثناء إضافة العميل.');
-          this.isSubmitting.set(false);
-        }
-      });
+  onBackdropClick(event: MouseEvent) {
+    if (event.target === event.currentTarget) {
+      this.onClose();
     }
   }
 
