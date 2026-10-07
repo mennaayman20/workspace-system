@@ -6,16 +6,24 @@ import { LucideAngularModule, Play, Plus, MoveLeft, Square, Clock } from 'lucide
 import { SessionsService } from '../sessions.service';
 import { ActiveSessionDto } from '../Isessions';
 import { StartSessionModalComponent } from '../start-session-modal/start-session-modal.component';
+import { TransferWorkspaceModalComponent } from '../transfer-session-modal/transfer-session-modal.component';
 
 type PendingAction =
   | { type: 'end'; sessionId: number }
-  | { type: 'move'; sessionId: number }
   | null;
 
 @Component({
   selector: 'app-live-sessions',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatSnackBarModule, LucideAngularModule, StartSessionModalComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatSnackBarModule,
+    LucideAngularModule,
+    StartSessionModalComponent,
+    TransferWorkspaceModalComponent,
+
+  ],
   templateUrl: './live-sessions.component.html'
 })
 export class LiveSessionsComponent implements OnInit, OnDestroy {
@@ -32,16 +40,33 @@ export class LiveSessionsComponent implements OnInit, OnDestroy {
   isLoading = signal(true);
   isStartModalOpen = signal(false);
 
-  // التايمر: signal واحد بيتحدث كل ثانية
+  // التايمر: signal واحد يتحدث كل ثانية
   now = signal(Date.now());
   private timerInterval?: ReturnType<typeof setInterval>;
 
-  // الأكشن المعلّق (تأكيد إنهاء / نقل)
+  // الأكشن المعلّق (تأكيد إنهاء الجلسة)
   pending = signal<PendingAction>(null);
-  newWorkspaceId = '';
   busyId = signal<number | null>(null);
 
   sessionsCount = computed(() => this.activeSessions().length);
+
+  isTransferModalOpen = signal<boolean>(false);
+selectedSessionToTransfer = signal<ActiveSessionDto | null>(null);
+
+openTransferModal(session: ActiveSessionDto) {
+  this.selectedSessionToTransfer.set(session);
+  this.isTransferModalOpen.set(true);
+}
+
+closeTransferModal() {
+  this.isTransferModalOpen.set(false);
+  this.selectedSessionToTransfer.set(null);
+}
+
+onTransferredSuccessfully() {
+  this.notify('تم نقل الجلسة بنجاح');
+  this.loadActiveSessions();
+}
 
   ngOnInit() {
     this.loadActiveSessions();
@@ -69,7 +94,7 @@ export class LiveSessionsComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ✅ حل مشكلة الـ 3 ساعات: لو السيرفر بعت UTC من غير Z نضيفها
+  // حل مشكلة الـ 3 ساعات: لو السيرفر بعت UTC من غير Z نضيفها
   private parseServerDate(value: string): number {
     const hasTimezone = /([zZ]|[+-]\d{2}:?\d{2})$/.test(value);
     return new Date(hasTimezone ? value : value + 'Z').getTime();
@@ -100,33 +125,6 @@ export class LiveSessionsComponent implements OnInit, OnDestroy {
       error: () => {
         this.busyId.set(null);
         this.notify('فشل إنهاء الجلسة', true);
-      }
-    });
-  }
-
-  // ===== نقل المكان =====
-  askMove(sessionId: number) {
-    this.newWorkspaceId = '';
-    this.pending.set({ type: 'move', sessionId });
-  }
-
-  confirmMove(sessionId: number) {
-    const id = Number(this.newWorkspaceId);
-    if (!id || id <= 0) {
-      this.notify('أدخل رقم Workspace صحيح', true);
-      return;
-    }
-    this.busyId.set(sessionId);
-    this.sessionsService.changeWorkspace(sessionId, { sessionId, newWorkspaceId: id }).subscribe({
-      next: () => {
-        this.closePending();
-        this.busyId.set(null);
-        this.notify('تم نقل الجلسة');
-        this.loadActiveSessions();
-      },
-      error: () => {
-        this.busyId.set(null);
-        this.notify('فشل نقل الجلسة', true);
       }
     });
   }

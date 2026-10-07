@@ -69,7 +69,7 @@
           </div>
 
           <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100">
-            <button (click)="askMove(session.id)" [disabled]="busyId() === session.id"
+            <button (click)="openTransferModal(session)"
               class="px-2 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-700 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
               <lucide-icon [img]="MoveIcon" class="w-3.5 h-3.5"></lucide-icon>
               <span>نقل المكان</span>
@@ -96,7 +96,18 @@
     </div>
   }
 
-  <!-- Confirm / Move dialog -->
+<!-- Transfer Workspace Modal -->
+@if (isTransferModalOpen() && selectedSessionToTransfer(); as s) {
+  <app-transfer-workspace-modal
+    [sessionId]="s.id"
+    [currentWorkspaceId]="s.workspaceId"
+    [currentWorkspaceName]="s.workspaceName"
+    (closeModal)="closeTransferModal()"
+    (transferred)="onTransferredSuccessfully()">
+  </app-transfer-workspace-modal>
+}
+
+  <!-- Confirm End Dialog -->
   @if (pending(); as p) {
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
          (click)="closePending()">
@@ -108,20 +119,6 @@
             <button (click)="confirmEnd(p.sessionId)" [disabled]="busyId() === p.sessionId"
               class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold">
               {{ busyId() === p.sessionId ? 'جاري الإنهاء...' : 'نعم، إنهاء' }}
-            </button>
-            <button (click)="closePending()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-bold text-slate-700">
-              إلغاء
-            </button>
-          </div>
-        } @else {
-          <h3 class="text-lg font-bold text-slate-900">نقل الجلسة #{{ p.sessionId }}</h3>
-          <label class="block text-sm text-slate-500 mt-2 mb-1">رقم الـ Workspace الجديد</label>
-          <input type="number" min="1" [(ngModel)]="newWorkspaceId" (keyup.enter)="confirmMove(p.sessionId)"
-            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40" />
-          <div class="flex gap-3 mt-6">
-            <button (click)="confirmMove(p.sessionId)" [disabled]="busyId() === p.sessionId"
-              class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold">
-              {{ busyId() === p.sessionId ? 'جاري النقل...' : 'نقل' }}
             </button>
             <button (click)="closePending()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-bold text-slate-700">
               إلغاء

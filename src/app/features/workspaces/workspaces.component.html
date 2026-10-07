@@ -197,7 +197,7 @@
 
                   <td class="py-4 px-6">
                     <div class="flex items-center justify-center gap-2">
-                      <select
+                      <!-- <select
                         [value]="ws.status"
                         [disabled]="isBusy(ws.id)"
                         (change)="onStatusChange(ws, $any($event.target).value)"
@@ -206,7 +206,7 @@
                         @for (s of statusOptions; track s.value) {
                           <option [value]="s.value" [selected]="s.value === ws.status">{{ s.label }}</option>
                         }
-                      </select>
+                      </select> -->
 
                       <button type="button" (click)="openEditModal(ws)" [disabled]="isBusy(ws.id)"
                         title="تعديل" aria-label="تعديل"
