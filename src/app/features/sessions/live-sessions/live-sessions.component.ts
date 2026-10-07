@@ -7,6 +7,8 @@ import { SessionsService } from '../sessions.service';
 import { ActiveSessionDto } from '../Isessions';
 import { StartSessionModalComponent } from '../start-session-modal/start-session-modal.component';
 import { TransferWorkspaceModalComponent } from '../transfer-session-modal/transfer-session-modal.component';
+import { ToastrService } from 'ngx-toastr';
+import { SessionPosModalComponent } from '../session-pos-modal/session-pos-modal.component';
 
 type PendingAction =
   | { type: 'end'; sessionId: number }
@@ -22,6 +24,7 @@ type PendingAction =
     LucideAngularModule,
     StartSessionModalComponent,
     TransferWorkspaceModalComponent,
+    SessionPosModalComponent
 
   ],
   templateUrl: './live-sessions.component.html'
@@ -29,7 +32,7 @@ type PendingAction =
 export class LiveSessionsComponent implements OnInit, OnDestroy {
   private sessionsService = inject(SessionsService);
   private snackBar = inject(MatSnackBar);
-
+private toastr = inject(ToastrService);
   readonly PlayIcon = Play;
   readonly PlusIcon = Plus;
   readonly MoveIcon = MoveLeft;
@@ -47,6 +50,7 @@ export class LiveSessionsComponent implements OnInit, OnDestroy {
   // الأكشن المعلّق (تأكيد إنهاء الجلسة)
   pending = signal<PendingAction>(null);
   busyId = signal<number | null>(null);
+selectedSessionForPos = signal<ActiveSessionDto | null>(null);
 
   sessionsCount = computed(() => this.activeSessions().length);
 
@@ -66,6 +70,15 @@ closeTransferModal() {
 onTransferredSuccessfully() {
   this.notify('تم نقل الجلسة بنجاح');
   this.loadActiveSessions();
+}
+
+
+openPosModal(session: ActiveSessionDto) {
+  this.selectedSessionForPos.set(session);
+}
+
+closePosModal() {
+  this.selectedSessionForPos.set(null);
 }
 
   ngOnInit() {
@@ -133,10 +146,8 @@ onTransferredSuccessfully() {
     this.pending.set(null);
   }
 
-  private notify(message: string, isError = false) {
-    this.snackBar.open(message, 'إغلاق', {
-      duration: 3000,
-      panelClass: isError ? ['bg-red-600', 'text-white'] : ['bg-emerald-600', 'text-white']
-    });
-  }
+private notify(message: string, isError = false) {
+  if (isError) this.toastr.error(message);
+  else this.toastr.success(message);
+}
 }

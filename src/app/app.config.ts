@@ -6,7 +6,8 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
-
+import { provideToastr } from 'ngx-toastr';
+import { provideAnimations } from '@angular/platform-browser/animations'
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 
@@ -26,5 +27,13 @@ provideHttpClient(withInterceptors([authInterceptor])),    provideTranslateServi
         suffix: '.json',
       }),
     }),
+provideAnimations(),
+  provideToastr({
+    positionClass: 'toast-bottom-left',
+    timeOut: 1000,
+    closeButton: true,
+  }),
+
+  
   ],
 };

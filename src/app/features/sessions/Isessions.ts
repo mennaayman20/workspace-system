@@ -33,3 +33,15 @@ export interface StartSessionCommand {
   pricingPlanId: number;
   numberOfPeople: number;
 }
+
+
+
+
+export interface SessionProductDto {
+  id?: number;
+  productId: number;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice?: number;
+}
