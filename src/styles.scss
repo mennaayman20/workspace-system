@@ -25,3 +25,10 @@ body {
   background-color: #f8fafc;
   direction: rtl; /* النظام باللغة العربية */
 }
+
+.cdk-overlay-pane.custom-dialog-container .mat-mdc-dialog-container .mdc-dialog__surface {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border-radius: 1.5rem !important; /* rounded-3xl */
+  overflow: hidden !important;
+}

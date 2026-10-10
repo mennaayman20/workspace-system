@@ -75,14 +75,14 @@
               <span>نقل المكان</span>
             </button>
 
-<button (click)="openPosModal(session)"
-  class="px-2 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
-  <lucide-icon [img]="PlusIcon" class="w-3.5 h-3.5"></lucide-icon>
-  <span>منتج POS</span>
-</button>
+            <button (click)="openPosModal(session)"
+              class="px-2 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
+              <lucide-icon [img]="PlusIcon" class="w-3.5 h-3.5"></lucide-icon>
+              <span>منتج POS</span>
+            </button>
 
-            <button (click)="askEnd(session.id)" [disabled]="busyId() === session.id"
-              class="px-2 py-2.5 bg-red-50 hover:bg-red-100 disabled:opacity-50 text-red-600 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
+            <button (click)="openCheckoutModal(session)"
+              class="px-2 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
               <lucide-icon [img]="StopIcon" class="w-3.5 h-3.5"></lucide-icon>
               <span>إنهاء</span>
             </button>
@@ -96,45 +96,36 @@
     </div>
   }
 
-<!-- Transfer Workspace Modal -->
-@if (isTransferModalOpen() && selectedSessionToTransfer(); as s) {
-  <app-transfer-workspace-modal
-    [sessionId]="s.id"
-    [currentWorkspaceId]="s.workspaceId"
-    [currentWorkspaceName]="s.workspaceName"
-    (closeModal)="closeTransferModal()"
-    (transferred)="onTransferredSuccessfully()">
-  </app-transfer-workspace-modal>
-}
+  <!-- Transfer Workspace Modal -->
+  @if (isTransferModalOpen() && selectedSessionToTransfer(); as s) {
+    <app-transfer-workspace-modal
+      [sessionId]="s.id"
+      [currentWorkspaceId]="s.workspaceId"
+      [currentWorkspaceName]="s.workspaceName"
+      (closeModal)="closeTransferModal()"
+      (transferred)="onTransferredSuccessfully()">
+    </app-transfer-workspace-modal>
+  }
 
-@if (selectedSessionForPos(); as s) {
-  <app-session-pos-modal
-    [sessionId]="s.id"
-    [customerName]="s.customerName"
-    (closeModal)="closePosModal()">
-  </app-session-pos-modal>
-}
+  <!-- POS Modal (تعديل المنتجات والخدمات) -->
+  @if (selectedSessionForPos(); as s) {
+    <app-session-pos-modal
+      mode="edit"
+      [sessionId]="s.id"
+      [customerName]="s.customerName"
+      (closeModal)="closePosModal()">
+    </app-session-pos-modal>
+  }
 
-  <!-- Confirm End Dialog -->
-  @if (pending(); as p) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
-         (click)="closePending()">
-      <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl" (click)="$event.stopPropagation()">
-        @if (p.type === 'end') {
-          <h3 class="text-lg font-bold text-slate-900">إنهاء الجلسة #{{ p.sessionId }}</h3>
-          <p class="text-sm text-slate-500 mt-2">هل أنت متأكد من إنهاء الجلسة وتجهيز الحساب؟</p>
-          <div class="flex gap-3 mt-6">
-            <button (click)="confirmEnd(p.sessionId)" [disabled]="busyId() === p.sessionId"
-              class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold">
-              {{ busyId() === p.sessionId ? 'جاري الإنهاء...' : 'نعم، إنهاء' }}
-            </button>
-            <button (click)="closePending()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-bold text-slate-700">
-              إلغاء
-            </button>
-          </div>
-        }
-      </div>
-    </div>
+  <!-- Checkout Modal (الفاتورة + الخصم + إنهاء وتحصيل) -->
+  @if (selectedSessionForCheckout(); as s) {
+    <app-session-pos-modal
+      mode="checkout"
+      [sessionId]="s.id"
+      [customerName]="s.customerName"
+      (closeModal)="closeCheckoutModal()"
+      (checkedOut)="onCheckedOut()">
+    </app-session-pos-modal>
   }
 
   <!-- Start Session Modal -->

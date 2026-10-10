@@ -7,162 +7,234 @@
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
 </style>
 
-<div dir="rtl"
-     class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 fade-up"
-     (click)="onBackdropClick($event)">
-  
+<div dir="rtl" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-up">
   <div role="dialog" aria-modal="true" aria-labelledby="customer-modal-title"
-       class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-100">
+       class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col overflow-hidden">
 
     <!-- Header -->
-    <div class="flex items-center justify-between gap-3 px-6 sm:px-8 pt-6 sm:pt-8 pb-5 border-b border-slate-100">
-      <div class="flex items-center gap-3.5">
-        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
-          <lucide-icon [img]="UserIcon" class="w-6 h-6"></lucide-icon>
+    <div class="px-6 sm:px-8 py-5 border-b border-slate-100 bg-gradient-to-l from-blue-50/70 to-white shrink-0">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
+            <lucide-icon [img]="UserIcon" class="w-6 h-6"></lucide-icon>
+          </div>
+          <div>
+            <h3 id="customer-modal-title" class="text-lg font-extrabold text-slate-900 leading-tight">
+              {{ customerToEdit() ? 'تعديل بيانات العميل' : 'إضافة عميل جديد' }}
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">
+              {{ customerToEdit() ? 'عدّلي البيانات ثم احفظي التغييرات' : 'أدخلي بيانات العميل وحددي نوع الحساب' }}
+            </p>
+          </div>
         </div>
-        <div>
-          <h3 id="customer-modal-title" class="text-lg font-bold text-slate-900 leading-tight">
-            {{ customerToEdit() ? 'تعديل بيانات العميل' : 'إضافة عميل جديد' }}
-          </h3>
-          <p class="text-xs text-slate-500 mt-0.5">
-            {{ customerToEdit() ? 'عدّلي بيانات العميل ثم احفظي التغييرات' : 'أدخلي بيانات العميل وحددي نوع الحساب' }}
-          </p>
-        </div>
+        <button type="button" (click)="onClose()" aria-label="إغلاق"
+                class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white transition-colors">
+          <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
+        </button>
       </div>
-      
-      <button type="button" (click)="onClose()" aria-label="إغلاق"
-              class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
-        <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
-      </button>
     </div>
 
-    <!-- Modal Content -->
-    <div class="px-6 sm:px-8 py-6 space-y-5">
+    <form [formGroup]="customerForm" (ngSubmit)="onSubmit()" class="flex flex-col min-h-0 flex-1" novalidate>
 
-      <!-- Success Message -->
-      @if (successMessage()) {
-        <div role="alert" class="flex items-center gap-2 p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-2xl font-medium fade-up">
-          <span class="font-bold">✓</span>
-          <span>{{ successMessage() }}</span>
-        </div>
-      }
+      <!-- Body -->
+      <div class="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-5 bg-slate-50/50">
 
-      <!-- Error Message -->
-      @if (errorMessage()) {
-        <div role="alert" class="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-2xl font-medium fade-up">
-          {{ errorMessage() }}
-        </div>
-      }
-
-      <!-- Form -->
-      <form [formGroup]="customerForm" (ngSubmit)="onSubmit()" class="space-y-4" novalidate>
-        
-        <!-- الاسم بالكامل -->
-        <div>
-          <label for="fullName" class="block text-xs font-bold text-slate-700 mb-1.5">الاسم بالكامل *</label>
-          <input id="fullName" formControlName="fullName" type="text" placeholder="اسم العميل الرباعي"
-                 [class.border-rose-400]="customerForm.get('fullName')?.touched && customerForm.get('fullName')?.invalid"
-                 class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-slate-400" />
-          @if (customerForm.get('fullName')?.touched && customerForm.get('fullName')?.invalid) {
-            <p class="text-xs text-rose-600 mt-1">الاسم بالكامل مطلوب</p>
-          }
-        </div>
-
-        <!-- الموبايل والبريد الإلكتروني في شبكة تفاعلية -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- الموبايل -->
-          <div>
-            <label for="mobileNumber" class="block text-xs font-bold text-slate-700 mb-1.5">رقم الموبايل *</label>
-            <input id="mobileNumber" formControlName="mobileNumber" type="text" placeholder="01012345678" dir="ltr"
-                   [class.border-rose-400]="customerForm.get('mobileNumber')?.touched && customerForm.get('mobileNumber')?.invalid"
-                   class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-slate-400 text-right" />
-            @if (customerForm.get('mobileNumber')?.touched && customerForm.get('mobileNumber')?.invalid) {
-              <p class="text-xs text-rose-600 mt-1">رقم الموبايل مطلوب</p>
-            }
-          </div>
-
-          <!-- البريد الإلكتروني -->
-          <div>
-            <label for="email" class="block text-xs font-bold text-slate-700 mb-1.5">
-              البريد الإلكتروني <span class="font-normal text-slate-400">(اختياري)</span>
-            </label>
-            <input id="email" formControlName="email" type="email" placeholder="example@domain.com" dir="ltr"
-                   [class.border-rose-400]="customerForm.get('email')?.touched && customerForm.get('email')?.hasError('email')"
-                   class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-slate-400 text-left" />
-            @if (customerForm.get('email')?.touched && customerForm.get('email')?.hasError('email')) {
-              <p class="text-xs text-rose-600 mt-1">صيغة البريد الإلكتروني غير صحيحة</p>
-            }
-          </div>
-        </div>
-
-        <!-- نوع العميل -->
-        <div>
-          <label for="customerType" class="block text-xs font-bold text-slate-700 mb-1.5">نوع العميل *</label>
-          <div class="relative">
-            <select id="customerType" formControlName="customerType"
-                    class="w-full h-11 pr-4 pl-10 appearance-none bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
-              <option value="Individual">فردي (Individual)</option>
-              <option value="Corporate">شركات (Corporate)</option>
-            </select>
-            <lucide-icon [img]="ChevronIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"></lucide-icon>
-          </div>
-        </div>
-
-        <!-- حقل اختيار الشركة -->
-        @if (customerForm.get('customerType')?.value === 'Corporate') {
-          <div class="p-4 bg-blue-50/60 border border-blue-100 rounded-2xl space-y-3 fade-up">
-            <div>
-              <label for="companyId" class="block text-xs font-bold text-slate-800 mb-1.5">اختر الشركة المربوط بها العميل *</label>
-              <div class="relative">
-                <select id="companyId" formControlName="companyId"
-                        [class.border-rose-400]="customerForm.get('companyId')?.touched && customerForm.get('companyId')?.invalid"
-                        class="w-full h-11 pr-4 pl-10 appearance-none bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
-                  <option [ngValue]="null" disabled>-- حدد شركة من القائمة --</option>
-                  @for (comp of companies(); track comp.id) {
-                    <option [value]="comp.id">{{ comp.name }}</option>
-                  }
-                </select>
-                <lucide-icon [img]="ChevronIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"></lucide-icon>
-              </div>
-              @if (customerForm.get('companyId')?.touched && customerForm.get('companyId')?.invalid) {
-                <p class="text-xs text-rose-600 mt-1">يرجى اختيار الشركة</p>
-              }
-            </div>
-
-            <!-- خيار إضافة شركة جديدة -->
-            <div class="flex items-center justify-between text-xs pt-2 border-t border-blue-100/70">
-              <span class="text-slate-500">الشركة غير مسجلة بالسيستم؟</span>
-              <button type="button" (click)="showCompanyModal.set(true)" 
-                      class="text-blue-600 font-bold hover:text-blue-800 hover:underline transition-all flex items-center gap-1">
-                <lucide-icon [img]="PlusIcon" class="w-3.5 h-3.5"></lucide-icon>
-                إضافة شركة جديدة الآن
-              </button>
-            </div>
+        @if (errorMessage()) {
+          <div role="alert" class="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-2xl font-medium">
+            {{ errorMessage() }}
           </div>
         }
 
-        <!-- الأزرار -->
-        <div class="flex items-center justify-end gap-3 pt-5 border-t border-slate-100">
-          <button type="button" (click)="onClose()" [disabled]="isSubmitting()" 
+        @if (isLoadingNames()) {
+          <div class="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
+            <span class="inline-block w-3.5 h-3.5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></span>
+            جاري تحميل الأسماء...
+          </div>
+        }
+
+        <!-- ① الاسم -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+              <lucide-icon [img]="UserIcon" class="w-4 h-4"></lucide-icon>
+            </span>
+            <h4 class="text-sm font-extrabold text-slate-800">اسم العميل</h4>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="fullNameAr" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+                <span>الاسم بالعربي <span class="text-rose-500">*</span></span>
+                <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
+              </label>
+              <input pInputText id="fullNameAr" formControlName="fullNameAr" dir="rtl"
+                     class="w-full !h-11 !rounded-xl" placeholder="اسم العميل الرباعي"
+                     [class.ng-invalid]="isInvalid('fullNameAr')" [class.ng-dirty]="isInvalid('fullNameAr')" />
+              @if (isInvalid('fullNameAr')) {
+                <p class="text-xs text-rose-600 mt-1">الاسم بالعربي مطلوب</p>
+              }
+            </div>
+
+            <div>
+              <label for="fullNameEn" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+                <span>Full Name <span class="text-rose-500">*</span></span>
+                <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
+              </label>
+              <input pInputText id="fullNameEn" formControlName="fullNameEn" dir="ltr"
+                     class="w-full !h-11 !rounded-xl" placeholder="Customer full name"
+                     [class.ng-invalid]="isInvalid('fullNameEn')" [class.ng-dirty]="isInvalid('fullNameEn')" />
+              @if (isInvalid('fullNameEn')) {
+                <p class="text-xs text-rose-600 mt-1">English name is required</p>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- ② بيانات التواصل -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+              <lucide-icon [img]="PhoneIcon" class="w-4 h-4"></lucide-icon>
+            </span>
+            <h4 class="text-sm font-extrabold text-slate-800">بيانات التواصل</h4>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="mobileNumber" class="block text-xs font-bold text-slate-700 mb-1.5">
+                رقم الموبايل <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <lucide-icon [img]="PhoneIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
+                <input pInputText id="mobileNumber" formControlName="mobileNumber" dir="ltr"
+                       class="w-full !h-11 !rounded-xl !ps-10 text-right" placeholder="01012345678"
+                       [class.ng-invalid]="isInvalid('mobileNumber')" [class.ng-dirty]="isInvalid('mobileNumber')" />
+              </div>
+              @if (isInvalid('mobileNumber')) {
+                <p class="text-xs text-rose-600 mt-1">رقم الموبايل مطلوب</p>
+              }
+            </div>
+
+            <div>
+              <label for="email" class="block text-xs font-bold text-slate-700 mb-1.5">
+                البريد الإلكتروني <span class="font-normal text-slate-400">(اختياري)</span>
+              </label>
+              <div class="relative">
+                <lucide-icon [img]="MailIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
+                <input pInputText id="email" formControlName="email" type="email" dir="ltr"
+                       class="w-full !h-11 !rounded-xl !ps-10 text-left" placeholder="example@domain.com"
+                       [class.ng-invalid]="isInvalid('email')" [class.ng-dirty]="isInvalid('email')" />
+              </div>
+              @if (isInvalid('email')) {
+                <p class="text-xs text-rose-600 mt-1">صيغة البريد الإلكتروني غير صحيحة</p>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- ③ نوع العميل -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+              <lucide-icon [img]="BuildingIcon" class="w-4 h-4"></lucide-icon>
+            </span>
+            <h4 class="text-sm font-extrabold text-slate-800">نوع الحساب</h4>
+          </div>
+
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">نوع العميل <span class="text-rose-500">*</span></label>
+          <p-select formControlName="customerType"
+                    [options]="typeOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    appendTo="body"
+                    [fluid]="true"
+                    styleClass="!rounded-xl !h-12">
+
+            <!-- القيمة المختارة -->
+            <ng-template #selectedItem let-opt>
+              <div class="flex items-center gap-2.5">
+                <span class="w-7 h-7 rounded-lg flex items-center justify-center {{ opt.tone }}">
+                  <lucide-icon [img]="opt.icon" class="w-4 h-4"></lucide-icon>
+                </span>
+                <span class="font-bold text-slate-800 text-sm">{{ opt.label }}</span>
+                <span class="text-xs text-slate-400" dir="ltr">{{ opt.hint }}</span>
+              </div>
+            </ng-template>
+
+            <!-- عناصر القائمة -->
+            <ng-template #item let-opt>
+              <div class="flex items-center gap-3 w-full">
+                <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {{ opt.tone }}">
+                  <lucide-icon [img]="opt.icon" class="w-4 h-4"></lucide-icon>
+                </span>
+                <span class="font-bold text-slate-800 text-sm flex-1">{{ opt.label }}</span>
+                <span class="text-xs text-slate-400" dir="ltr">{{ opt.hint }}</span>
+              </div>
+            </ng-template>
+          </p-select>
+
+          <!-- اختيار الشركة -->
+          @if (customerForm.get('customerType')?.value === 'Corporate') {
+            <div class="mt-4 p-4 bg-blue-50/60 border border-blue-100 rounded-2xl space-y-3 fade-up">
+              <div>
+                <label class="block text-xs font-bold text-slate-800 mb-1.5">
+                  الشركة المربوط بها العميل <span class="text-rose-500">*</span>
+                </label>
+                <p-select formControlName="companyId"
+                          [options]="companies()"
+                          optionLabel="name"
+                          optionValue="id"
+                          placeholder="-- حدد شركة من القائمة --"
+                          [filter]="true"
+                          filterBy="name"
+                          filterPlaceholder="ابحث عن شركة..."
+                          [showClear]="true"
+                          appendTo="body"
+                          [fluid]="true"
+                          styleClass="!rounded-xl !h-11"
+                          [class.ng-invalid]="isInvalid('companyId')"
+                          [class.ng-dirty]="isInvalid('companyId')">
+                </p-select>
+                @if (isInvalid('companyId')) {
+                  <p class="text-xs text-rose-600 mt-1">يرجى اختيار الشركة</p>
+                }
+              </div>
+
+              <div class="flex items-center justify-between text-xs pt-2 border-t border-blue-100/70">
+                <span class="text-slate-500">الشركة غير مسجلة بالسيستم؟</span>
+                <button type="button" (click)="showCompanyModal.set(true)"
+                        class="text-blue-600 font-bold hover:text-blue-800 hover:underline transition-all flex items-center gap-1">
+                  <lucide-icon [img]="PlusIcon" class="w-3.5 h-3.5"></lucide-icon>
+                  إضافة شركة جديدة الآن
+                </button>
+              </div>
+            </div>
+          }
+        </section>
+      </div>
+
+      <!-- Footer -->
+      <div class="shrink-0 flex items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
+        <p class="hidden sm:block text-[11px] text-slate-400"><span class="text-rose-500">*</span> حقول مطلوبة</p>
+        <div class="flex items-center gap-3 ms-auto">
+          <button type="button" (click)="onClose()" [disabled]="isSubmitting()"
                   class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
             إلغاء
           </button>
-          
-          <button type="submit" [disabled]="isSubmitting()" 
+          <button type="submit" [disabled]="isSubmitting() || isLoadingNames()"
                   class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2">
             <lucide-icon [img]="SaveIcon" class="w-4 h-4"></lucide-icon>
             {{ isSubmitting() ? 'جاري الحفظ...' : (customerToEdit() ? 'حفظ التعديلات' : 'حفظ العميل') }}
           </button>
         </div>
-
-      </form>
-    </div>
+      </div>
+    </form>
   </div>
 </div>
 
 <!-- مودال إنشاء شركة فرعي -->
 @if (showCompanyModal()) {
-  <app-add-company-modal 
+  <app-add-company-modal
     (companySaved)="onCompanyCreated($event)"
     (closeModal)="showCompanyModal.set(false)">
   </app-add-company-modal>

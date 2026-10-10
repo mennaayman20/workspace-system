@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PlanFormDialogComponent } from './plan-form-dialog.component';
+import { ServiceListComponent } from './service-list.component';
 
-describe('PlanFormDialogComponent', () => {
-  let component: PlanFormDialogComponent;
-  let fixture: ComponentFixture<PlanFormDialogComponent>;
+describe('ServiceListComponent', () => {
+  let component: ServiceListComponent;
+  let fixture: ComponentFixture<ServiceListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PlanFormDialogComponent]
+      imports: [ServiceListComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(PlanFormDialogComponent);
+    fixture = TestBed.createComponent(ServiceListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

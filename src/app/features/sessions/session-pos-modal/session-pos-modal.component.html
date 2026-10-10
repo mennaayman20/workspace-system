@@ -1,5 +1,7 @@
 <div dir="rtl" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-  <div class="w-full max-w-4xl bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]">
+  <div class="w-full bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]"
+       [class.max-w-4xl]="mode() === 'edit'"
+       [class.max-w-xl]="mode() === 'checkout'">
 
     <!-- Header -->
     <div class="flex items-start justify-between p-6 border-b border-slate-100">
@@ -8,153 +10,350 @@
           <lucide-icon [img]="BagIcon" class="w-5 h-5"></lucide-icon>
         </div>
         <div>
-          <h3 class="text-lg font-bold text-slate-900">إضافة منتجات للجلسة #{{ sessionId() }}</h3>
+          <h3 class="text-lg font-bold text-slate-900">
+            {{ mode() === 'checkout' ? 'فاتورة الجلسة' : 'إضافة منتجات وخدمات للجلسة' }} #{{ sessionId() }}
+          </h3>
           @if (customerName()) {
             <p class="text-xs text-slate-500 mt-0.5">{{ customerName() }}</p>
           }
         </div>
       </div>
-      <button (click)="closeModal.emit()" [disabled]="isSaving()"
+      <button (click)="closeModal.emit()" [disabled]="isBusy()"
         class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 disabled:opacity-50 flex items-center justify-center text-slate-500 transition-colors">
         <lucide-icon [img]="CloseIcon" class="w-4 h-4"></lucide-icon>
       </button>
     </div>
 
-    <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 lg:grid-cols-5 gap-6">
+    <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 gap-6"
+         [class.lg:grid-cols-5]="mode() === 'edit'">
 
-      <!-- يمين: التصنيفات + المنتجات -->
+      <!-- يمين: التابات + (التصنيفات والمنتجات) أو (الخدمات) — وضع التعديل فقط -->
+      @if (mode() === 'edit') {
       <div class="lg:col-span-3 space-y-4">
 
-        <!-- Categories -->
-        <div>
-          <p class="text-xs font-bold text-slate-500 mb-2">التصنيفات</p>
-          <div class="flex flex-wrap gap-2">
-            @for (cat of categories(); track cat.id) {
-              <button type="button" (click)="selectCategory(cat.id)"
-                class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all"
-                [class.bg-blue-600]="selectedCategoryId() === cat.id"
-                [class.text-white]="selectedCategoryId() === cat.id"
-                [class.border-blue-600]="selectedCategoryId() === cat.id"
-                [class.bg-white]="selectedCategoryId() !== cat.id"
-                [class.text-slate-700]="selectedCategoryId() !== cat.id"
-                [class.border-slate-200]="selectedCategoryId() !== cat.id">
-                {{ cat.name }}
-              </button>
-            } @empty {
-              <span class="text-sm text-slate-400">لا توجد تصنيفات</span>
+        <!-- Tabs -->
+        <div class="inline-flex p-1 bg-slate-100 rounded-2xl">
+          <button type="button" (click)="setTab('products')"
+            class="px-5 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
+            [class.bg-white]="activeTab() === 'products'"
+            [class.shadow-sm]="activeTab() === 'products'"
+            [class.text-blue-600]="activeTab() === 'products'"
+            [class.text-slate-500]="activeTab() !== 'products'">
+            المنتجات
+            @if (draftItems().length > 0) {
+              <span class="min-w-5 h-5 px-1.5 rounded-full bg-blue-600 text-white text-[11px] flex items-center justify-center">
+                {{ draftItems().length }}
+              </span>
             }
-          </div>
+          </button>
+          <button type="button" (click)="setTab('services')"
+            class="px-5 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
+            [class.bg-white]="activeTab() === 'services'"
+            [class.shadow-sm]="activeTab() === 'services'"
+            [class.text-blue-600]="activeTab() === 'services'"
+            [class.text-slate-500]="activeTab() !== 'services'">
+            الخدمات
+            @if (draftServices().length > 0) {
+              <span class="min-w-5 h-5 px-1.5 rounded-full bg-blue-600 text-white text-[11px] flex items-center justify-center">
+                {{ draftServices().length }}
+              </span>
+            }
+          </button>
         </div>
 
-        <!-- Products -->
-        <div>
-          <p class="text-xs font-bold text-slate-500 mb-2">المنتجات</p>
+        @if (activeTab() === 'products') {
 
-          @if (selectedCategoryId() === null) {
-            <div class="py-10 text-center text-sm text-slate-400 border border-dashed border-slate-200 rounded-2xl">
-              اختاري تصنيف لعرض منتجاته
+          <!-- Categories -->
+          <div>
+            <p class="text-xs font-bold text-slate-500 mb-2">التصنيفات</p>
+            <div class="flex flex-wrap gap-2">
+              @for (cat of categories(); track cat.id) {
+                <button type="button" (click)="selectCategory(cat.id)"
+                  class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all"
+                  [class.bg-blue-600]="selectedCategoryId() === cat.id"
+                  [class.text-white]="selectedCategoryId() === cat.id"
+                  [class.border-blue-600]="selectedCategoryId() === cat.id"
+                  [class.bg-white]="selectedCategoryId() !== cat.id"
+                  [class.text-slate-700]="selectedCategoryId() !== cat.id"
+                  [class.border-slate-200]="selectedCategoryId() !== cat.id">
+                  {{ cat.name }}
+                </button>
+              } @empty {
+                <span class="text-sm text-slate-400">لا توجد تصنيفات</span>
+              }
             </div>
-          } @else {
+          </div>
+
+          <!-- Products -->
+          <div>
+            <p class="text-xs font-bold text-slate-500 mb-2">المنتجات</p>
+
+            @if (selectedCategoryId() === null) {
+              <div class="py-10 text-center text-sm text-slate-400 border border-dashed border-slate-200 rounded-2xl">
+                اختاري تصنيف لعرض منتجاته
+              </div>
+            } @else {
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                @for (p of products(); track p.id) {
+                  <button type="button" (click)="addProduct(p)"
+                    class="relative text-start p-4 rounded-2xl border border-slate-200 bg-white hover:border-blue-400 hover:bg-blue-50/40 active:scale-[0.98] transition-all">
+                    @if (quantityOf(p.id) > 0) {
+                      <span class="absolute top-2 left-2 min-w-6 h-6 px-1.5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">
+                        {{ quantityOf(p.id) }}
+                      </span>
+                    }
+                    <p class="font-bold text-slate-800 text-sm truncate">{{ p.englishName }}</p>
+                    <p dir="ltr" class="text-xs font-mono font-bold text-emerald-600 mt-1 text-right">
+                      {{ p.sellingPrice | currency:'EGP' }}
+                    </p>
+                  </button>
+                } @empty {
+                  <div class="col-span-full py-10 text-center text-sm text-slate-400 border border-dashed border-slate-200 rounded-2xl">
+                    لا توجد منتجات في هذا التصنيف
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+        } @else {
+
+          <!-- Services -->
+          <div>
+            <p class="text-xs font-bold text-slate-500 mb-2">الخدمات</p>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              @for (p of products(); track p.id) {
-                <button type="button" (click)="addProduct(p)"
+              @for (s of availableServices(); track s.id) {
+                <button type="button" (click)="addService(s)"
                   class="relative text-start p-4 rounded-2xl border border-slate-200 bg-white hover:border-blue-400 hover:bg-blue-50/40 active:scale-[0.98] transition-all">
-                  @if (quantityOf(p.id) > 0) {
+                  @if (serviceQuantityOf(s.id) > 0) {
                     <span class="absolute top-2 left-2 min-w-6 h-6 px-1.5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">
-                      {{ quantityOf(p.id) }}
+                      {{ serviceQuantityOf(s.id) }}
                     </span>
                   }
-                  <p class="font-bold text-slate-800 text-sm truncate">{{ p.englishName }}</p>
+                  <p class="font-bold text-slate-800 text-sm truncate">{{ s.name }}</p>
+                  @if (s.description) {
+                    <p class="text-[11px] text-slate-400 mt-0.5 truncate">{{ s.description }}</p>
+                  }
                   <p dir="ltr" class="text-xs font-mono font-bold text-emerald-600 mt-1 text-right">
-                    {{ p.sellingPrice | currency:'EGP' }}
+                    {{ s.price | currency:'EGP' }}
                   </p>
                 </button>
               } @empty {
                 <div class="col-span-full py-10 text-center text-sm text-slate-400 border border-dashed border-slate-200 rounded-2xl">
-                  لا توجد منتجات في هذا التصنيف
+                  لا توجد خدمات متاحة
                 </div>
               }
             </div>
-          }
-        </div>
+          </div>
+
+        }
       </div>
+      }
 
-      <!-- يسار: منتجات الجلسة -->
-      <div class="lg:col-span-2 bg-slate-50 rounded-2xl p-4 flex flex-col">
-        <div class="flex items-center justify-between mb-3">
-          <p class="text-sm font-bold text-slate-800">منتجات الجلسة</p>
-          @if (draftItems().length > 0) {
-            <button type="button" (click)="clearAll()"
-              class="text-xs font-bold text-red-600 hover:text-red-700">
-              مسح الكل
-            </button>
-          }
-        </div>
+      <!-- يسار: ملخص الجلسة (منتجات + خدمات) -->
+      <div class="bg-slate-50 rounded-2xl p-4 flex flex-col"
+           [class.lg:col-span-2]="mode() === 'edit'">
 
-        <div class="flex-1 space-y-2 overflow-y-auto">
-          @if (isLoadingItems()) {
-            @for (i of [1,2]; track i) {
-              <div class="h-16 rounded-xl bg-slate-200 animate-pulse"></div>
-            }
-          } @else {
-            @for (item of draftItems(); track item.productId) {
-              <div class="bg-white rounded-xl border border-slate-200 p-3">
-                <div class="flex items-center justify-between gap-2">
-                  <p class="text-sm font-bold text-slate-800 truncate">{{ item.productName }}</p>
-                  <button type="button" (click)="remove(item.productId)"
-                    class="text-rose-500 hover:text-rose-700" title="حذف">
-                    <lucide-icon [img]="TrashIcon" class="w-4 h-4"></lucide-icon>
-                  </button>
-                </div>
-                <div class="flex items-center justify-between mt-2">
-                  <div class="inline-flex items-center gap-2">
-                    <button type="button" (click)="changeQuantity(item, -1)"
-                      class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
-                      <lucide-icon [img]="MinusIcon" class="w-3.5 h-3.5"></lucide-icon>
-                    </button>
-                    <span class="text-sm font-bold w-6 text-center tabular-nums">{{ item.quantity }}</span>
-                    <button type="button" (click)="changeQuantity(item, 1)"
-                      class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
-                      <lucide-icon [img]="PlusIcon" class="w-3.5 h-3.5"></lucide-icon>
-                    </button>
+        <div class="flex-1 space-y-5 overflow-y-auto">
+
+          <!-- منتجات الجلسة -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-sm font-bold text-slate-800">منتجات الجلسة</p>
+              @if (mode() === 'edit' && draftItems().length > 0) {
+                <button type="button" (click)="clearAll()"
+                  class="text-xs font-bold text-red-600 hover:text-red-700">
+                  مسح الكل
+                </button>
+              }
+            </div>
+
+            <div class="space-y-2">
+              @if (isLoadingItems()) {
+                @for (i of [1,2]; track i) {
+                  <div class="h-16 rounded-xl bg-slate-200 animate-pulse"></div>
+                }
+              } @else {
+                @for (item of draftItems(); track item.productId) {
+                  <div class="bg-white rounded-xl border border-slate-200 p-3">
+                    <div class="flex items-center justify-between gap-2">
+                      <p class="text-sm font-bold text-slate-800 truncate">{{ item.productName }}</p>
+                      @if (mode() === 'edit') {
+                        <button type="button" (click)="remove(item.productId)"
+                          class="text-rose-500 hover:text-rose-700" title="حذف">
+                          <lucide-icon [img]="TrashIcon" class="w-4 h-4"></lucide-icon>
+                        </button>
+                      }
+                    </div>
+                    <div class="flex items-center justify-between mt-2">
+                      @if (mode() === 'edit') {
+                        <div class="inline-flex items-center gap-2">
+                          <button type="button" (click)="changeQuantity(item, -1)"
+                            class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
+                            <lucide-icon [img]="MinusIcon" class="w-3.5 h-3.5"></lucide-icon>
+                          </button>
+                          <span class="text-sm font-bold w-6 text-center tabular-nums">{{ item.quantity }}</span>
+                          <button type="button" (click)="changeQuantity(item, 1)"
+                            class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
+                            <lucide-icon [img]="PlusIcon" class="w-3.5 h-3.5"></lucide-icon>
+                          </button>
+                        </div>
+                      } @else {
+                        <span class="text-xs text-slate-500">
+                          {{ item.quantity }} × {{ item.unitPrice | currency:'EGP' }}
+                        </span>
+                      }
+                      <span dir="ltr" class="text-sm font-mono font-bold text-slate-700">
+                        {{ item.unitPrice * item.quantity | currency:'EGP' }}
+                      </span>
+                    </div>
                   </div>
-                  <span dir="ltr" class="text-sm font-mono font-bold text-slate-700">
-                    {{ item.unitPrice * item.quantity | currency:'EGP' }}
-                  </span>
-                </div>
-              </div>
-            } @empty {
-              <div class="py-8 text-center text-sm text-slate-400">لم تتم إضافة منتجات بعد</div>
-            }
-          }
+                } @empty {
+                  <div class="py-4 text-center text-sm text-slate-400">
+                    {{ mode() === 'edit' ? 'لم تتم إضافة منتجات بعد' : 'لا توجد منتجات' }}
+                  </div>
+                }
+              }
+            </div>
+          </div>
+
+          <!-- خدمات الجلسة -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-sm font-bold text-slate-800">خدمات الجلسة</p>
+              @if (mode() === 'edit' && draftServices().length > 0) {
+                <button type="button" (click)="clearAllServices()"
+                  class="text-xs font-bold text-red-600 hover:text-red-700">
+                  مسح الكل
+                </button>
+              }
+            </div>
+
+            <div class="space-y-2">
+              @if (isLoadingItems()) {
+                @for (i of [1,2]; track i) {
+                  <div class="h-16 rounded-xl bg-slate-200 animate-pulse"></div>
+                }
+              } @else {
+                @for (item of draftServices(); track item.serviceId) {
+                  <div class="bg-white rounded-xl border border-slate-200 p-3">
+                    <div class="flex items-center justify-between gap-2">
+                      <p class="text-sm font-bold text-slate-800 truncate">{{ item.serviceName }}</p>
+                      @if (mode() === 'edit') {
+                        <button type="button" (click)="removeService(item.serviceId)"
+                          class="text-rose-500 hover:text-rose-700" title="حذف">
+                          <lucide-icon [img]="TrashIcon" class="w-4 h-4"></lucide-icon>
+                        </button>
+                      }
+                    </div>
+                    <div class="flex items-center justify-between mt-2">
+                      @if (mode() === 'edit') {
+                        <div class="inline-flex items-center gap-2">
+                          <button type="button" (click)="changeServiceQuantity(item, -1)"
+                            class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
+                            <lucide-icon [img]="MinusIcon" class="w-3.5 h-3.5"></lucide-icon>
+                          </button>
+                          <span class="text-sm font-bold w-6 text-center tabular-nums">{{ item.quantity }}</span>
+                          <button type="button" (click)="changeServiceQuantity(item, 1)"
+                            class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
+                            <lucide-icon [img]="PlusIcon" class="w-3.5 h-3.5"></lucide-icon>
+                          </button>
+                        </div>
+                      } @else {
+                        <span class="text-xs text-slate-500">
+                          {{ item.quantity }} × {{ item.unitPrice | currency:'EGP' }}
+                        </span>
+                      }
+                      <span dir="ltr" class="text-sm font-mono font-bold text-slate-700">
+                        {{ item.unitPrice * item.quantity | currency:'EGP' }}
+                      </span>
+                    </div>
+                  </div>
+                } @empty {
+                  <div class="py-4 text-center text-sm text-slate-400">
+                    {{ mode() === 'edit' ? 'لم تتم إضافة خدمات بعد' : 'لا توجد خدمات' }}
+                  </div>
+                }
+              }
+            </div>
+          </div>
         </div>
 
-        <div class="flex items-center justify-between pt-3 mt-3 border-t border-slate-200">
-          <span class="text-sm text-slate-500">الإجمالي</span>
-          <span dir="ltr" class="text-lg font-extrabold font-mono text-slate-900">
-            {{ itemsTotal() | currency:'EGP' }}
-          </span>
+        <!-- Totals -->
+        <div class="pt-3 mt-3 border-t border-slate-200 space-y-1.5">
+          <div class="flex items-center justify-between text-xs text-slate-500">
+            <span>إجمالي المنتجات</span>
+            <span dir="ltr" class="font-mono font-bold">{{ productsTotal() | currency:'EGP' }}</span>
+          </div>
+          <div class="flex items-center justify-between text-xs text-slate-500">
+            <span>إجمالي الخدمات</span>
+            <span dir="ltr" class="font-mono font-bold">{{ servicesTotal() | currency:'EGP' }}</span>
+          </div>
+
+          @if (mode() === 'checkout') {
+            <!-- اختيار الخصم -->
+            <div class="pt-2">
+              <label class="block text-xs font-bold text-slate-600 mb-1.5">الخصم</label>
+              <select (change)="onDiscountChange($any($event.target).value)" [disabled]="isCheckingOut()"
+                class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:border-blue-400 disabled:opacity-60">
+                <option value="">بدون خصم</option>
+                @for (d of availableDiscounts(); track d.id) {
+                  <option [value]="d.id" [selected]="d.id === selectedDiscountId()">
+                    {{ d.name }} — {{ d.type === 'Percentage' ? d.value + '%' : (d.value | currency:'EGP') }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            @if (discountAmount() > 0) {
+              <div class="flex items-center justify-between text-xs text-emerald-600 pt-1">
+                <span>قيمة الخصم</span>
+                <span dir="ltr" class="font-mono font-bold">- {{ discountAmount() | currency:'EGP' }}</span>
+              </div>
+            }
+          }
+
+          <div class="flex items-center justify-between pt-1.5">
+            <span class="text-sm text-slate-500">الإجمالي</span>
+            <span dir="ltr" class="text-lg font-extrabold font-mono text-slate-900">
+              {{ (mode() === 'checkout' ? netTotal() : grandTotal()) | currency:'EGP' }}
+            </span>
+          </div>
+
+          @if (mode() === 'checkout') {
+            <p class="text-[11px] text-slate-400 pt-1">
+              الإجمالي هنا للمنتجات والخدمات فقط، وحساب وقت المكان بيتضاف تلقائياً من النظام عند الإنهاء.
+            </p>
+          }
         </div>
       </div>
     </div>
 
     <!-- Footer -->
     <div class="p-4 border-t border-slate-100 flex items-center justify-between gap-3">
-      @if (hasChanges()) {
+      @if (mode() === 'edit' && hasChanges()) {
         <span class="text-xs font-bold text-amber-600">يوجد تعديلات لم يتم حفظها</span>
       } @else {
         <span></span>
       }
 
       <div class="flex gap-3">
-        <button (click)="closeModal.emit()" [disabled]="isSaving()"
+        <button (click)="closeModal.emit()" [disabled]="isBusy()"
           class="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 rounded-xl text-sm font-bold text-slate-700">
           إلغاء
         </button>
-        <button (click)="save()" [disabled]="isSaving() || isLoadingItems()"
-          class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-bold">
-          {{ isSaving() ? 'جاري الحفظ...' : 'حفظ' }}
-        </button>
+
+        @if (mode() === 'edit') {
+          <button (click)="save()" [disabled]="isBusy() || isLoadingItems()"
+            class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-bold">
+            {{ isSaving() ? 'جاري الحفظ...' : 'حفظ' }}
+          </button>
+        } @else {
+          <button (click)="confirmCheckout()" [disabled]="isBusy() || isLoadingItems()"
+            class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-bold">
+            {{ isCheckingOut() ? 'جاري الإنهاء...' : 'إنهاء وتحصيل الفاتورة' }}
+          </button>
+        }
       </div>
     </div>
   </div>

@@ -14,8 +14,19 @@ export const EMPTY_CONFIG: TypePricingConfig = {
   rounding: { mode: 'none', minutes: null },
 };
 
-const activeValue = (rules: PricingRule[], type: SupportedRuleType): number | null =>
-  rules.find((r) => r.ruleType === type && r.isActive)?.value ?? null;
+/**
+ * الـ rule الأساسية = من غير تواريخ ولا يوم.
+ * أي rule تانية (weekend، فترة معينة...) مش بتاعة الفورم دي ومنلمسهاش.
+ */
+const isBase = (r: PricingRule): boolean => !r.startDate && !r.endDate && !r.dayOfWeek;
+
+const findBase = (rules: PricingRule[], type: SupportedRuleType): PricingRule | undefined =>
+  rules.find((r) => isBase(r) && r.ruleType === type);
+
+const activeValue = (rules: PricingRule[], type: SupportedRuleType): number | null => {
+  const rule = findBase(rules, type);
+  return rule?.isActive ? rule.value : null;
+};
 
 /** rules[] (الـ API) → الفورم */
 export function rulesToConfig(rules: PricingRule[]): TypePricingConfig {
@@ -70,15 +81,15 @@ const newPayload = (
   isActive: true,
 });
 
-/** بيحافظ على التواريخ/اليوم الموجودين على الـ rule بدل ما يمسحهم. */
+/** التعديل بيشتغل على الـ base rule بس، فالتواريخ واليوم دايمًا null. */
 const updatedPayload = (rule: PricingRule, value: number): PricingRulePayload => ({
   pricingPlanId: rule.pricingPlanId,
   workspaceTypeId: rule.workspaceTypeId,
   ruleType: rule.ruleType,
   value,
-  startDate: rule.startDate,
-  endDate: rule.endDate,
-  dayOfWeek: rule.dayOfWeek,
+  startDate: null,
+  endDate: null,
+  dayOfWeek: null,
   isActive: true,
 });
 
@@ -93,7 +104,7 @@ export function configToOperations(
   const operations: RuleOperation[] = [];
 
   for (const ruleType of SUPPORTED_RULE_TYPES) {
-    const current = existing.find((r) => r.ruleType === ruleType);
+    const current = findBase(existing, ruleType);
     const value = desired[ruleType];
 
     if (value === undefined) {

@@ -1,0 +1,235 @@
+<style>
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp .35s ease-out both; }
+  @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
+</style>
+
+<div dir="rtl" class="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-up">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+        <lucide-icon [img]="ServiceIcon" class="w-6 h-6"></lucide-icon>
+      </div>
+      <div>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">إدارة الخدمات</h1>
+        <p class="text-sm text-slate-500 mt-1">إضافة وتعديل الخدمات المقدّمة وأسعارها</p>
+      </div>
+    </div>
+
+    @if (!isFormOpen()) {
+      <button type="button" (click)="openAddForm()"
+        class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+        <lucide-icon [img]="PlusIcon" class="w-4 h-4"></lucide-icon>
+        <span>إضافة خدمة جديدة</span>
+      </button>
+    }
+  </div>
+
+  <!-- Form -->
+  @if (isFormOpen()) {
+    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs fade-up space-y-6">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+        <h2 class="text-lg font-bold text-slate-900">
+          {{ selectedService() ? 'تعديل بيانات الخدمة' : 'إضافة خدمة جديدة' }}
+        </h2>
+        <button type="button" (click)="resetForm()" title="إغلاق"
+          class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+          <lucide-icon [img]="XIcon" class="w-5 h-5"></lucide-icon>
+        </button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-3 gap-5" novalidate>
+
+        <!-- Name -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">اسم الخدمة</label>
+          <input type="text" formControlName="name" placeholder="مثال: طباعة، تصوير"
+            class="w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-sm focus:outline-none focus:bg-white focus:ring-2 transition-all"
+            [class.border-slate-200]="!(form.controls.name.invalid && form.controls.name.touched)"
+            [class.focus:border-blue-500]="!(form.controls.name.invalid && form.controls.name.touched)"
+            [class.focus:ring-blue-100]="!(form.controls.name.invalid && form.controls.name.touched)"
+            [class.border-red-400]="form.controls.name.invalid && form.controls.name.touched"
+            [class.focus:ring-red-100]="form.controls.name.invalid && form.controls.name.touched" />
+          @if (form.controls.name.invalid && form.controls.name.touched) {
+            <p class="text-xs text-red-500 mt-1">اسم الخدمة مطلوب</p>
+          }
+        </div>
+
+        <!-- Price -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">السعر</label>
+          <input type="number" formControlName="price" placeholder="0.00" dir="ltr" min="0" step="0.01"
+            class="w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-sm text-right font-mono focus:outline-none focus:bg-white focus:ring-2 transition-all"
+            [class.border-slate-200]="!(form.controls.price.invalid && form.controls.price.touched)"
+            [class.focus:border-blue-500]="!(form.controls.price.invalid && form.controls.price.touched)"
+            [class.focus:ring-blue-100]="!(form.controls.price.invalid && form.controls.price.touched)"
+            [class.border-red-400]="form.controls.price.invalid && form.controls.price.touched"
+            [class.focus:ring-red-100]="form.controls.price.invalid && form.controls.price.touched" />
+          @if (form.controls.price.invalid && form.controls.price.touched) {
+            <p class="text-xs text-red-500 mt-1">أدخلي سعراً صحيحاً</p>
+          }
+        </div>
+
+        <!-- Active -->
+        <div class="flex items-center pt-2 md:pt-6">
+          <label class="relative inline-flex items-center cursor-pointer gap-3 select-none">
+            <input type="checkbox" formControlName="isActive" class="sr-only peer" />
+            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            <span class="text-xs font-bold text-slate-700">تفعيل الخدمة</span>
+          </label>
+        </div>
+
+        <!-- Description -->
+        <div class="md:col-span-3">
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">الوصف (اختياري)</label>
+          <textarea formControlName="description" rows="2" placeholder="وصف مختصر للخدمة"
+            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"></textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="md:col-span-3 flex justify-end gap-3 pt-4 border-t border-slate-100">
+          <button type="button" (click)="resetForm()" [disabled]="isSubmitting()"
+            class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-700 rounded-xl text-sm font-bold transition-colors">
+            إلغاء
+          </button>
+          <button type="submit" [disabled]="isSubmitting()"
+            class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none">
+            <lucide-icon [img]="selectedService() ? SaveIcon : PlusIcon" class="w-4 h-4"></lucide-icon>
+            <span>
+              {{ isSubmitting() ? 'جاري الحفظ...' : (selectedService() ? 'تحديث الخدمة' : 'حفظ الخدمة') }}
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- List -->
+  @if (serviceCatalog.isLoading() && serviceCatalog.services().length === 0) {
+    <div class="space-y-3 fade-up">
+      @for (i of [1,2,3]; track i) {
+        <div class="h-16 rounded-2xl bg-slate-100 animate-pulse"></div>
+      }
+    </div>
+  } @else if (serviceCatalog.services().length === 0) {
+    <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center space-y-4 fade-up">
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
+        <lucide-icon [img]="ServiceIcon" class="w-8 h-8"></lucide-icon>
+      </div>
+      <p class="text-base font-bold text-slate-800">لا توجد خدمات مضافة حتى الآن</p>
+    </div>
+  } @else {
+
+    <!-- Desktop Table -->
+    <div class="hidden md:block bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs fade-up">
+      <div class="overflow-x-auto">
+        <table class="w-full text-right border-collapse min-w-[700px]">
+          <thead>
+            <tr class="bg-slate-50/80 text-xs font-bold text-slate-500 tracking-wide">
+              <th scope="col" class="py-4 px-6">الخدمة</th>
+              <th scope="col" class="py-4 px-6">الوصف</th>
+              <th scope="col" class="py-4 px-6">السعر</th>
+              <th scope="col" class="py-4 px-6">الحالة</th>
+              <th scope="col" class="py-4 px-6 text-center">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-sm text-slate-600">
+            @for (s of serviceCatalog.services(); track s.id; let i = $index) {
+              <tr class="fade-up group hover:bg-blue-50/40 transition-colors duration-200"
+                  [style.animation-delay.ms]="i * 40">
+                <td class="py-4 px-6 font-bold text-slate-900 text-[15px]">{{ s.name }}</td>
+                <td class="py-4 px-6 text-slate-500 max-w-xs truncate">{{ s.description || '-' }}</td>
+                <td class="py-4 px-6 font-mono text-[13px] font-bold text-slate-800" dir="ltr">
+                  {{ s.price | currency:'EGP' }}
+                </td>
+                <td class="py-4 px-6">
+                  <span [class]="s.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-rose-50 text-rose-700 ring-rose-600/20'"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset">
+                    <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                    {{ s.isActive ? 'نشطة' : 'غير نشطة' }}
+                  </span>
+                </td>
+                <td class="py-4 px-6">
+                  <div class="flex items-center justify-center gap-2">
+                    <button type="button" (click)="editService(s)" title="تعديل" aria-label="تعديل"
+                      class="w-10 h-10 rounded-xl flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white hover:scale-105 transition-all duration-200">
+                      <lucide-icon [img]="EditIcon" class="w-4 h-4"></lucide-icon>
+                    </button>
+                    <button type="button" (click)="askDelete(s)" title="حذف" aria-label="حذف"
+                      class="w-10 h-10 rounded-xl flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white hover:scale-105 transition-all duration-200">
+                      <lucide-icon [img]="TrashIcon" class="w-4 h-4"></lucide-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Mobile Cards -->
+    <div class="block md:hidden space-y-4">
+      @for (s of serviceCatalog.services(); track s.id; let i = $index) {
+        <div class="fade-up bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4"
+             [style.animation-delay.ms]="i * 50">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="font-bold text-slate-900 text-base truncate">{{ s.name }}</h3>
+            <span [class]="s.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-rose-50 text-rose-700 ring-rose-600/20'"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset shrink-0">
+              <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+              {{ s.isActive ? 'نشطة' : 'غير نشطة' }}
+            </span>
+          </div>
+
+          @if (s.description) {
+            <p class="text-xs text-slate-500">{{ s.description }}</p>
+          }
+
+          <div class="bg-slate-50 rounded-xl p-3 text-xs">
+            <span class="text-slate-400 block mb-0.5">السعر</span>
+            <span class="font-bold text-slate-900 font-mono" dir="ltr">{{ s.price | currency:'EGP' }}</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button type="button" (click)="editService(s)"
+              class="h-10 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-xs font-bold transition-colors">
+              تعديل
+            </button>
+            <button type="button" (click)="askDelete(s)"
+              class="h-10 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-colors">
+              حذف
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Delete Confirm -->
+  @if (serviceToDelete(); as s) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+      <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl">
+        <h3 class="text-lg font-bold text-slate-900">حذف الخدمة</h3>
+        <p class="text-sm text-slate-500 mt-2">
+          هل أنت متأكد من حذف الخدمة <span class="font-bold text-slate-700">"{{ s.name }}"</span>؟
+        </p>
+        <div class="flex gap-3 mt-6">
+          <button (click)="confirmDelete()" [disabled]="isDeleting()"
+            class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold">
+            {{ isDeleting() ? 'جاري الحذف...' : 'نعم، حذف' }}
+          </button>
+          <button (click)="cancelDelete()" [disabled]="isDeleting()"
+            class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-60 rounded-xl text-sm font-bold text-slate-700">
+            إلغاء
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

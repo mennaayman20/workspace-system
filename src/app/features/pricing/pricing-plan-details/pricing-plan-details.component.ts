@@ -1,47 +1,37 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
-import { filter, forkJoin } from 'rxjs';
-
-// استيراد Lucide Icons
+import { ToastrService } from 'ngx-toastr';
+import { forkJoin } from 'rxjs';
 import { LucideAngularModule, ArrowRight, Pencil } from 'lucide-angular';
 
 import { PricingPlanService } from '../../pricing/pricing-plan.service';
 import { PricingRuleService } from '../../pricing/pricing-rule.service';
 import { WorkspaceService } from '../../../core/services/workspace.service';
-import { NotifyService } from '../../pricing/notify.service';
 import { apiErrorMessage } from '../../../core/utils/api-error';
 import { WorkspaceType } from '../../../core/interfaces/Iworkspace';
 import { WorkspaceTypePricingCardComponent } from '../components/workspace-type-pricing-card/workspace-type-pricing-card.component';
+import { PlanFormModalComponent } from '../pricing-plans/plan-form-modal/plan-form-modal.component';
 import { isReadyForCheckout, rulesToConfig } from '../pricing-rules.mapper';
 import { PricingPlan, PricingRule } from '../Ipricing';
-import {
-  PlanFormDialogComponent,
-  PlanFormDialogData,
-  PlanFormResult,
-} from '../pricing-plans/plan-form-dialog/plan-form-dialog.component';
 
 const NO_RULES: PricingRule[] = [];
 
 @Component({
   selector: 'app-pricing-plan-details',
   standalone: true,
-  // استبدال MatIconModule بـ LucideAngularModule
-  imports: [RouterLink, LucideAngularModule, WorkspaceTypePricingCardComponent],
+  imports: [RouterLink, LucideAngularModule, WorkspaceTypePricingCardComponent, PlanFormModalComponent],
   templateUrl: './pricing-plan-details.component.html',
 })
 export class PricingPlanDetailsComponent implements OnInit {
-  // تعريف الأيقونات للاستخدام في الـ Template
-  readonly ArrowBackIcon = ArrowRight; // تم استخدام ArrowRight لتتناسب مع اتجاه العودة للواجهات العربية (RTL)
+  readonly ArrowBackIcon = ArrowRight;
   readonly EditIcon = Pencil;
 
   private readonly route = inject(ActivatedRoute);
   private readonly planService = inject(PricingPlanService);
   private readonly ruleService = inject(PricingRuleService);
   private readonly workspaceService = inject(WorkspaceService);
-  private readonly dialog = inject(MatDialog);
-  private readonly notify = inject(NotifyService);
+  private readonly toastr = inject(ToastrService);
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly planId = Number(this.route.snapshot.paramMap.get('id'));
@@ -52,6 +42,7 @@ export class PricingPlanDetailsComponent implements OnInit {
   readonly workspaceTypes = signal<WorkspaceType[]>([]);
   readonly isLoading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly isEditOpen = signal(false);
 
   readonly rulesByType = computed(() => {
     const grouped = new Map<number, PricingRule[]>();
@@ -65,8 +56,8 @@ export class PricingPlanDetailsComponent implements OnInit {
 
   readonly readyCount = computed(
     () =>
-      this.workspaceTypes().filter((type) =>
-        isReadyForCheckout(rulesToConfig(this.rulesByType().get(type.id) ?? NO_RULES)),
+      this.workspaceTypes().filter((t) =>
+        isReadyForCheckout(rulesToConfig(this.rulesByType().get(t.id) ?? NO_RULES)),
       ).length,
   );
 
@@ -90,20 +81,12 @@ export class PricingPlanDetailsComponent implements OnInit {
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ plan, rules, types }: any) => {
-          const planData = plan?.data || plan;
-          this.plan.set(planData);
-
-          const rulesList = Array.isArray(rules)
-            ? rules
-            : rules?.data?.items || rules?.data || rules?.items || [];
-          this.rules.set(rulesList);
-
-          const typesList = Array.isArray(types)
-            ? types
-            : types?.data?.items || types?.data || types?.items || [];
-          this.workspaceTypes.set(typesList);
-
+        next: ({ plan, rules, types }) => {
+          this.plan.set(plan);
+          this.rules.set(rules);
+          // شيل الـ cast ده لو getWorkspaceTypes بيرجّع WorkspaceType[] فعلًا
+          const list = types as any;
+          this.workspaceTypes.set(Array.isArray(list) ? list : (list?.items ?? list?.data?.items ?? list?.data ?? []));
           this.isLoading.set(false);
         },
         error: (err) => {
@@ -118,41 +101,20 @@ export class PricingPlanDetailsComponent implements OnInit {
       .getByPlan(this.planId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (rules: any) => {
-          const rulesList = Array.isArray(rules)
-            ? rules
-            : rules?.data?.items || rules?.data || rules?.items || [];
-          this.rules.set(rulesList);
-        },
-        error: () => this.notify.show('تعذر تحديث الأسعار، حدّث الصفحة'),
+        next: (rules) => this.rules.set(rules),
+        error: () => this.toastr.error('تعذر تحديث الأسعار، حدّث الصفحة'),
       });
   }
 
-  editPlan(): void {
-    const plan = this.plan();
-    if (!plan) return;
-
-    this.dialog
-      .open<PlanFormDialogComponent, PlanFormDialogData, PlanFormResult>(PlanFormDialogComponent, {
-        width: '480px',
-        maxWidth: '95vw',
-        data: { plan },
-      })
-      .afterClosed()
-      .pipe(
-        filter((result): result is PlanFormResult => !!result),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe(() => {
-        this.notify.show('تم تحديث الخطة بنجاح');
-        this.reloadPlan();
-      });
-  }
-
-  private reloadPlan(): void {
+  onPlanSaved(): void {
+    this.isEditOpen.set(false);
+    this.toastr.success('تم تحديث الخطة بنجاح');
     this.planService
       .getById(this.planId)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((plan) => this.plan.set(plan));
+      .subscribe({
+        next: (plan) => this.plan.set(plan),
+        error: () => this.toastr.error('تعذر تحديث بيانات الخطة، حدّث الصفحة'),
+      });
   }
 }

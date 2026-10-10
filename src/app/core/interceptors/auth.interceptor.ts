@@ -1,20 +1,29 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { LanguageService } from '../services/lang.service'; // عدّلي المسار حسب مكان الخدمة عندك
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
-  const token = authService.getToken();
+  const langService = inject(LanguageService);
 
-  // إذا كان الـ Token موجوداً، نطبعه داخل الـ Headers لكل Request
+  const token = authService.getToken();
+  const currentLang = langService.currentLang();
+
+  // تجهيز الـ Headers الأساسية التي ترسل دائماً
+  const headers: Record<string, string> = {
+    'Accept-Language': currentLang,
+  };
+
+  // إضافة التوكن إذا كان موجوداً
   if (token) {
-    const clonedReq = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    return next(clonedReq);
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
-  return next(req);
+  // عمل Clone للـ Request مرة واحدة بالـ Headers الكاملة
+  const clonedReq = req.clone({
+    setHeaders: headers
+  });
+
+  return next(clonedReq);
 };

@@ -1,34 +1,27 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
-import { Subject, debounceTime, distinctUntilChanged, filter } from 'rxjs';
-
-// استيراد Lucide
+import { ToastrService } from 'ngx-toastr';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { LucideAngularModule, Plus, Search, Pencil, Trash2, CreditCard } from 'lucide-angular';
 
 import { PricingPlanService } from '../../pricing/pricing-plan.service';
-import { NotifyService } from '../../pricing/notify.service';
 import { apiErrorMessage } from '../../../core/utils/api-error';
-import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { PricingPlan } from '../Ipricing';
 import {
-  PlanFormDialogComponent,
-  PlanFormDialogData,
+  PlanFormModalComponent,
   PlanFormResult,
-} from './plan-form-dialog/plan-form-dialog.component';
+} from './plan-form-modal/plan-form-modal.component';
 
 type StatusFilter = 'all' | 'active' | 'inactive';
 
 @Component({
   selector: 'app-pricing-plans',
   standalone: true,
-  // إضافة LucideAngularModule هنا
-  imports: [RouterLink, LucideAngularModule],
+  imports: [RouterLink, LucideAngularModule, PlanFormModalComponent],
   templateUrl: './pricing-plans.component.html',
 })
 export class PricingPlansComponent implements OnInit {
-  // تعريف الأيقونات للاستخدام في الـ Template
   readonly PlusIcon = Plus;
   readonly SearchIcon = Search;
   readonly EditIcon = Pencil;
@@ -36,8 +29,7 @@ export class PricingPlansComponent implements OnInit {
   readonly CardIcon = CreditCard;
 
   private readonly planService = inject(PricingPlanService);
-  private readonly dialog = inject(MatDialog);
-  private readonly notify = inject(NotifyService);
+  private readonly toastr = inject(ToastrService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly search$ = new Subject<string>();
@@ -57,6 +49,14 @@ export class PricingPlansComponent implements OnInit {
   readonly searchTerm = signal('');
   readonly statusFilter = signal<StatusFilter>('all');
   readonly deletingId = signal<number | null>(null);
+
+  // Form modal
+  readonly isFormOpen = signal(false);
+  readonly editingPlan = signal<PricingPlan | null>(null);
+
+  // Delete confirmation
+  readonly pendingDelete = signal<PricingPlan | null>(null);
+  readonly isDeleting = signal(false);
 
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalCount() / this.pageSize)));
   readonly hasFilters = computed(() => this.searchTerm().trim() !== '' || this.statusFilter() !== 'all');
@@ -89,11 +89,8 @@ export class PricingPlansComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
-          const plansList = result?.items || [];
-          const count = result?.totalCount || 0;
-
-          this.plans.set(plansList);
-          this.totalCount.set(count);
+          this.plans.set(result?.items || []);
+          this.totalCount.set(result?.totalCount || 0);
           this.isLoading.set(false);
         },
         error: (err) => {
@@ -102,6 +99,10 @@ export class PricingPlansComponent implements OnInit {
           this.errorMessage.set(apiErrorMessage(err, 'تعذر تحميل خطط التسعير، حاول مرة أخرى.'));
         },
       });
+  }
+
+  displayName(plan: PricingPlan): string {
+    return plan.name || plan.nameAr || plan.nameEn || `#${plan.id}`;
   }
 
   onSearch(value: string): void {
@@ -118,59 +119,63 @@ export class PricingPlansComponent implements OnInit {
     this.load();
   }
 
+  // ---------- الإضافة والتعديل ----------
   openForm(plan?: PricingPlan): void {
-    this.dialog
-      .open<PlanFormDialogComponent, PlanFormDialogData, PlanFormResult>(PlanFormDialogComponent, {
-        width: '480px',
-        maxWidth: '95vw',
-        data: { plan },
-      })
-      .afterClosed()
-      .pipe(
-        filter((result): result is PlanFormResult => !!result),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((result) => {
-        if (result.isNew) {
-          this.notify.show('تم إنشاء الخطة، حدّد الآن أسعار أنواع المساحات');
-          void this.router.navigate(['/pricing', result.id]);
-        } else {
-          this.notify.show('تم تحديث الخطة بنجاح');
-          this.load();
-        }
-      });
+    this.editingPlan.set(plan ?? null);
+    this.isFormOpen.set(true);
   }
 
-  onDelete(plan: PricingPlan): void {
-    this.dialog
-      .open(ConfirmDialogComponent, {
-        width: '400px',
-        data: {
-          title: 'تأكيد الحذف',
-          message: `هل أنت متأكد من حذف الخطة "${plan.name}"؟`,
-        },
-      })
-      .afterClosed()
-      .pipe(filter(Boolean), takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.executeDelete(plan.id));
+  closeForm(): void {
+    this.isFormOpen.set(false);
+    this.editingPlan.set(null);
   }
 
-  private executeDelete(id: number): void {
-    this.deletingId.set(id);
+  onFormSaved(result: PlanFormResult): void {
+    this.closeForm();
+    if (result.isNew) {
+      this.toastr.success('تم إنشاء الخطة، حدّد الآن أسعار أنواع المساحات');
+      void this.router.navigate(['/pricing', result.id]);
+    } else {
+      this.toastr.success('تم تحديث الخطة بنجاح');
+      this.load();
+    }
+  }
+
+  // ---------- الحذف ----------
+  askDelete(plan: PricingPlan): void {
+    this.pendingDelete.set(plan);
+  }
+
+  cancelDelete(): void {
+    if (this.isDeleting()) return;
+    this.pendingDelete.set(null);
+  }
+
+  confirmDelete(): void {
+    const plan = this.pendingDelete();
+    if (!plan) return;
+
+    this.isDeleting.set(true);
+    this.deletingId.set(plan.id);
 
     this.planService
-      .delete(id)
+      .delete(plan.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
+          this.isDeleting.set(false);
           this.deletingId.set(null);
-          this.notify.show('تم حذف الخطة بنجاح');
-          if (this.plans().length === 1 && this.pageNumber() > 1) this.pageNumber.update((p) => p - 1);
+          this.pendingDelete.set(null);
+          this.toastr.success('تم حذف الخطة بنجاح');
+          if (this.plans().length === 1 && this.pageNumber() > 1) {
+            this.pageNumber.update((p) => p - 1);
+          }
           this.load();
         },
         error: (err) => {
+          this.isDeleting.set(false);
           this.deletingId.set(null);
-          this.notify.show(apiErrorMessage(err, 'تعذر حذف الخطة'));
+          this.toastr.error(apiErrorMessage(err, 'تعذر حذف الخطة'));
         },
       });
   }

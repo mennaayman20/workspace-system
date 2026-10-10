@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, forkJoin, map } from 'rxjs';
 
 import {
   ApiResponse,
   PagedResult,
+  PlanTranslations,
   PricingPlan,
   PricingPlanPayload,
   PricingPlanQuery,
@@ -28,6 +29,23 @@ export class PricingPlanService {
 
   getById(id: number): Observable<PricingPlan> {
     return this.http.get<ApiResponse<PricingPlan>>(`${this.url}/${id}`).pipe(map((res) => res.data));
+  }
+
+  /** الاسم والوصف باللغتين للتعديل (خام لو الباك رجّعه، وإلا طلب بكل لغة) */
+  getTranslations(id: number): Observable<PlanTranslations> {
+    const fetchLang = (lang: 'ar' | 'en') =>
+      this.http
+        .get<ApiResponse<any>>(`${this.url}/${id}`, { headers: { 'Accept-Language': lang } })
+        .pipe(map((res) => res.data));
+
+    return forkJoin([fetchLang('ar'), fetchLang('en')]).pipe(
+      map(([ar, en]) => ({
+        nameAr: ar?.nameAr ?? ar?.name ?? '',
+        nameEn: en?.nameEn ?? en?.name ?? '',
+        descriptionAr: ar?.descriptionAr ?? ar?.description ?? '',
+        descriptionEn: en?.descriptionEn ?? en?.description ?? '',
+      })),
+    );
   }
 
   /** بيرجّع id الخطة الجديدة */

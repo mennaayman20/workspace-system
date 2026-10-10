@@ -91,10 +91,7 @@ export class StartSessionModalComponent implements OnInit {
     return !!c && c.invalid && (c.touched || c.dirty);
   }
 
-  @HostListener('document:keydown.escape')
-  onEscape() {
-    this.closeModal.emit();
-  }
+
 
   ngOnInit(): void {
     this.loadInitialData();

@@ -1,3 +1,4 @@
+import { DiscountsComponent } from './features/discount/discount.component';
 import { BookingComponent } from './features/booking/booking/booking.component';
 import { Routes } from '@angular/router';
 import { LoginComponent } from './features/login/login.component';
@@ -40,6 +41,28 @@ export const routes: Routes = [
         loadChildren: () => import('./features/products/product.route').then(m => m.PRODUCT_ROUTES)
       },
 
+      {
+  path: 'services',
+  loadComponent: () =>
+    import('./features/services/service-list/service-list.component').then(
+      (m) => m.ServiceListComponent
+    ),
+},
+
+
+      {
+  path: 'discounts',
+  loadComponent: () =>
+    import('./features/discount/discount.component').then(
+      (m) => m.DiscountsComponent
+    ),
+},
+
+{
+  path: 'packages',
+  loadComponent: () =>
+    import('./features/packages/packages.component').then((m) => m.PackagesComponent),
+},
 
 
             { 

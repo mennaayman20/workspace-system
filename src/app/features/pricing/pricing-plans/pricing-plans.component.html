@@ -3,20 +3,28 @@
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .fade-up { animation: fadeUp .35s ease-out both; }
+  /* backwards: عشان الـ transform يتشال بعد الأنيميشن ومايأثرش على أي fixed جواه */
+  .fade-up { animation: fadeUp .35s ease-out backwards; }
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
 </style>
 
 <div class="p-4 sm:p-8 space-y-6 max-w-7xl mx-auto fade-up">
 
   <!-- Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-up">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div class="flex items-center gap-4">
       <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
         <lucide-icon [img]="CardIcon" class="w-6 h-6"></lucide-icon>
       </div>
       <div>
-        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">خطط التسعير</h1>
+        <div class="flex items-center gap-2.5">
+          <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">خطط التسعير</h1>
+          @if (!isLoading() && !errorMessage()) {
+            <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-extrabold ring-1 ring-inset ring-blue-600/15">
+              {{ totalCount() }}
+            </span>
+          }
+        </div>
         <p class="text-sm text-slate-500 mt-1">أنشئ قوائم الأسعار وحدّد سعر كل نوع مساحة داخل كل خطة</p>
       </div>
     </div>
@@ -29,21 +37,25 @@
   </div>
 
   <!-- Toolbar -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white p-2.5 sm:p-3 rounded-xl border border-slate-200/80 fade-up">
-    <div class="relative flex-1 max-w-xs">
-      <lucide-icon [img]="SearchIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+    <div class="relative flex-1 sm:max-w-sm">
+      <lucide-icon [img]="SearchIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3.5 pointer-events-none"></lucide-icon>
       <input
         type="search"
         (input)="onSearch($any($event.target).value)"
         placeholder="ابحث بالاسم أو الوصف..."
-        class="w-full ps-9 pe-3 py-1.5 bg-slate-50 border border-slate-200/90 rounded-lg text-xs placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+        aria-label="بحث في الخطط"
+        class="w-full h-10 ps-10 pe-3 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all" />
     </div>
 
-    <div class="flex items-center gap-1">
+    <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-xl self-start sm:self-auto" role="group" aria-label="تصفية بالحالة">
       @for (option of statusOptions; track option.value) {
         <button type="button" (click)="onFilterStatus(option.value)"
-          [class]="statusFilter() === option.value ? 'bg-slate-900 text-white' : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200/70'"
-          class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
+          [attr.aria-pressed]="statusFilter() === option.value"
+          [class]="statusFilter() === option.value
+            ? 'bg-white text-slate-900 shadow-sm'
+            : 'text-slate-500 hover:text-slate-800'"
+          class="px-4 h-8 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
           {{ option.label }}
         </button>
       }
@@ -52,9 +64,9 @@
 
   <!-- Content -->
   @if (isLoading()) {
-    <div class="space-y-3" aria-busy="true">
-      @for (i of [1, 2, 3, 4]; track i) {
-        <div class="h-20 rounded-2xl bg-slate-100 animate-pulse"></div>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" aria-busy="true">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="h-44 rounded-3xl bg-slate-100 animate-pulse"></div>
       }
     </div>
   } @else if (errorMessage()) {
@@ -72,6 +84,7 @@
       </div>
       @if (hasFilters()) {
         <p class="text-base font-bold text-slate-800">لا توجد نتائج مطابقة</p>
+        <p class="text-sm text-slate-500">جرّب تغيير كلمة البحث أو الحالة</p>
       } @else {
         <p class="text-base font-bold text-slate-800">لا توجد خطط تسعير حتى الآن</p>
         <p class="text-sm text-slate-500">ابدأ بخطة أساسية مثل "Standard Plan" ثم حدّد أسعار الأنواع</p>
@@ -82,46 +95,56 @@
       }
     </div>
   } @else {
-    <ul class="divide-y divide-slate-100 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-      @for (plan of plans(); track plan.id) {
-        <li class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 sm:p-5 hover:bg-blue-50/40 transition-colors"
-            [class.opacity-50]="deletingId() === plan.id"
-            [class.pointer-events-none]="deletingId() === plan.id">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      @for (plan of plans(); track plan.id; let i = $index) {
+        <article
+          class="fade-up group flex flex-col bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-lg hover:shadow-blue-900/5 hover:border-blue-200 hover:-translate-y-0.5 transition-all duration-200"
+          [style.animation-delay.ms]="i * 40"
+          [class.opacity-50]="deletingId() === plan.id"
+          [class.pointer-events-none]="deletingId() === plan.id">
 
-          <a [routerLink]="['/pricing', plan.id]" class="group flex items-center gap-3 min-w-0 flex-1">
-            <div class="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 font-extrabold flex items-center justify-center text-lg">
-              {{ plan.name.charAt(0) }}
+          <!-- الجزء العلوي: قابل للضغط -->
+          <a [routerLink]="['/pricing', plan.id]" class="flex-1 p-5 block min-w-0">
+            <div class="flex items-start justify-between gap-3">
+              <div class="w-12 h-12 shrink-0 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 font-extrabold flex items-center justify-center text-xl">
+                {{ displayName(plan).charAt(0) }}
+              </div>
+
+              <span
+                [class]="plan.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-100 text-slate-600 ring-slate-500/20'"
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ring-1 ring-inset shrink-0">
+                <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                {{ plan.isActive ? 'نشطة' : 'غير نشطة' }}
+              </span>
             </div>
-            <div class="min-w-0">
-              <p class="font-bold text-slate-900 truncate group-hover:text-blue-700 transition-colors">{{ plan.name }}</p>
-              <p class="text-sm text-slate-500 truncate">{{ plan.description || 'بدون وصف' }}</p>
-            </div>
+
+            <h3 class="mt-4 text-base font-extrabold text-slate-900 truncate group-hover:text-blue-700 transition-colors">
+              {{ displayName(plan) }}
+            </h3>
+            <p class="mt-1 text-sm text-slate-500 leading-relaxed line-clamp-2 min-h-[2.75rem]">
+              {{ plan.description || plan.descriptionAr || plan.descriptionEn || 'بدون وصف' }}
+            </p>
           </a>
 
-          <span
-            [class]="plan.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-100 text-slate-600 ring-slate-500/20'"
-            class="inline-flex items-center gap-1.5 self-start sm:self-auto px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset shrink-0">
-            <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-            {{ plan.isActive ? 'نشطة' : 'غير نشطة' }}
-          </span>
-
-          <div class="flex items-center gap-2 shrink-0">
+          <!-- الأكشنز -->
+          <div class="flex items-center gap-2 px-5 py-3.5 border-t border-slate-100">
             <a [routerLink]="['/pricing', plan.id]"
-              class="inline-flex items-center gap-1.5 px-4 h-10 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white text-sm font-bold transition-colors">
+              class="flex-1 inline-flex items-center justify-center gap-2 h-10 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white text-sm font-bold transition-colors">
               إدارة الأسعار
+              <span aria-hidden="true">←</span>
             </a>
             <button type="button" (click)="openForm(plan)" title="تعديل" aria-label="تعديل"
               class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
-              <lucide-icon [img]="EditIcon" class="w-5 h-5"></lucide-icon>
+              <lucide-icon [img]="EditIcon" class="w-4 h-4"></lucide-icon>
             </button>
-            <button type="button" (click)="onDelete(plan)" title="حذف" aria-label="حذف"
+            <button type="button" (click)="askDelete(plan)" title="حذف" aria-label="حذف"
               class="w-10 h-10 rounded-xl flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white transition-colors">
-              <lucide-icon [img]="DeleteIcon" class="w-5 h-5"></lucide-icon>
+              <lucide-icon [img]="DeleteIcon" class="w-4 h-4"></lucide-icon>
             </button>
           </div>
-        </li>
+        </article>
       }
-    </ul>
+    </div>
 
     @if (totalPages() > 1) {
       <div class="flex items-center justify-between gap-3">
@@ -138,3 +161,48 @@
     }
   }
 </div>
+
+<!-- المودالات برّه الـ container اللي عليه fade-up -->
+
+@if (isFormOpen()) {
+  <app-plan-form-modal
+    [plan]="editingPlan()"
+    (saved)="onFormSaved($event)"
+    (closeModal)="closeForm()">
+  </app-plan-form-modal>
+}
+
+@if (pendingDelete(); as d) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
+       (click)="cancelDelete()">
+    <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl fade-up" dir="rtl"
+         role="alertdialog" aria-modal="true" aria-labelledby="delete-title"
+         (click)="$event.stopPropagation()">
+
+      <div class="flex items-start gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+          <lucide-icon [img]="DeleteIcon" class="w-5 h-5"></lucide-icon>
+        </div>
+        <div>
+          <h3 id="delete-title" class="text-lg font-bold text-slate-900">حذف الخطة</h3>
+          <p class="text-sm text-slate-500 mt-1.5 leading-relaxed">
+            هل أنت متأكد من حذف
+            <b class="text-slate-800">"{{ displayName(d) }}"</b>؟
+            لن تظهر لباقي الصفحات بعد الحذف.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex gap-3 mt-6">
+        <button type="button" (click)="confirmDelete()" [disabled]="isDeleting()"
+                class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-colors">
+          {{ isDeleting() ? 'جاري الحذف...' : 'نعم، حذف' }}
+        </button>
+        <button type="button" (click)="cancelDelete()" [disabled]="isDeleting()"
+                class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-60 rounded-xl text-sm font-bold text-slate-700 transition-colors">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+}

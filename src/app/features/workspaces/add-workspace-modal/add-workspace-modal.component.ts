@@ -29,7 +29,6 @@ const integer: ValidatorFn = (c: AbstractControl): ValidationErrors | null =>
   standalone: true,
   imports: [ReactiveFormsModule, LucideAngularModule],
   templateUrl: './add-workspace-modal.component.html',
-  host: { '(document:keydown.escape)': 'onEscape()' }
 })
 export class CreateWorkspaceModalComponent implements OnInit {
   readonly NEW_TYPE_VALUE = '__new__';
@@ -222,13 +221,7 @@ readonly capacityPresets = [2, 4, 8, 12, 20];
     this.closeModal.emit();
   }
 
-  onBackdropClick(event: MouseEvent): void {
-    if (event.target === event.currentTarget) this.onClose();
-  }
 
-  onEscape(): void {
-    this.onClose();
-  }
 
 
 

@@ -1,5 +1,6 @@
 import { Component, DestroyRef, computed, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ToastrService } from 'ngx-toastr';
 
 // استيراد Lucide Icons
 import { LucideAngularModule, ChevronDown } from 'lucide-angular';
@@ -25,6 +26,7 @@ export class WorkspaceTypePricingCardComponent {
   private readonly ruleService = inject(PricingRuleService);
   private readonly notify = inject(NotifyService);
   private readonly destroyRef = inject(DestroyRef);
+private readonly toastr = inject(ToastrService);   // بدل NotifyService
 
   readonly planId = input.required<number>();
   readonly workspaceType = input.required<WorkspaceType>();
@@ -34,11 +36,11 @@ export class WorkspaceTypePricingCardComponent {
 
   readonly isSaving = signal(false);
   private readonly manualToggle = signal<boolean | null>(null);
+readonly isOpen = computed(() => this.manualToggle() ?? !this.isReady());
 
   readonly config = computed(() => rulesToConfig(this.rules()));
   readonly isReady = computed(() => isReadyForCheckout(this.config()));
   /** مفتوح تلقائيًا لو النوع لسه ملوش سعر، إلا لو المستخدم غيّر بنفسه */
-  readonly isOpen = computed(() => this.manualToggle() ?? !this.isReady());
   readonly summary = computed(() => {
     const rate = this.config().hourlyRate;
     return rate ? `${rate} ج / ساعة` : 'لم يتم تحديد السعر بعد';
@@ -48,25 +50,29 @@ export class WorkspaceTypePricingCardComponent {
     this.manualToggle.set(!this.isOpen());
   }
 
-  onSave(config: TypePricingConfig): void {
-    const operations = configToOperations(this.planId(), this.workspaceType().id, this.rules(), config);
-    if (operations.length === 0) return;
-
-    this.isSaving.set(true);
-    this.ruleService
-      .applyOperations(operations)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.isSaving.set(false);
-          this.notify.show('تم حفظ التسعير بنجاح');
-          this.changed.emit();
-        },
-        error: (err: unknown) => {
-          this.isSaving.set(false);
-          this.notify.show(apiErrorMessage(err, 'تعذر حفظ التسعير، حاول مرة أخرى'));
-          this.changed.emit();
-        },
-      });
+ onSave(config: TypePricingConfig): void {
+  const operations = configToOperations(this.planId(), this.workspaceType().id, this.rules(), config);
+  if (operations.length === 0) {
+    this.toastr.info('لا توجد تغييرات للحفظ');
+    return;
   }
+
+  this.isSaving.set(true);
+  this.ruleService
+    .applyOperations(operations)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+      next: () => {
+        this.isSaving.set(false);
+        this.manualToggle.set(false);          // اقفل الكارت بعد الحفظ صراحةً
+        this.toastr.success('تم حفظ التسعير بنجاح');
+        this.changed.emit();
+      },
+      error: (err: unknown) => {
+        this.isSaving.set(false);
+        this.toastr.error(apiErrorMessage(err, 'تعذر حفظ التسعير، حاول مرة أخرى'));
+        // مفيش changed.emit هنا: عشان الفورم ميتمسحش
+      },
+    });
+}
 }

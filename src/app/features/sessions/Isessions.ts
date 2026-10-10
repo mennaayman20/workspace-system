@@ -45,3 +45,11 @@ export interface SessionProductDto {
   unitPrice: number;
   totalPrice?: number;
 }
+
+
+export interface SessionServiceDto {
+  serviceId: number;
+  serviceName: string;
+  unitPrice: number;
+  quantity: number;
+}

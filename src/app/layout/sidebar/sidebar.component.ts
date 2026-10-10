@@ -48,12 +48,14 @@ export class SidebarComponent {
         { label: 'الجلسات الحيه', route: 'live-sessions', icon: 'dashboard' },
         { label: ' الحجوزات و المواعيد', route: 'bookings', icon: 'dashboard' },
 
- { label: 'دخول عميل', route: 'customers', icon: 'person_add' },
+ { label: 'ادارة العملاء ', route: 'customers', icon: 'person_add' },
    
     { label: 'خطط التسعير ', route: '/pricing', icon: 'payments' },
     { label: '  ادارة الموظفين', route: 'employee', icon: 'dashboard' },
-    { label: ' POS ', route: 'products', icon: 'dashboard' },
+        { label: '  ادارة الخصومات و الباقات', route: 'discounts', icon: 'dashboard' },
 
+    { label: ' POS ', route: 'products', icon: 'dashboard' },
+{ label: 'ادارة الخدمات', route: '/services', icon: 'ConciergeBell' },
     { label: 'الخزينة والتقارير', route: 'payments', icon: 'account_balance_wallet' },
   ];
 

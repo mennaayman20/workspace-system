@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { LucideAngularModule, Play, Plus, MoveLeft, Square, Clock } from 'lucide-angular';
 import { SessionsService } from '../sessions.service';
 import { ActiveSessionDto } from '../Isessions';
@@ -9,10 +9,6 @@ import { StartSessionModalComponent } from '../start-session-modal/start-session
 import { TransferWorkspaceModalComponent } from '../transfer-session-modal/transfer-session-modal.component';
 import { ToastrService } from 'ngx-toastr';
 import { SessionPosModalComponent } from '../session-pos-modal/session-pos-modal.component';
-
-type PendingAction =
-  | { type: 'end'; sessionId: number }
-  | null;
 
 @Component({
   selector: 'app-live-sessions',
@@ -25,14 +21,13 @@ type PendingAction =
     StartSessionModalComponent,
     TransferWorkspaceModalComponent,
     SessionPosModalComponent
-
   ],
   templateUrl: './live-sessions.component.html'
 })
 export class LiveSessionsComponent implements OnInit, OnDestroy {
   private sessionsService = inject(SessionsService);
-  private snackBar = inject(MatSnackBar);
-private toastr = inject(ToastrService);
+  private toastr = inject(ToastrService);
+
   readonly PlayIcon = Play;
   readonly PlusIcon = Plus;
   readonly MoveIcon = MoveLeft;
@@ -47,39 +42,50 @@ private toastr = inject(ToastrService);
   now = signal(Date.now());
   private timerInterval?: ReturnType<typeof setInterval>;
 
-  // الأكشن المعلّق (تأكيد إنهاء الجلسة)
-  pending = signal<PendingAction>(null);
-  busyId = signal<number | null>(null);
-selectedSessionForPos = signal<ActiveSessionDto | null>(null);
+  selectedSessionForPos = signal<ActiveSessionDto | null>(null);
+  selectedSessionForCheckout = signal<ActiveSessionDto | null>(null);
 
   sessionsCount = computed(() => this.activeSessions().length);
 
   isTransferModalOpen = signal<boolean>(false);
-selectedSessionToTransfer = signal<ActiveSessionDto | null>(null);
+  selectedSessionToTransfer = signal<ActiveSessionDto | null>(null);
 
-openTransferModal(session: ActiveSessionDto) {
-  this.selectedSessionToTransfer.set(session);
-  this.isTransferModalOpen.set(true);
-}
+  openTransferModal(session: ActiveSessionDto) {
+    this.selectedSessionToTransfer.set(session);
+    this.isTransferModalOpen.set(true);
+  }
 
-closeTransferModal() {
-  this.isTransferModalOpen.set(false);
-  this.selectedSessionToTransfer.set(null);
-}
+  closeTransferModal() {
+    this.isTransferModalOpen.set(false);
+    this.selectedSessionToTransfer.set(null);
+  }
 
-onTransferredSuccessfully() {
-  this.notify('تم نقل الجلسة بنجاح');
-  this.loadActiveSessions();
-}
+  onTransferredSuccessfully() {
+    this.notify('تم نقل الجلسة بنجاح');
+    this.loadActiveSessions();
+  }
 
+  openPosModal(session: ActiveSessionDto) {
+    this.selectedSessionForPos.set(session);
+  }
 
-openPosModal(session: ActiveSessionDto) {
-  this.selectedSessionForPos.set(session);
-}
+  closePosModal() {
+    this.selectedSessionForPos.set(null);
+  }
 
-closePosModal() {
-  this.selectedSessionForPos.set(null);
-}
+  // ===== إنهاء الجلسة (Checkout) =====
+  // الزرار بيفتح مودال الفاتورة، والـ POST بيتعمل جوّاه (POST /api/Checkout/sessions/{sessionId})
+  openCheckoutModal(session: ActiveSessionDto) {
+    this.selectedSessionForCheckout.set(session);
+  }
+
+  closeCheckoutModal() {
+    this.selectedSessionForCheckout.set(null);
+  }
+
+  onCheckedOut() {
+    this.loadActiveSessions();
+  }
 
   ngOnInit() {
     this.loadActiveSessions();
@@ -121,33 +127,8 @@ closePosModal() {
     return `${h}:${m}:${s}`;
   }
 
-  // ===== إنهاء الجلسة =====
-  askEnd(sessionId: number) {
-    this.pending.set({ type: 'end', sessionId });
+  private notify(message: string, isError = false) {
+    if (isError) this.toastr.error(message);
+    else this.toastr.success(message);
   }
-
-  confirmEnd(sessionId: number) {
-    this.busyId.set(sessionId);
-    this.sessionsService.endSession(sessionId).subscribe({
-      next: () => {
-        this.closePending();
-        this.busyId.set(null);
-        this.notify('تم إنهاء الجلسة بنجاح');
-        this.loadActiveSessions();
-      },
-      error: () => {
-        this.busyId.set(null);
-        this.notify('فشل إنهاء الجلسة', true);
-      }
-    });
-  }
-
-  closePending() {
-    this.pending.set(null);
-  }
-
-private notify(message: string, isError = false) {
-  if (isError) this.toastr.error(message);
-  else this.toastr.success(message);
-}
 }

@@ -14,20 +14,35 @@ export interface PagedResult<T> {
 // ---------- Plans ----------
 export interface PricingPlan {
   id: number;
-  name: string;
-  description: string | null;
+  name: string;                     // المترجم (للعرض)
+  description?: string | null;
+  nameAr?: string | null;
+  nameEn?: string | null;
+  descriptionAr?: string | null;
+  descriptionEn?: string | null;
   isActive: boolean;
 }
-
-export type PricingPlanPayload = Omit<PricingPlan, 'id'>;
-
 export interface PricingPlanQuery {
   pageNumber?: number;
   pageSize?: number;
   search?: string;
   isActive?: boolean;
 }
+/** نفس CreatePricingPlanCommand (والتعديل بيبعت نفس الشكل) */
+export interface PricingPlanPayload {
+  nameAr: string;
+  nameEn: string;
+  descriptionAr: string | null;
+  descriptionEn: string | null;
+  isActive: boolean;
+}
 
+export interface PlanTranslations {
+  nameAr: string;
+  nameEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
+}
 // ---------- Rules ----------
 /** الأنواع اللي الباك إند بيحسب بيها فعلًا في الـ checkout. */
 export const SUPPORTED_RULE_TYPES = [

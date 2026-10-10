@@ -1,0 +1,224 @@
+<div dir="rtl" class="p-4 sm:p-8 space-y-6 max-w-7xl mx-auto">
+
+
+<div class="w-full mb-6">
+  <nav class="inline-flex items-center gap-1.5 p-1.5 bg-slate-200/40 backdrop-blur-md rounded-2xl border border-slate-200/60 overflow-x-auto no-scrollbar" aria-label="Tabs">
+
+    <a [routerLink]="['/discounts']"
+       routerLinkActive="bg-white text-blue-600 shadow-sm border-slate-200/80 font-bold"
+       class="group inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 border border-transparent transition-all duration-200 shrink-0 cursor-pointer select-none">
+      <lucide-icon [img]="PercentIcon" class="w-4 h-4 text-slate-400 group-[.font-bold]:text-blue-600 transition-colors"></lucide-icon>
+      <span>الخصومات</span>
+    </a>
+
+    <a [routerLink]="['/packages']"
+       routerLinkActive="bg-white text-blue-600 shadow-sm border-slate-200/80 font-bold"
+       class="group inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 border border-transparent transition-all duration-200 shrink-0 cursor-pointer select-none">
+      <lucide-icon [img]="PackageIcon" class="w-4 h-4 text-slate-400 group-[.font-bold]:text-blue-600 transition-colors"></lucide-icon>
+      <span>الباقات</span>
+    </a>
+
+  </nav>
+</div>
+
+  <!-- Header -->
+  <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-5">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 text-white flex items-center justify-center shadow-lg shadow-amber-500/20">
+        <lucide-icon [img]="PercentIcon" class="w-6 h-6"></lucide-icon>
+      </div>
+      <div>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 flex items-center gap-2">
+          إدارة الخصومات
+          <span class="px-2.5 py-0.5 text-xs font-bold bg-amber-50 text-amber-600 rounded-full">{{ count() }}</span>
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">أنشئ وعدّل الخصومات اللي بتظهر عند إنهاء الجلسة</p>
+      </div>
+    </div>
+
+    <button type="button" (click)="openCreate()"
+      class="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all">
+      <lucide-icon [img]="PlusIcon" class="w-4 h-4"></lucide-icon>
+      <span>خصم جديد</span>
+    </button>
+  </div>
+
+  <!-- List -->
+  @if (isLoading() && count() === 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (i of [1,2,3]; track i) {
+        <div class="h-44 rounded-3xl bg-slate-100 animate-pulse"></div>
+      }
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (d of discounts(); track d.id) {
+        <div class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
+             [class.opacity-60]="d.isDeleted">
+
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 rounded-full text-xs font-bold" [ngClass]="status(d).cls">
+                {{ status(d).label }}
+              </span>
+              <span class="text-xs text-slate-400">{{ typeLabels[d.type] }}</span>
+            </div>
+
+            <h3 class="text-lg font-bold text-slate-800 truncate">{{ d.name }}</h3>
+
+            <p dir="ltr" class="text-3xl font-extrabold font-mono text-amber-600 mt-2 text-right tabular-nums">
+              @if (d.type === 'Percentage') {
+                {{ d.value }}%
+              } @else {
+                {{ d.value | currency:'EGP' }}
+              }
+            </p>
+
+            @if (d.startDate || d.endDate) {
+              <p class="text-xs text-slate-500 mt-3">
+                @if (d.startDate) { من {{ d.startDate | date:'yyyy/MM/dd' }} }
+                @if (d.endDate) { إلى {{ d.endDate | date:'yyyy/MM/dd' }} }
+              </p>
+            } @else {
+              <p class="text-xs text-slate-400 mt-3">بدون تاريخ محدد</p>
+            }
+          </div>
+
+          <div class="flex items-center gap-2 pt-4 mt-4 border-t border-slate-100">
+            @if (d.isDeleted) {
+              <button type="button" (click)="restore(d)" [disabled]="busyId() === d.id"
+                class="flex-1 px-3 py-2.5 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-50 text-emerald-700 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
+                <lucide-icon [img]="RestoreIcon" class="w-3.5 h-3.5"></lucide-icon>
+                <span>استعادة</span>
+              </button>
+            } @else {
+              <button type="button" (click)="openEdit(d)"
+                class="flex-1 px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
+                <lucide-icon [img]="EditIcon" class="w-3.5 h-3.5"></lucide-icon>
+                <span>تعديل</span>
+              </button>
+              <button type="button" (click)="askDelete(d)"
+                class="flex-1 px-3 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
+                <lucide-icon [img]="TrashIcon" class="w-3.5 h-3.5"></lucide-icon>
+                <span>حذف</span>
+              </button>
+            }
+          </div>
+        </div>
+      } @empty {
+        <div class="col-span-full py-16 text-center text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200">
+          لا توجد خصومات بعد. اضغطي "خصم جديد" للبدء.
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Create / Edit Modal -->
+  @if (isFormOpen()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+      <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]">
+
+        <div class="flex items-center justify-between p-6 border-b border-slate-100">
+          <h3 class="text-lg font-bold text-slate-900">
+            {{ editing() ? 'تعديل الخصم' : 'خصم جديد' }}
+          </h3>
+          <button type="button" (click)="closeForm()" [disabled]="isSaving()"
+            class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 disabled:opacity-50 flex items-center justify-center text-slate-500">
+            <lucide-icon [img]="CloseIcon" class="w-4 h-4"></lucide-icon>
+          </button>
+        </div>
+
+        <div [formGroup]="form" class="flex-1 overflow-y-auto p-6 space-y-4">
+
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">اسم الخصم</label>
+            <input type="text" formControlName="name" placeholder="مثال: خصم الطلبة"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500">
+            @if (form.controls.name.touched && form.controls.name.invalid) {
+              <p class="text-xs text-red-600 mt-1">الاسم مطلوب</p>
+            }
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">نوع الخصم</label>
+            <div class="grid grid-cols-2 gap-2">
+              @for (t of typeOptions; track t) {
+                <button type="button" (click)="form.controls.type.setValue(t)"
+                  class="px-4 py-2.5 rounded-xl text-sm font-bold border-2 transition-all"
+                  [class.bg-blue-600]="form.controls.type.value === t"
+                  [class.text-white]="form.controls.type.value === t"
+                  [class.border-blue-600]="form.controls.type.value === t"
+                  [class.bg-white]="form.controls.type.value !== t"
+                  [class.text-slate-700]="form.controls.type.value !== t"
+                  [class.border-slate-200]="form.controls.type.value !== t">
+                  {{ typeLabels[t] }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">
+              {{ form.controls.type.value === 'Percentage' ? 'النسبة (%)' : 'المبلغ (ج.م)' }}
+            </label>
+            <input type="number" dir="ltr" formControlName="value" min="0" step="0.01"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:outline-none focus:border-blue-500">
+            @if (form.controls.value.touched && form.controls.value.invalid) {
+              <p class="text-xs text-red-600 mt-1">القيمة لازم تكون أكبر من صفر</p>
+            }
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 mb-1.5">يبدأ من (اختياري)</label>
+              <input type="date" dir="ltr" formControlName="startDate"
+                class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 mb-1.5">ينتهي في (اختياري)</label>
+              <input type="date" dir="ltr" formControlName="endDate"
+                class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500">
+            </div>
+          </div>
+
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" formControlName="isActive" class="w-4 h-4 rounded border-slate-300">
+            <span class="text-sm font-bold text-slate-700">الخصم فعّال</span>
+          </label>
+        </div>
+
+        <div class="p-4 border-t border-slate-100 flex gap-3 justify-end">
+          <button type="button" (click)="closeForm()" [disabled]="isSaving()"
+            class="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 rounded-xl text-sm font-bold text-slate-700">
+            إلغاء
+          </button>
+          <button type="button" (click)="save()" [disabled]="isSaving()"
+            class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-bold">
+            {{ isSaving() ? 'جاري الحفظ...' : 'حفظ' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Confirm Delete -->
+  @if (pendingDelete(); as d) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
+         (click)="cancelDelete()">
+      <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl" (click)="$event.stopPropagation()">
+        <h3 class="text-lg font-bold text-slate-900">حذف الخصم</h3>
+        <p class="text-sm text-slate-500 mt-2">هل أنت متأكد من حذف "{{ d.name }}"؟ تقدر تستعيده بعد كده.</p>
+        <div class="flex gap-3 mt-6">
+          <button type="button" (click)="confirmDelete()" [disabled]="busyId() === d.id"
+            class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold">
+            {{ busyId() === d.id ? 'جاري الحذف...' : 'نعم، حذف' }}
+          </button>
+          <button type="button" (click)="cancelDelete()"
+            class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-bold text-slate-700">
+            إلغاء
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

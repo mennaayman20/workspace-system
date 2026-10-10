@@ -3,7 +3,7 @@
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .fade-up { animation: fadeUp .35s ease-out both; }
+  .fade-up { animation: fadeUp .35s ease-out backwards; }
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
 </style>
 
@@ -84,27 +84,25 @@
           <tbody class="divide-y divide-slate-100 text-sm">
             @for (customer of customers(); track customer.id) {
               <tr class="hover:bg-slate-50 transition-colors">
-                <td class="py-3 px-4 font-semibold text-slate-800">{{ customer.fullName }}</td>
+<td class="py-3 px-4 font-semibold text-slate-800">{{ customer.fullName || '-' }}</td>
                 <td class="py-3 px-4 text-slate-600 dir-ltr text-right">{{ customer.mobileNumber }}</td>
                 <td class="py-3 px-4">
-                  <span [class]="getCustomerTypeBadgeClass(customer.customerType)" 
+<span [class]="getCustomerTypeBadgeClass(customer.customerType)"
       class="px-2.5 py-1 rounded-full text-xs font-bold">
-  {{ customer.customerType }}
+  {{ typeLabel(customer.customerType) }}
 </span>
                 </td>
-               <td class="py-3 px-4 text-slate-600">
-  {{ customer.companyName }}
-</td>
+<td class="py-3 px-4 text-slate-600">{{ customer.companyName || '-' }}</td>
                 <td class="py-3 px-4 text-slate-500 text-xs">{{ customer.email || '-' }}</td>
                 <td class="py-3 px-4 text-center space-x-2 space-x-reverse">
                   <button (click)="openEditModal(customer)" 
                           class="px-3 py-1 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg text-xs font-bold transition-colors">
                     تعديل
                   </button>
-                  <button (click)="onDelete(customer.id)" 
-                          class="px-3 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-bold transition-colors">
-                    حذف
-                  </button>
+<button (click)="askDelete(customer)"
+        class="px-3 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-bold transition-colors">
+  حذف
+</button>
                 </td>
               </tr>
             } @empty {
@@ -128,5 +126,37 @@
       (customerCreated)="refreshAfterSave()">
     </app-add-customer-modal>
   }
+@if (pendingDelete(); as d) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
+       (click)="cancelDelete()">
+    <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl" dir="rtl"
+         role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
 
+      <div class="flex items-start gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+          <lucide-icon [img]="TrashIcon" class="w-5 h-5"></lucide-icon>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">حذف العميل</h3>
+          <p class="text-sm text-slate-500 mt-1.5 leading-relaxed">
+            هل أنت متأكد من حذف
+            <b class="text-slate-800">"{{ d.fullName || d.mobileNumber }}"</b>؟
+            يمكنك استعادته لاحقاً.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex gap-3 mt-6">
+        <button type="button" (click)="confirmDelete()" [disabled]="isDeleting()"
+                class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-colors">
+          {{ isDeleting() ? 'جاري الحذف...' : 'نعم، حذف' }}
+        </button>
+        <button type="button" (click)="cancelDelete()" [disabled]="isDeleting()"
+                class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-60 rounded-xl text-sm font-bold text-slate-700 transition-colors">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+}
 </div>

@@ -108,9 +108,6 @@ export class BookingFormModalComponent implements OnInit {
     this.closeModal.emit();
   }
 
-  onBackdropClick(event: MouseEvent): void {
-    if (event.target === event.currentTarget) this.close();
-  }
 
   // ---------- Form helpers ----------
   showError(name: string): boolean {
