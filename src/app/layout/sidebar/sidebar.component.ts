@@ -42,7 +42,7 @@ interface NavItem {
 export class SidebarComponent {
   // public langService = inject(LanguageService);
   navItems: NavItem[] = [
-    { label: 'لوحة التحكّم', route: 'control-panel', icon: 'dashboard' },
+    // { label: 'لوحة التحكّم', route: 'control-panel', icon: 'dashboard' },
     { label: 'مساحات العمل', route: 'Workspaces', icon: 'meeting_room' },
 
         { label: 'الجلسات الحيه', route: 'live-sessions', icon: 'dashboard' },

@@ -46,7 +46,7 @@ onSubmit(): void {
     next: (res) => {
       this.isLoading = false;
       if (res.succeeded) {
-        this.router.navigate(['/control-panel']);
+        this.router.navigate(['/Workspaces']);
       } else {
         this.errorMessage = res.message || 'تعذر تسجيل الدخول';
       }

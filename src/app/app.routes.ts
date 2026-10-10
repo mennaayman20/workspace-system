@@ -18,10 +18,10 @@ export const routes: Routes = [
     component: MainLayoutComponent,
     canActivate: [authGuard], // حماية كل الصفحات التي بداخل المخطط مرة واحدة
     children: [
-      { 
-        path: 'control-panel', 
-        loadComponent: () => import('./features/dashboard/dashboard/dashboard.component').then(m => m.DashboardComponent)
-      },
+      // { 
+      //   path: 'control-panel', 
+      //   loadComponent: () => import('./features/dashboard/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      // },
       { 
         path: 'live-sessions', 
         loadComponent: () => import('./features/sessions/live-sessions/live-sessions.component').then(m => m.LiveSessionsComponent)
