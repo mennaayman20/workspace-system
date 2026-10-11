@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { unwrapList } from '../../../core/utils/unwrap-list';
 import { Booking, BookingStatus, CreateBookingDto, UpdateBookingDto } from './Ibooking';
@@ -10,9 +10,11 @@ export class BookingService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/api/Bookings`;
 
-  getBookings(): Observable<Booking[]> {
+  /** الباك بيرجّع صفحات، فبنطلب صفحة كبيرة عشان البورد الأسبوعي */
+  getBookings(pageNumber = 1, pageSize = 100): Observable<Booking[]> {
+    const params = new HttpParams().set('pageNumber', pageNumber).set('pageSize', pageSize);
     return this.http
-      .get<any>(this.baseUrl)
+      .get<any>(this.baseUrl, { params })
       .pipe(map(res => unwrapList(res).map(r => this.normalize(r))));
   }
 

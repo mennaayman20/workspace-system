@@ -7,7 +7,7 @@
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
 </style>
 
-<div dir="rtl" class="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
+<div dir="rtl" class="p-4 sm:p-8 space-y-6 max-w-7xl mx-auto">
 
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-up">
@@ -17,7 +17,7 @@
       </div>
       <div>
         <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">إدارة الحجوزات</h1>
-        <p class="text-sm text-slate-500 mt-1">عرض وإضافة وتعديل حجوزات العملاء لمساحات العمل</p>
+        <p class="text-sm text-slate-500 mt-1">جدول أسبوعي لحجوزات العملاء، اسحبي أي حجز ليوم تاني لتغيير موعده</p>
       </div>
     </div>
 
@@ -28,11 +28,98 @@
     </button>
   </div>
 
+  <!-- Toolbar: الأسبوع + البحث + الفلاتر -->
+  <div class="bg-white p-3 sm:p-4 rounded-2xl border border-blue-100 shadow-sm space-y-3 fade-up">
+
+    <div class="flex flex-wrap items-center justify-between gap-3">
+
+      <!-- التنقل بين الأسابيع -->
+      <div class="flex items-center gap-2">
+        <button type="button" (click)="shiftWeek(-1)" aria-label="الأسبوع السابق" title="الأسبوع السابق"
+          class="w-10 h-10 rounded-xl flex items-center justify-center border border-slate-200 text-slate-600 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-200">
+          <lucide-icon [img]="PrevIcon" class="w-5 h-5"></lucide-icon>
+        </button>
+
+        <div class="min-w-[13rem] text-center">
+          <p class="text-sm font-extrabold text-slate-900">{{ weekLabel() }}</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">{{ weekBookings().length }} حجز في هذا الأسبوع</p>
+        </div>
+
+        <button type="button" (click)="shiftWeek(1)" aria-label="الأسبوع التالي" title="الأسبوع التالي"
+          class="w-10 h-10 rounded-xl flex items-center justify-center border border-slate-200 text-slate-600 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-200">
+          <lucide-icon [img]="NextIcon" class="w-5 h-5"></lucide-icon>
+        </button>
+
+        @if (!isCurrentWeek()) {
+          <button type="button" (click)="goToToday()"
+            class="px-4 h-10 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-bold transition-colors">
+            الأسبوع الحالي
+          </button>
+        }
+      </div>
+
+      <!-- البحث -->
+      <div class="relative w-full sm:w-72">
+        <lucide-icon [img]="SearchIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
+        <input type="search" [value]="searchTerm()"
+          (input)="onSearch($any($event.target).value)"
+          placeholder="ابحث باسم العميل أو المساحة..."
+          class="w-full ps-9 pe-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+      </div>
+    </div>
+
+<!-- كروت الإحصائيات والفلاتر السريعة (بنفس ستايل الـ Workspace) -->
+<!-- كروت الإحصائيات والفلاتر السريعة -->
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 pt-1">
+    @for (c of statCards; track c.value; let i = $index) {
+      <button type="button" (click)="onFilterStatus($any(c.value))"
+        [attr.aria-pressed]="statusFilter() === c.value"
+        [style.animation-delay.ms]="i * 50"
+        [class]="c.border + ' ' + c.tint + (statusFilter() === c.value ? ' ring-2 ring-offset-1 ' + c.ring : '')"
+        class="fade-up flex items-center justify-between gap-3 text-start p-4 sm:p-5 rounded-2xl border border-slate-200 border-s-4 bg-gradient-to-br via-white to-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+        
+        <div class="min-w-0">
+          <div class="text-sm font-semibold text-slate-600 leading-snug">{{ c.label }}</div>
+          <div class="mt-1 text-3xl font-extrabold text-slate-800 tabular-nums">
+            {{ statusCounts()[c.value] }}
+          </div>
+        </div>
+
+        <span [class]="c.chip" class="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center">
+          <lucide-icon [img]="c.icon" class="w-5 h-5"></lucide-icon>
+        </span>
+      </button>
+    }
+  </div>
+
+  <!-- زر مسح الفلاتر لو في بحث أو فلاتر مفعلة -->
+  <!-- @if (searchTerm() || statusFilter() !== 'all') {
+    <div class="flex items-center justify-between pt-1">
+      <span class="text-xs text-slate-500 font-medium">تم تطبيق الفلاتر والبحث النشط</span>
+      <button type="button" (click)="resetFilters()"
+        class="px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors flex items-center gap-1">
+        <span>مسح الفلاتر والبحث</span>
+      </button>
+    </div>
+  } -->
+
+    <!-- زر مسح الفلاتر لو في بحث أو فلاتر مفعلة -->
+    <!-- @if (searchTerm() || statusFilter() !== 'all') {
+      <div class="flex items-center justify-between pt-2">
+        <span class="text-xs text-slate-500 font-medium">تم تطبيق الفلاتر والبحث النشط</span>
+        <button type="button" (click)="resetFilters()"
+          class="px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors flex items-center gap-1">
+          <span>مسح الفلاتر والبحث</span>
+        </button>
+      </div>
+    } -->
+  </div>
+
   <!-- Loading -->
   @if (isLoading()) {
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6" aria-busy="true">
-      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
-        <div class="h-56 rounded-2xl bg-slate-100 animate-pulse"></div>
+    <div class="flex gap-4 overflow-hidden" aria-busy="true">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <div class="h-96 w-[16.5rem] shrink-0 rounded-2xl bg-slate-100 animate-pulse"></div>
       }
     </div>
   }
@@ -48,160 +135,210 @@
     </div>
   }
 
+  <!-- البورد الأسبوعي -->
   @if (!isLoading() && !errorMessage()) {
+    <div cdkDropListGroup
+         class="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-proximity">
 
-    <!-- Status filter cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-      <button type="button" (click)="onFilterStatus('all')"
-        [class]="statusFilter() === 'all' ? 'ring-2 ring-blue-500 bg-blue-50/60 border-transparent' : 'bg-white border-slate-200 hover:border-slate-300'"
-        class="fade-up text-right p-4 rounded-2xl border shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-        <div class="flex items-center gap-2 text-sm font-semibold text-slate-500">
-          <span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span> الكل
-        </div>
-        <div class="mt-2 text-3xl font-extrabold text-slate-900">{{ statusCounts()['all'] }}</div>
-      </button>
+      @for (day of weekDays(); track day.key; let i = $index) {
+        <section [id]="day.isToday ? 'booking-day-today' : null"
+                 [style.animation-delay.ms]="i * 40"
+                 [class]="day.isToday ? 'border-blue-300 ring-2 ring-blue-100' : 'border-blue-100'"
+                 class="fade-up snap-start shrink-0 w-[16.5rem] flex flex-col rounded-2xl border bg-white shadow-sm">
 
-      @for (s of statusOptions; track s.value; let i = $index) {
-        <button type="button" (click)="onFilterStatus(s.value)"
-          [style.animation-delay.ms]="(i + 1) * 50"
-          [class]="statusFilter() === s.value ? 'ring-2 ring-blue-500 bg-blue-50/60 border-transparent' : 'bg-white border-slate-200 hover:border-slate-300'"
-          class="fade-up text-right p-4 rounded-2xl border shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-          <div class="flex items-center gap-2 text-sm font-semibold text-slate-500">
-            <span class="w-2.5 h-2.5 rounded-full" [class]="statusDotClass(s.value)"></span>
-            {{ s.label }}
+          <!-- رأس اليوم -->
+          <header class="flex items-center justify-between gap-2 px-4 py-3 rounded-t-2xl border-b"
+                  [class]="day.isToday ? 'bg-blue-600 border-blue-600' : 'bg-[#f5f8ff] border-blue-100'">
+            <div>
+              <p class="text-sm font-extrabold" [class]="day.isToday ? 'text-white' : 'text-blue-700'">{{ day.weekday }}</p>
+              <p class="text-xs mt-0.5" [class]="day.isToday ? 'text-blue-100' : 'text-slate-500'">{{ day.day }} {{ day.month }}</p>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              @if (day.isToday) {
+                <span class="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold">اليوم</span>
+              }
+              <span class="min-w-6 h-6 px-1.5 rounded-full flex items-center justify-center text-xs font-extrabold"
+                    [class]="day.isToday ? 'bg-white/20 text-white' : 'bg-white text-slate-600 border border-blue-100'">
+                {{ day.items.length }}
+              </span>
+              @if (!day.isPast) {
+                <button type="button" (click)="openForm(null, day.key)"
+                        title="حجز جديد في هذا اليوم" aria-label="حجز جديد في هذا اليوم"
+                        class="w-7 h-7 rounded-full flex items-center justify-center transition-colors"
+                        [class]="day.isToday ? 'text-white hover:bg-white/20' : 'text-blue-600 hover:bg-blue-100'">
+                  <lucide-icon [img]="PlusIcon" class="w-4 h-4"></lucide-icon>
+                </button>
+              }
+            </div>
+          </header>
+
+          <!-- منطقة الإفلات + الـ Timeline -->
+          <div cdkDropList
+               [cdkDropListData]="day"
+               [cdkDropListSortingDisabled]="true"
+               [cdkDropListEnterPredicate]="day.enterPredicate"
+               (cdkDropListDropped)="onDrop($event)"
+               class="booking-drop flex-1 min-h-[14rem] p-4"
+               [class.opacity-60]="day.isPast">
+
+            @if (day.items.length === 0) {
+              <p class="py-10 text-center text-xs text-slate-300 select-none">لا توجد حجوزات</p>
+            }
+
+            <ol class="relative ms-1.5 border-s-2 border-slate-200 space-y-5">
+              @for (b of day.items; track b.id) {
+                <li cdkDrag
+                    [cdkDragData]="b"
+                    [cdkDragDisabled]="!canDrag(b) || isBusy(b.id)"
+                    class="relative ps-5"
+                    [class.cursor-grab]="canDrag(b)"
+                    [class.opacity-50]="isBusy(b.id)">
+
+                  <!-- نقطة الـ Timeline -->
+                  <span class="absolute -start-[7px] top-[0.3rem] w-3 h-3 rounded-full ring-4 ring-white"
+                        [class]="statusInfo(b.status).dot"></span>
+
+                  <!-- الوقت -->
+                  <p class="flex items-center gap-1.5 mb-1.5 text-xs font-bold text-slate-500">
+                    <lucide-icon [img]="ClockIcon" class="w-3.5 h-3.5"></lucide-icon>
+                    <span>{{ formatTime(b.startTime) }}</span>
+                    @if (b.expectedEndTime) {
+                      <span class="text-slate-300">—</span>
+                      <span>{{ formatTime(b.expectedEndTime) }}</span>
+                    }
+                  </p>
+
+                  <!-- الكارت -->
+                  <article class="rounded-xl border border-slate-200 border-s-4 bg-white p-3 shadow-xs hover:shadow-md transition-shadow"
+                           [class]="statusInfo(b.status).border">
+
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="min-w-0">
+                        <h3 class="font-bold text-slate-900 text-sm truncate" [title]="b.customerName">{{ b.customerName }}</h3>
+                        <p class="flex items-center gap-1.5 mt-0.5 text-xs text-slate-500">
+                          <lucide-icon [img]="BuildingIcon" class="w-3.5 h-3.5 shrink-0"></lucide-icon>
+                          <span class="truncate">{{ b.workspaceName }}</span>
+                        </p>
+                      </div>
+
+                      <button type="button" (click)="openMenu($event, b)"
+                              aria-label="خيارات الحجز" aria-haspopup="menu"
+                              class="w-8 h-8 -me-1 -mt-1 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors shrink-0">
+                        <lucide-icon [img]="MoreIcon" class="w-4 h-4"></lucide-icon>
+                      </button>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-2 mt-2.5">
+                      <span [class]="statusInfo(b.status).badge"
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold">
+                        {{ statusInfo(b.status).label }}
+                      </span>
+                      <span class="inline-flex items-center gap-1 text-xs text-slate-500">
+                        <lucide-icon [img]="PeopleIcon" class="w-3.5 h-3.5"></lucide-icon>
+                        {{ b.numberOfPeople }}
+                      </span>
+                    </div>
+
+                    @if (b.notes) {
+                      <p class="mt-2 flex items-start gap-1.5 text-xs text-slate-400 bg-slate-50 rounded-lg px-2 py-1.5" [title]="b.notes">
+                        <lucide-icon [img]="NoteIcon" class="w-3.5 h-3.5 shrink-0 mt-0.5"></lucide-icon>
+                        <span class="line-clamp-2">{{ b.notes }}</span>
+                      </p>
+                    }
+                  </article>
+
+                  <!-- شكل الكارت أثناء السحب -->
+                  <div *cdkDragPreview dir="rtl"
+                       class="w-60 rounded-xl border border-blue-300 bg-white p-3 shadow-2xl">
+                    <p class="text-xs font-bold text-blue-600">{{ formatTime(b.startTime) }}</p>
+                    <p class="font-bold text-sm text-slate-900 truncate mt-0.5">{{ b.customerName }}</p>
+                    <p class="text-xs text-slate-500 truncate">{{ b.workspaceName }}</p>
+                  </div>
+
+                  <!-- مكان الكارت وهو بيتسحب -->
+                  <div *cdkDragPlaceholder
+                       class="ms-5 h-24 rounded-xl border-2 border-dashed border-blue-300 bg-blue-50/60"></div>
+                </li>
+              }
+            </ol>
           </div>
-          <div class="mt-2 text-3xl font-extrabold text-slate-900">{{ statusCounts()[s.value] }}</div>
-        </button>
+        </section>
       }
     </div>
 
-    <!-- Search -->
-    <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs fade-up">
-      <div class="relative w-full sm:w-80">
-        <lucide-icon [img]="SearchIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 right-3 pointer-events-none"></lucide-icon>
-        <input type="search" [value]="searchTerm()"
-          (input)="onSearch($any($event.target).value)"
-          placeholder="ابحث باسم العميل أو المساحة..."
-          class="w-full pr-9 pl-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-      </div>
-    </div>
+    @if (weekBookings().length === 0 && bookings().length > 0) {
+      <p class="text-center text-sm text-slate-400">
+        مفيش حجوزات في الأسبوع ده. تنقّل بين الأسابيع أو اضغط + على أي يوم لإضافة حجز.
+      </p>
+    }
 
-<!-- Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-  @for (b of filteredBookings(); track b.id; let i = $index) {
-    <article
-      class="group relative flex flex-col bg-white rounded-2xl border border-slate-200 overflow-hidden fade-up transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-900/5"
-      [class.opacity-50]="isBusy(b.id)" [class.pointer-events-none]="isBusy(b.id)"
-      [style.animation-delay.ms]="(i % 12) * 40">
-
-      <div class="h-1.5 bg-gradient-to-l" [class]="statusAccentClass(b.status)"></div>
-
-      <div class="p-5 flex-1 space-y-4">
-        <!-- Customer + status -->
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0">
-            <h3 class="font-bold text-slate-900 text-base truncate" [matTooltip]="b.customerName">{{ b.customerName }}</h3>
-            <div class="flex items-center gap-1.5 mt-1 text-xs font-semibold text-slate-500">
-              <lucide-icon [img]="BuildingIcon" class="w-3.5 h-3.5 shrink-0"></lucide-icon>
-              <span class="truncate">{{ b.workspaceName }}</span>
-            </div>
-          </div>
-          <span [class]="statusBadgeClass(b.status)"
-            class="shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold ring-1 ring-inset">
-            {{ statusLabel(b.status) }}
-          </span>
+    @if (bookings().length === 0) {
+      <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-10 text-center space-y-4 fade-up">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
+          <lucide-icon [img]="CalendarIcon" class="w-8 h-8"></lucide-icon>
         </div>
-
-        <!-- Date / time / people -->
-        <dl class="space-y-2.5 text-sm text-slate-600">
-          <div class="flex items-center gap-3">
-            <lucide-icon [img]="CalendarIcon" class="w-4 h-4 shrink-0 text-slate-400 group-hover:text-blue-500 transition-colors"></lucide-icon>
-            <dd class="text-[13px]">{{ formatDate(b.bookingDate) }}</dd>
-          </div>
-          <div class="flex items-center gap-3">
-            <lucide-icon [img]="ClockIcon" class="w-4 h-4 shrink-0 text-slate-400 group-hover:text-blue-500 transition-colors"></lucide-icon>
-            <dd class="text-[13px]">
-              {{ formatTime(b.startTime) }}
-              @if (b.expectedEndTime) { — {{ formatTime(b.expectedEndTime) }} }
-            </dd>
-          </div>
-          <div class="flex items-center gap-3">
-            <lucide-icon [img]="PeopleIcon" class="w-4 h-4 shrink-0 text-slate-400 group-hover:text-blue-500 transition-colors"></lucide-icon>
-            <dd class="text-[13px]">{{ b.numberOfPeople }} أشخاص</dd>
-          </div>
-          @if (b.notes) {
-            <div class="flex items-start gap-3">
-              <lucide-icon [img]="NoteIcon" class="w-4 h-4 shrink-0 mt-0.5 text-slate-400"></lucide-icon>
-              <dd class="text-[13px] text-slate-500 line-clamp-2" [matTooltip]="b.notes">{{ b.notes }}</dd>
-            </div>
-          }
-        </dl>
-      </div>
-
-      <!-- Footer -->
-      <div class="flex items-center justify-between gap-3 px-5 py-3 bg-slate-50/70 border-t border-slate-100">
-        <!-- Dropdown المحسّن -->
-        <div class="relative min-w-[130px]">
-          <select
-            [disabled]="isBusy(b.id)"
-            (change)="onStatusChange(b, $event)"
-            aria-label="تغيير الحالة"
-            class="w-full h-9 appearance-none bg-white border border-slate-200 rounded-xl pr-3 pl-8 text-xs font-bold text-slate-700 hover:border-blue-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
-            @for (s of statusOptions; track s.value) {
-              <option [value]="s.value" [selected]="s.value === b.status" class="py-1 text-xs font-semibold text-slate-800">
-                {{ s.label }}
-              </option>
-            }
-          </select>
-          <!-- سهم انسيابي مخصص -->
-          <div class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400">
-            <lucide-icon [img]="ChevronDownIcon" class="w-4 h-4 transition-transform duration-200"></lucide-icon>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-1.5 shrink-0">
-          <button type="button" (click)="openForm(b)" matTooltip="تعديل" aria-label="تعديل"
-            class="w-9 h-9 rounded-xl flex items-center justify-center text-blue-600 bg-white border border-slate-200 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-200">
-            <lucide-icon [img]="EditIcon" class="w-4 h-4"></lucide-icon>
-          </button>
-          <button type="button" (click)="onDelete(b)" matTooltip="حذف" aria-label="حذف"
-            class="w-9 h-9 rounded-xl flex items-center justify-center text-rose-600 bg-white border border-slate-200 hover:bg-rose-600 hover:border-rose-600 hover:text-white transition-all duration-200">
-            <lucide-icon [img]="TrashIcon" class="w-4 h-4"></lucide-icon>
-          </button>
-        </div>
-      </div>
-    </article>
-  } @empty {
-    <div class="col-span-full bg-white rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center space-y-4 fade-up">
-      <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
-        <lucide-icon [img]="CalendarIcon" class="w-8 h-8"></lucide-icon>
-      </div>
-      @if (bookings().length === 0) {
         <p class="text-base font-bold text-slate-800">لا توجد حجوزات حتى الآن</p>
         <button type="button" (click)="openForm()"
           class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors">
           + أضيفي أول حجز
         </button>
-      } @else {
-        <p class="text-base font-bold text-slate-800">لا توجد نتائج مطابقة</p>
-        <button type="button" (click)="resetFilters()"
-          class="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600 transition-colors">
-          مسح الفلاتر
-        </button>
-      }
-    </div>
-  }
-</div>
+      </div>
+    }
   }
 
-    <!-- Modal -->
+  <!-- مودال الإضافة والتعديل -->
   @if (isModalOpen()) {
     <app-booking-form-modal
       [booking]="editingBooking()"
       [customers]="customers()"
       [workspaces]="workspaces()"
+      [defaultDate]="modalDefaultDate()"
       (closeModal)="closeModal()"
-      (saved)="onSaved()">
+      (saved)="onSaved($event)">
     </app-booking-form-modal>
   }
+
+  <!-- قايمة ⋮ المشتركة لكل الكروت -->
+  <p-popover #menuPop appendTo="body">
+    @if (activeBooking(); as b) {
+      <div class="flex flex-col min-w-52 p-1" role="menu">
+        <p class="px-3 pt-2 pb-1 text-[11px] font-bold text-slate-400">تغيير الحالة</p>
+
+        @for (s of statusOptions; track s.value) {
+          <button type="button" role="menuitem" (click)="onMenuStatus(s.value)"
+                  class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-start text-slate-700 hover:bg-slate-100 transition-colors">
+            <span class="w-2.5 h-2.5 rounded-full" [class]="s.dot"></span>
+            <span class="flex-1">{{ s.label }}</span>
+            @if (b.status === s.value) {
+              <lucide-icon [img]="CheckIcon" class="w-4 h-4 text-blue-600"></lucide-icon>
+            }
+          </button>
+        }
+
+        <div class="my-1 border-t border-slate-100"></div>
+
+        <button type="button" role="menuitem" (click)="onMenuEdit()"
+                class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-start text-slate-700 hover:bg-slate-100 transition-colors">
+          <lucide-icon [img]="EditIcon" class="w-4 h-4 shrink-0"></lucide-icon>
+          <span>تعديل</span>
+        </button>
+
+        <button type="button" role="menuitem" (click)="onMenuDelete()"
+                class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-start text-rose-600 hover:bg-rose-50 transition-colors">
+          <lucide-icon [img]="TrashIcon" class="w-4 h-4 shrink-0"></lucide-icon>
+          <span>حذف</span>
+        </button>
+      </div>
+    }
+  </p-popover>
+
+  <!-- تأكيد الحذف -->
+  <app-confirm-dialog
+    [open]="!!pendingDelete()"
+    title="حذف الحجز"
+    [itemName]="pendingDelete()?.customerName ?? ''"
+    [loading]="isDeleting()"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()" />
 </div>

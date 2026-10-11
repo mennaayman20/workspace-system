@@ -1,61 +1,99 @@
-import { Component, EventEmitter, HostListener, Input, OnInit, Output, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import {
   AbstractControl,
-  FormBuilder,
+  NonNullableFormBuilder,
   ReactiveFormsModule,
   ValidationErrors,
   Validators
 } from '@angular/forms';
-import { LucideAngularModule, CalendarPlus, Clock, ChevronDown, Minus, Plus, X } from 'lucide-angular';
+import { Observable } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { TextareaModule } from 'primeng/textarea';
+import {
+  LucideAngularModule, CalendarPlus, Clock, Minus, Plus, X, UserRound, Users, FileText,
+} from 'lucide-angular';
+
 import { BookingService } from '../booking.service';
 import { Booking, CreateBookingDto, LookupItem } from '../Ibooking';
 
+// ---------- helpers ----------
 const pad = (n: number) => String(n).padStart(2, '0');
 
-/** 'HH:mm' -> دقائق من بداية اليوم */
-const toMin = (t: string | null | undefined): number | null => {
-  if (!t) return null;
-  const [h, m] = t.split(':').map(Number);
-  return h * 60 + m;
+const minutesOf = (d: Date | null | undefined): number | null =>
+  d ? d.getHours() * 60 + d.getMinutes() : null;
+
+/** دقائق من بداية اليوم -> Date (للـ time picker) */
+const timeDate = (min: number): Date => new Date(1970, 0, 1, Math.floor(min / 60), min % 60, 0, 0);
+
+const hhmm = (d: Date) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+const dateKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+const parseKey = (key: string): Date => {
+  const [y, m, d] = key.slice(0, 10).split('-').map(Number);
+  return new Date(y, m - 1, d);
 };
 
-const toHHmm = (min: number) => `${pad(Math.floor(min / 60))}:${pad(min % 60)}`;
+const startOfToday = (): Date => {
+  const n = new Date();
+  return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+};
 
+// ---------- validators ----------
 function endAfterStart(group: AbstractControl): ValidationErrors | null {
-  const start = toMin(group.get('startTime')?.value);
-  const end = toMin(group.get('expectedEndTime')?.value);
+  const start = minutesOf(group.get('startTime')?.value);
+  const end = minutesOf(group.get('expectedEndTime')?.value);
   return start !== null && end !== null && end <= start ? { endBeforeStart: true } : null;
+}
+
+function notPastDate(c: AbstractControl): ValidationErrors | null {
+  const v = c.value as Date | null;
+  return v && dateKey(v) < dateKey(startOfToday()) ? { pastDate: true } : null;
 }
 
 @Component({
   selector: 'app-booking-form-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, LucideAngularModule],
+  imports: [
+    ReactiveFormsModule, LucideAngularModule,
+    SelectModule, DatePickerModule, InputNumberModule, TextareaModule,
+  ],
   templateUrl: './booking-form-modal.component.html'
 })
 export class BookingFormModalComponent implements OnInit {
-  private fb = inject(FormBuilder);
-  private bookingService = inject(BookingService);
+  private readonly fb = inject(NonNullableFormBuilder);
+  private readonly bookingService = inject(BookingService);
+  private readonly toastr = inject(ToastrService);
 
-  @Input() booking: Booking | null = null;
-  @Input() customers: LookupItem[] = [];
-  @Input() workspaces: LookupItem[] = [];
-  @Output() closeModal = new EventEmitter<void>();
-  @Output() saved = new EventEmitter<void>();
+  booking = input<Booking | null>(null);
+  customers = input<LookupItem[]>([]);
+  workspaces = input<LookupItem[]>([]);
+  /** yyyy-MM-dd: لما الحجز يتفتح من زرار + في يوم معيّن */
+  defaultDate = input<string | null>(null);
+
+  closeModal = output<void>();
+  /** بيطلّع تاريخ الحجز (yyyy-MM-dd) عشان الصفحة تروح لأسبوعه */
+  saved = output<string>();
 
   // Icons
   readonly CalendarPlusIcon = CalendarPlus;
   readonly ClockIcon = Clock;
-  readonly ChevronIcon = ChevronDown;
   readonly MinusIcon = Minus;
   readonly PlusIcon = Plus;
   readonly CloseIcon = X;
+  readonly UserIcon = UserRound;
+  readonly PeopleIcon = Users;
+  readonly NoteIcon = FileText;
 
-  isSubmitting = signal(false);
-  formError = signal<string | null>(null);
-  today = this.toDateInput(new Date());
+  readonly isSubmitting = signal(false);
+  readonly formError = signal<string | null>(null);
+  readonly today = startOfToday();
 
-  readonly startSlots = ['09:00', '10:00', '11:00', '12:00', '14:00', '16:00'];
+  /** بدايات سريعة (بالدقائق من بداية اليوم) */
+  readonly startSlots = [9, 10, 11, 12, 14, 16].map(h => h * 60);
   readonly durations = [
     { hours: 1, label: 'ساعة' },
     { hours: 2, label: 'ساعتين' },
@@ -63,51 +101,53 @@ export class BookingFormModalComponent implements OnInit {
     { hours: 4, label: '4 ساعات' }
   ];
 
-  form = this.fb.group(
+  readonly form = this.fb.group(
     {
-      customerId: [null as number | null, Validators.required],
-      workspaceId: [null as number | null, Validators.required],
-      bookingDate: ['', Validators.required],
-      startTime: ['', Validators.required],
-      expectedEndTime: [''],
-      numberOfPeople: [1, [Validators.required, Validators.min(1)]],
+      customerId: this.fb.control<number | null>(null, Validators.required),
+      workspaceId: this.fb.control<number | null>(null, Validators.required),
+      bookingDate: this.fb.control<Date | null>(null, Validators.required),
+      startTime: this.fb.control<Date | null>(null, Validators.required),
+      expectedEndTime: this.fb.control<Date | null>(null),
+      numberOfPeople: this.fb.control<number | null>(1, [Validators.required, Validators.min(1)]),
       notes: ['']
     },
     { validators: endAfterStart }
   );
 
   get isEdit(): boolean {
-    return !!this.booking;
+    return !!this.booking();
   }
 
   ngOnInit(): void {
-    const b = this.booking;
-    if (!b) return;
+    const b = this.booking();
 
-    const timeOf = (v?: string | null) => {
-      if (!v) return '';
-      const d = new Date(v);
-      return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    };
+    if (b) {
+      const asTime = (v?: string | null): Date | null => {
+        if (!v) return null;
+        const d = new Date(v);
+        return isNaN(d.getTime()) ? null : timeDate(d.getHours() * 60 + d.getMinutes());
+      };
 
-    this.form.patchValue({
-      customerId: b.customerId,
-      workspaceId: b.workspaceId,
-      bookingDate: this.toDateInput(new Date(b.bookingDate)),
-      startTime: timeOf(b.startTime),
-      expectedEndTime: timeOf(b.expectedEndTime),
-      numberOfPeople: b.numberOfPeople,
-      notes: b.notes ?? ''
-    });
+      this.form.patchValue({
+        customerId: b.customerId,
+        workspaceId: b.workspaceId,
+        bookingDate: parseKey(b.bookingDate),
+        startTime: asTime(b.startTime),
+        expectedEndTime: asTime(b.expectedEndTime),
+        numberOfPeople: b.numberOfPeople,
+        notes: b.notes ?? ''
+      });
+      return;
+    }
+
+    // حجز جديد: ممنوع تاريخ قديم
+    const dateCtrl = this.form.controls.bookingDate;
+    dateCtrl.addValidators(notPastDate);
+
+    const def = this.defaultDate();
+    if (def) dateCtrl.setValue(parseKey(def));
+    dateCtrl.updateValueAndValidity();
   }
-
-  // ---------- Modal ----------
-  @HostListener('document:keydown.escape')
-  close(): void {
-    if (this.isSubmitting()) return;
-    this.closeModal.emit();
-  }
-
 
   // ---------- Form helpers ----------
   showError(name: string): boolean {
@@ -116,43 +156,49 @@ export class BookingFormModalComponent implements OnInit {
   }
 
   errorOf(name: string): string {
-    const c = this.form.get(name);
-    if (c?.errors?.['required']) return 'هذا الحقل مطلوب';
-    if (c?.errors?.['min']) return 'لازم يكون 1 على الأقل';
+    const e = this.form.get(name)?.errors;
+    if (e?.['required']) return 'هذا الحقل مطلوب';
+    if (e?.['min']) return 'لازم يكون 1 على الأقل';
+    if (e?.['pastDate']) return 'لا يمكن الحجز في تاريخ سابق';
     return 'قيمة غير صالحة';
   }
 
   // ---------- Quick date ----------
   setDateOffset(days: number): void {
-    const d = new Date();
+    const d = startOfToday();
     d.setDate(d.getDate() + days);
-    this.form.patchValue({ bookingDate: this.toDateInput(d) });
+    this.form.controls.bookingDate.setValue(d);
     this.form.controls.bookingDate.markAsDirty();
   }
 
   isDateOffset(days: number): boolean {
-    const d = new Date();
+    const v = this.form.controls.bookingDate.value;
+    const d = startOfToday();
     d.setDate(d.getDate() + days);
-    return this.form.value.bookingDate === this.toDateInput(d);
+    return !!v && dateKey(v) === dateKey(d);
   }
 
   // ---------- Quick start ----------
-  setStart(time: string): void {
-    this.form.patchValue({ startTime: time });
+  setStart(min: number): void {
+    this.form.controls.startTime.setValue(timeDate(min));
     this.form.controls.startTime.markAsDirty();
+  }
+
+  isStartSlot(min: number): boolean {
+    return minutesOf(this.form.controls.startTime.value) === min;
   }
 
   // ---------- Quick duration ----------
   setDuration(hours: number): void {
-    const start = toMin(this.form.value.startTime);
+    const start = minutesOf(this.form.controls.startTime.value);
     if (start === null || this.isDurationDisabled(hours)) return;
-    this.form.patchValue({ expectedEndTime: toHHmm(start + hours * 60) });
+    this.form.controls.expectedEndTime.setValue(timeDate(start + hours * 60));
     this.form.controls.expectedEndTime.markAsDirty();
   }
 
   /** الشريحة تتعطل لو مفيش بداية أو النهاية هتعدي منتصف الليل */
   isDurationDisabled(hours: number): boolean {
-    const start = toMin(this.form.value.startTime);
+    const start = minutesOf(this.form.controls.startTime.value);
     return start === null || start + hours * 60 > 23 * 60 + 59;
   }
 
@@ -161,41 +207,34 @@ export class BookingFormModalComponent implements OnInit {
   }
 
   durationMinutes(): number | null {
-    const start = toMin(this.form.value.startTime);
-    const end = toMin(this.form.value.expectedEndTime);
+    const start = minutesOf(this.form.controls.startTime.value);
+    const end = minutesOf(this.form.controls.expectedEndTime.value);
     return start !== null && end !== null && end > start ? end - start : null;
   }
 
   // ---------- People stepper ----------
   changePeople(delta: number): void {
-    const current = Number(this.form.value.numberOfPeople) || 1;
-    this.form.patchValue({ numberOfPeople: Math.max(1, current + delta) });
+    const current = Number(this.form.controls.numberOfPeople.value) || 1;
+    this.form.controls.numberOfPeople.setValue(Math.max(1, current + delta));
     this.form.controls.numberOfPeople.markAsDirty();
   }
 
   // ---------- Display ----------
-  fmt12(time: string): string {
-    const d = new Date();
-    const [h, m] = time.split(':').map(Number);
-    d.setHours(h, m, 0, 0);
-    return d.toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit', hour12: true });
+  fmt12(min: number): string {
+    return timeDate(min).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit', hour12: true });
   }
 
   summary(): string {
-    const { bookingDate, startTime, expectedEndTime } = this.form.value;
-    if (!bookingDate || !startTime) return '';
+    const { bookingDate, startTime, expectedEndTime } = this.form.getRawValue();
+    const start = minutesOf(startTime);
+    if (!bookingDate || start === null) return '';
 
-    const day = new Date(`${bookingDate}T00:00:00`).toLocaleDateString('ar-EG', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long'
-    });
-    let text = `${day} · ${this.fmt12(startTime)}`;
+    const day = bookingDate.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+    let text = `${day} · ${this.fmt12(start)}`;
 
     const mins = this.durationMinutes();
-    if (expectedEndTime && mins) {
-      text += ` ← ${this.fmt12(expectedEndTime)} (${this.durationLabel(mins)})`;
-    }
+    const end = minutesOf(expectedEndTime);
+    if (end !== null && mins) text += ` ← ${this.fmt12(end)} (${this.durationLabel(mins)})`;
     return text;
   }
 
@@ -209,44 +248,52 @@ export class BookingFormModalComponent implements OnInit {
 
   // ---------- Save ----------
   save(): void {
+    if (this.isSubmitting()) return;
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
     const v = this.form.getRawValue();
+    const key = dateKey(v.bookingDate!);
+
     const dto: CreateBookingDto = {
       customerId: Number(v.customerId),
       workspaceId: Number(v.workspaceId),
-      bookingDate: `${v.bookingDate}T00:00:00`,
-      startTime: `${v.bookingDate}T${v.startTime}:00`,
-      expectedEndTime: v.expectedEndTime ? `${v.bookingDate}T${v.expectedEndTime}:00` : null,
+      bookingDate: `${key}T00:00:00`,
+      startTime: `${key}T${hhmm(v.startTime!)}:00`,
+      expectedEndTime: v.expectedEndTime ? `${key}T${hhmm(v.expectedEndTime)}:00` : null,
       numberOfPeople: Number(v.numberOfPeople),
       notes: v.notes?.trim() || null
     };
 
+    const current = this.booking();
+    const request$: Observable<unknown> = current
+      ? this.bookingService.updateBooking(current.id, dto)
+      : this.bookingService.createBooking(dto);
+
     this.isSubmitting.set(true);
     this.formError.set(null);
-
-    const request$ = this.booking
-      ? this.bookingService.updateBooking(this.booking.id, dto)
-      : this.bookingService.createBooking(dto);
 
     request$.subscribe({
       next: () => {
         this.isSubmitting.set(false);
-        this.saved.emit();
+        this.toastr.success(current ? 'تم تعديل الحجز بنجاح' : 'تمت إضافة الحجز بنجاح');
+        this.saved.emit(key);
       },
       error: err => {
+        const msg = this.extractError(err);
         this.isSubmitting.set(false);
-        this.formError.set(this.extractError(err));
+        this.formError.set(msg);
+        this.toastr.error(msg);
       }
     });
   }
 
-  // ---------- Utils ----------
-  private toDateInput(d: Date): string {
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  close(): void {
+    if (this.isSubmitting()) return;
+    this.closeModal.emit();
   }
 
   private extractError(err: any): string {

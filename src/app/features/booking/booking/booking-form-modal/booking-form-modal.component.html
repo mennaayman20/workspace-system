@@ -7,213 +7,281 @@
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
 </style>
 
-<div dir="rtl"
-     class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 fade-up"
-     >
+<div dir="rtl" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-up">
   <div role="dialog" aria-modal="true" aria-labelledby="booking-modal-title"
-       class="bg-white rounded-3xl max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-100">
+       class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col overflow-hidden">
 
     <!-- Header -->
-    <div class="flex items-center justify-between gap-3 px-6 sm:px-8 pt-6 sm:pt-8 pb-5 border-b border-slate-100">
-      <div class="flex items-center gap-3.5">
-        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
-          <lucide-icon [img]="CalendarPlusIcon" class="w-6 h-6"></lucide-icon>
+    <div class="shrink-0 px-6 sm:px-8 py-5 border-b border-slate-100 bg-gradient-to-l from-blue-50/70 to-white">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
+            <lucide-icon [img]="CalendarPlusIcon" class="w-6 h-6"></lucide-icon>
+          </div>
+          <div>
+            <h3 id="booking-modal-title" class="text-lg font-extrabold text-slate-900 leading-tight">
+              {{ isEdit ? 'تعديل الحجز' : 'حجز جديد' }}
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">
+              {{ isEdit ? 'عدّلي بيانات الحجز ثم احفظي' : 'اختاري العميل والمساحة والموعد' }}
+            </p>
+          </div>
         </div>
-        <div>
-          <h3 id="booking-modal-title" class="text-lg font-bold text-slate-900 leading-tight">
-            {{ isEdit ? 'تعديل الحجز' : 'حجز جديد' }}
-          </h3>
-          <p class="text-xs text-slate-500 mt-0.5">
-            {{ isEdit ? 'عدل بيانات الحجز ثم احفظ' : 'اختار العميل والمساحة والموعد' }}
-          </p>
-        </div>
+        <button type="button" (click)="close()" [disabled]="isSubmitting()" aria-label="إغلاق"
+                class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white disabled:opacity-50 transition-colors">
+          <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
+        </button>
       </div>
-      <button type="button" (click)="close()" aria-label="إغلاق"
-        class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
-        <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
-      </button>
     </div>
 
-    <div class="px-6 sm:px-8 py-6 space-y-5">
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate class="flex flex-col min-h-0 flex-1">
 
-      @if (formError()) {
-        <div role="alert" class="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl font-medium">
-          {{ formError() }}
-        </div>
-      }
+      <div class="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-5 bg-slate-50/50">
 
-      <!-- ملخص الحجز -->
-      @if (summary(); as s) {
-        <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-blue-50/70 border border-blue-100 text-blue-800 fade-up">
-          <lucide-icon [img]="ClockIcon" class="w-4 h-4 shrink-0 text-blue-500"></lucide-icon>
-          <span class="text-sm font-semibold">{{ s }}</span>
-        </div>
-      }
-
-      <form [formGroup]="form" (ngSubmit)="save()" class="space-y-5" novalidate>
-
-        <!-- العميل + المساحة -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label for="customerId" class="block text-xs font-bold text-slate-700 mb-1.5">العميل</label>
-            <div class="relative">
-              <select id="customerId" formControlName="customerId"
-                [class.border-rose-400]="showError('customerId')"
-                class="w-full h-11 pr-4 pl-10 appearance-none bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
-                <option [ngValue]="null" disabled>اختر العميل...</option>
-                @for (c of customers; track c.id) {
-                  <option [ngValue]="c.id">{{ c.name }}</option>
-                }
-              </select>
-              <lucide-icon [img]="ChevronIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"></lucide-icon>
-            </div>
-            @if (showError('customerId')) {
-              <p class="text-xs text-rose-600 mt-1">{{ errorOf('customerId') }}</p>
-            }
+        @if (formError()) {
+          <div role="alert" class="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-2xl font-medium">
+            {{ formError() }}
           </div>
+        }
 
-          <div>
-            <label for="workspaceId" class="block text-xs font-bold text-slate-700 mb-1.5">مساحة العمل</label>
-            <div class="relative">
-              <select id="workspaceId" formControlName="workspaceId"
-                [class.border-rose-400]="showError('workspaceId')"
-                class="w-full h-11 pr-4 pl-10 appearance-none bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
-                <option [ngValue]="null" disabled>اختر مكان العمل...</option>
-                @for (w of workspaces; track w.id) {
-                  <option [ngValue]="w.id">{{ w.name }}</option>
-                }
-              </select>
-              <lucide-icon [img]="ChevronIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"></lucide-icon>
-            </div>
-            @if (showError('workspaceId')) {
-              <p class="text-xs text-rose-600 mt-1">{{ errorOf('workspaceId') }}</p>
-            }
+        <!-- ① العميل والمساحة -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+              <lucide-icon [img]="UserIcon" class="w-4 h-4"></lucide-icon>
+            </span>
+            <h4 class="text-sm font-extrabold text-slate-800">العميل والمساحة</h4>
           </div>
-        </div>
-
-        <!-- التاريخ -->
-        <div>
-          <label for="bookingDate" class="block text-xs font-bold text-slate-700 mb-1.5">تاريخ الحجز</label>
-          <div class="flex flex-wrap items-center gap-2">
-            <input id="bookingDate" type="date" formControlName="bookingDate" [attr.min]="isEdit ? null : today"
-              [class.border-rose-400]="showError('bookingDate')"
-              class="flex-1 min-w-[11rem] h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-
-            <button type="button" (click)="setDateOffset(0)"
-              [class]="isDateOffset(0)
-                ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
-                : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'"
-              class="px-4 h-11 rounded-xl border text-xs font-bold transition-all duration-200">
-              اليوم
-            </button>
-            <button type="button" (click)="setDateOffset(1)"
-              [class]="isDateOffset(1)
-                ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
-                : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'"
-              class="px-4 h-11 rounded-xl border text-xs font-bold transition-all duration-200">
-              بكرة
-            </button>
-          </div>
-          @if (showError('bookingDate')) {
-            <p class="text-xs text-rose-600 mt-1">{{ errorOf('bookingDate') }}</p>
-          }
-        </div>
-
-        <!-- الوقت -->
-        <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 space-y-4">
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label for="startTime" class="block text-xs font-bold text-slate-700 mb-1.5">وقت البداية</label>
-              <input id="startTime" type="time" step="900" formControlName="startTime"
-                [class.border-rose-400]="showError('startTime')"
-                class="w-full h-11 px-4 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-              @if (showError('startTime')) {
-                <p class="text-xs text-rose-600 mt-1">{{ errorOf('startTime') }}</p>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                العميل <span class="text-rose-500">*</span>
+              </label>
+              <p-select formControlName="customerId"
+                        [options]="customers()"
+                        optionLabel="name"
+                        optionValue="id"
+                        placeholder="اختر العميل..."
+                        [filter]="true"
+                        filterBy="name"
+                        filterPlaceholder="ابحث عن عميل..."
+                        appendTo="body"
+                        [fluid]="true"
+                        styleClass="!rounded-xl !h-11"
+                        [class.ng-invalid]="showError('customerId')"
+                        [class.ng-dirty]="showError('customerId')">
+              </p-select>
+              @if (showError('customerId')) {
+                <p class="text-xs text-rose-600 mt-1">{{ errorOf('customerId') }}</p>
               }
             </div>
 
             <div>
-              <label for="expectedEndTime" class="block text-xs font-bold text-slate-700 mb-1.5">
-                وقت النهاية <span class="font-normal text-slate-400">(اختياري)</span>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                مساحة العمل <span class="text-rose-500">*</span>
               </label>
-              <input id="expectedEndTime" type="time" step="900" formControlName="expectedEndTime"
-                [class.border-rose-400]="form.hasError('endBeforeStart')"
-                class="w-full h-11 px-4 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-              @if (form.hasError('endBeforeStart')) {
-                <p class="text-xs text-rose-600 mt-1">لازم يكون بعد وقت البداية</p>
+              <p-select formControlName="workspaceId"
+                        [options]="workspaces()"
+                        optionLabel="name"
+                        optionValue="id"
+                        placeholder="اختر مكان العمل..."
+                        [filter]="true"
+                        filterBy="name"
+                        filterPlaceholder="ابحث عن مساحة..."
+                        appendTo="body"
+                        [fluid]="true"
+                        styleClass="!rounded-xl !h-11"
+                        [class.ng-invalid]="showError('workspaceId')"
+                        [class.ng-dirty]="showError('workspaceId')">
+              </p-select>
+              @if (showError('workspaceId')) {
+                <p class="text-xs text-rose-600 mt-1">{{ errorOf('workspaceId') }}</p>
               }
             </div>
           </div>
+        </section>
 
-          <!-- بداية سريعة -->
-          <div class="space-y-2">
-            <span class="block text-[11px] font-bold text-slate-500">بداية سريعة</span>
-            <div class="flex flex-wrap gap-2">
-              @for (t of startSlots; track t) {
-                <button type="button" (click)="setStart(t)"
-                  [class]="form.value.startTime === t
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
-                    : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'"
-                  class="px-3.5 h-8 rounded-full border text-xs font-bold transition-all duration-200">
-                  {{ fmt12(t) }}
-                </button>
-              }
+        <!-- ② الموعد -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+          <div class="flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+              <lucide-icon [img]="ClockIcon" class="w-4 h-4"></lucide-icon>
+            </span>
+            <h4 class="text-sm font-extrabold text-slate-800">الموعد</h4>
+          </div>
+
+          <!-- التاريخ -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+              تاريخ الحجز <span class="text-rose-500">*</span>
+            </label>
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="flex-1 min-w-[11rem]">
+                <p-datepicker formControlName="bookingDate"
+                              dateFormat="yy/mm/dd"
+                              placeholder="yyyy/mm/dd"
+                              [minDate]="isEdit ? undefined : today"
+                              [showIcon]="true"
+                              appendTo="body"
+                              [fluid]="true"
+                              [class.ng-invalid]="showError('bookingDate')"
+                              [class.ng-dirty]="showError('bookingDate')" />
+              </div>
+
+              <button type="button" (click)="setDateOffset(0)"
+                [class]="isDateOffset(0)
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
+                  : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'"
+                class="px-4 h-10 rounded-xl border text-xs font-bold transition-all duration-200">
+                اليوم
+              </button>
+              <button type="button" (click)="setDateOffset(1)"
+                [class]="isDateOffset(1)
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
+                  : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'"
+                class="px-4 h-10 rounded-xl border text-xs font-bold transition-all duration-200">
+                بكرة
+              </button>
+            </div>
+            @if (showError('bookingDate')) {
+              <p class="text-xs text-rose-600 mt-1">{{ errorOf('bookingDate') }}</p>
+            }
+          </div>
+
+          <!-- الوقت -->
+          <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  وقت البداية <span class="text-rose-500">*</span>
+                </label>
+                <p-datepicker formControlName="startTime"
+                              [timeOnly]="true"
+                              hourFormat="12"
+                              [stepMinute]="15"
+                              [showIcon]="true"
+                              appendTo="body"
+                              [fluid]="true"
+                              [class.ng-invalid]="showError('startTime')"
+                              [class.ng-dirty]="showError('startTime')" />
+                @if (showError('startTime')) {
+                  <p class="text-xs text-rose-600 mt-1">{{ errorOf('startTime') }}</p>
+                }
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  وقت النهاية <span class="font-normal text-slate-400">(اختياري)</span>
+                </label>
+                <p-datepicker formControlName="expectedEndTime"
+                              [timeOnly]="true"
+                              hourFormat="12"
+                              [stepMinute]="15"
+                              [showIcon]="true"
+                              [showClear]="true"
+                              appendTo="body"
+                              [fluid]="true"
+                              [class.ng-invalid]="form.hasError('endBeforeStart')"
+                              [class.ng-dirty]="form.hasError('endBeforeStart')" />
+                @if (form.hasError('endBeforeStart')) {
+                  <p class="text-xs text-rose-600 mt-1">لازم يكون بعد وقت البداية</p>
+                }
+              </div>
+            </div>
+
+            <!-- بداية سريعة -->
+            <div class="space-y-2">
+              <span class="block text-[11px] font-bold text-slate-500">بداية سريعة</span>
+              <div class="flex flex-wrap gap-2">
+                @for (m of startSlots; track m) {
+                  <button type="button" (click)="setStart(m)"
+                    [class]="isStartSlot(m)
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
+                      : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'"
+                    class="px-3.5 h-8 rounded-full border text-xs font-bold transition-all duration-200">
+                    {{ fmt12(m) }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- مدة سريعة -->
+            <div class="space-y-2">
+              <span class="block text-[11px] font-bold text-slate-500">مدة سريعة</span>
+              <div class="flex flex-wrap gap-2">
+                @for (d of durations; track d.hours) {
+                  <button type="button" (click)="setDuration(d.hours)"
+                    [disabled]="isDurationDisabled(d.hours)"
+                    [class]="isDuration(d.hours)
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
+                      : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'"
+                    class="px-3.5 h-8 rounded-full border text-xs font-bold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-slate-200 disabled:hover:text-slate-600">
+                    {{ d.label }}
+                  </button>
+                }
+              </div>
             </div>
           </div>
 
-          <!-- مدة سريعة -->
-          <div class="space-y-2">
-            <span class="block text-[11px] font-bold text-slate-500">مدة سريعة</span>
-            <div class="flex flex-wrap gap-2">
-              @for (d of durations; track d.hours) {
-                <button type="button" (click)="setDuration(d.hours)"
-                  [disabled]="isDurationDisabled(d.hours)"
-                  [class]="isDuration(d.hours)
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
-                    : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'"
-                  class="px-3.5 h-8 rounded-full border text-xs font-bold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-slate-200 disabled:hover:text-slate-600">
-                  {{ d.label }}
-                </button>
-              }
+          <!-- ملخص الحجز -->
+          @if (summary(); as s) {
+            <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-blue-50/70 border border-blue-100 text-blue-800 fade-up">
+              <lucide-icon [img]="ClockIcon" class="w-4 h-4 shrink-0 text-blue-500"></lucide-icon>
+              <span class="text-sm font-semibold">{{ s }}</span>
             </div>
-          </div>
-        </div>
-
-        <!-- عدد الأشخاص -->
-        <div>
-          <label for="numberOfPeople" class="block text-xs font-bold text-slate-700 mb-1.5">عدد الأشخاص</label>
-          <div class="inline-flex items-center gap-1 p-1 bg-slate-50 border border-slate-200 rounded-xl"
-               [class.border-rose-400]="showError('numberOfPeople')">
-            <button type="button" (click)="changePeople(-1)" aria-label="تقليل"
-              [disabled]="(form.value.numberOfPeople ?? 1) <= 1"
-              class="w-9 h-9 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none">
-              <lucide-icon [img]="MinusIcon" class="w-4 h-4"></lucide-icon>
-            </button>
-            <input id="numberOfPeople" type="number" min="1" formControlName="numberOfPeople" dir="ltr"
-              class="w-14 h-9 text-center bg-transparent text-sm font-bold text-slate-900 focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
-            <button type="button" (click)="changePeople(1)" aria-label="زيادة"
-              class="w-9 h-9 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-200">
-              <lucide-icon [img]="PlusIcon" class="w-4 h-4"></lucide-icon>
-            </button>
-          </div>
-          @if (showError('numberOfPeople')) {
-            <p class="text-xs text-rose-600 mt-1">{{ errorOf('numberOfPeople') }}</p>
           }
-        </div>
+        </section>
 
-        <!-- ملاحظات -->
-        <div>
-          <label for="notes" class="block text-xs font-bold text-slate-700 mb-1.5">
-            ملاحظات <span class="font-normal text-slate-400">(اختياري)</span>
-          </label>
-          <textarea id="notes" rows="3" formControlName="notes"
-            placeholder="أي تفاصيل إضافية عن الحجز..."
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"></textarea>
-        </div>
+        <!-- ③ الأشخاص والملاحظات -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-5">
+          <div>
+            <div class="flex items-center gap-2.5 mb-3">
+              <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+                <lucide-icon [img]="PeopleIcon" class="w-4 h-4"></lucide-icon>
+              </span>
+              <h4 class="text-sm font-extrabold text-slate-800">عدد الأشخاص <span class="text-rose-500">*</span></h4>
+            </div>
 
-        <!-- الأزرار -->
-        <div class="flex items-center justify-end gap-3 pt-5 border-t border-slate-100">
+            <div class="inline-flex items-center gap-1 p-1 bg-slate-50 border rounded-xl"
+                 [class]="showError('numberOfPeople') ? 'border-rose-400' : 'border-slate-200'">
+              <button type="button" (click)="changePeople(-1)" aria-label="تقليل"
+                [disabled]="(form.controls.numberOfPeople.value ?? 1) <= 1"
+                class="w-9 h-9 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none">
+                <lucide-icon [img]="MinusIcon" class="w-4 h-4"></lucide-icon>
+              </button>
+
+              <p-inputNumber formControlName="numberOfPeople" [min]="1" [useGrouping]="false"
+                             inputStyleClass="!w-16 !h-9 !text-center !font-bold !border-0 !bg-transparent !shadow-none" />
+
+              <button type="button" (click)="changePeople(1)" aria-label="زيادة"
+                class="w-9 h-9 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-200">
+                <lucide-icon [img]="PlusIcon" class="w-4 h-4"></lucide-icon>
+              </button>
+            </div>
+            @if (showError('numberOfPeople')) {
+              <p class="text-xs text-rose-600 mt-1">{{ errorOf('numberOfPeople') }}</p>
+            }
+          </div>
+
+          <div>
+            <div class="flex items-center gap-2.5 mb-3">
+              <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center">
+                <lucide-icon [img]="NoteIcon" class="w-4 h-4"></lucide-icon>
+              </span>
+              <h4 class="text-sm font-extrabold text-slate-800">ملاحظات <span class="font-normal text-slate-400">(اختياري)</span></h4>
+            </div>
+            <textarea pTextarea formControlName="notes" rows="3"
+                      placeholder="أي تفاصيل إضافية عن الحجز..."
+                      class="w-full !rounded-xl resize-none"></textarea>
+          </div>
+        </section>
+      </div>
+
+      <!-- Footer -->
+      <div class="shrink-0 flex items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
+        <p class="hidden sm:block text-[11px] text-slate-400"><span class="text-rose-500">*</span> حقول مطلوبة</p>
+        <div class="flex items-center gap-3 ms-auto">
           <button type="button" (click)="close()" [disabled]="isSubmitting()"
             class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
             إلغاء
@@ -223,7 +291,7 @@
             {{ isSubmitting() ? 'جاري الحفظ...' : (isEdit ? 'حفظ التعديلات' : 'حفظ الحجز') }}
           </button>
         </div>
-      </form>
-    </div>
+      </div>
+    </form>
   </div>
 </div>
