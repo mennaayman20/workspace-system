@@ -78,37 +78,12 @@
     </app-category-form-modal>
   }
 
-  <!-- مودال تأكيد الحذف -->
-  @if (pendingDelete(); as d) {
-    <div class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
-         (click)="cancelDelete()">
-      <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl" dir="rtl"
-           role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
+<app-confirm-dialog
+  [open]="!!pendingDelete()"
+  title="حذف التصنيف"
+  [itemName]="pendingDelete() ? displayName(pendingDelete()!) : ''"
+   [loading]="isDeleting()"
 
-        <div class="flex items-start gap-3">
-          <div class="w-11 h-11 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
-            <lucide-icon [img]="TrashIcon" class="w-5 h-5"></lucide-icon>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-slate-900">حذف التصنيف</h3>
-            <p class="text-sm text-slate-500 mt-1.5 leading-relaxed">
-              هل أنت متأكد من حذف
-              <b class="text-slate-800">"{{ displayName(d) }}"</b>؟
-            </p>
-          </div>
-        </div>
-
-        <div class="flex gap-3 mt-6">
-          <button type="button" (click)="confirmDelete()" [disabled]="isDeleting()"
-                  class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-colors">
-            {{ isDeleting() ? 'جاري الحذف...' : 'نعم، حذف' }}
-          </button>
-          <button type="button" (click)="cancelDelete()" [disabled]="isDeleting()"
-                  class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-60 rounded-xl text-sm font-bold text-slate-700 transition-colors">
-            إلغاء
-          </button>
-        </div>
-      </div>
-    </div>
-  }
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()" />
 </div>

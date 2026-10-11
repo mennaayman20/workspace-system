@@ -20,6 +20,7 @@ import {
   TableActionEvent,
   TableColumn
 } from '../../shared/components/data-table';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog';
 
 interface StatCard {
   value: WorkspaceStatus | 'all';
@@ -42,7 +43,8 @@ interface StatCard {
     CreateWorkspaceModalComponent,
     DataTableComponent,
     CellTemplateDirective,
-    RowActionsDirective
+    RowActionsDirective,
+    ConfirmDialogComponent
   ],
   templateUrl: './workspaces.component.html'
 })

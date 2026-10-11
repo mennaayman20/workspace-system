@@ -142,47 +142,13 @@
       (closeModal)="closeForm()">
     </app-package-form-modal>
   }
+<app-confirm-dialog
+  [open]="!!pendingDelete()"
+  title="حذف الباقه"
+  [itemName]="pendingDelete() ? displayName(pendingDelete()!) : ''"
+  [loading]="busyId() !== null && busyId() === pendingDelete()?.id"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()" />
 
-  <!-- مودال تأكيد الحذف -->
-  @if (pendingDelete(); as d) {
-    <div class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
-         (click)="cancelDelete()">
-      <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl" [dir]="isAr() ? 'rtl' : 'ltr'"
-           role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
 
-        <div class="flex items-start gap-3">
-          <div class="w-11 h-11 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
-            <lucide-icon [img]="TrashIcon" class="w-5 h-5"></lucide-icon>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-slate-900">
-              {{ isAr() ? 'حذف الباقة' : 'Delete Package' }}
-            </h3>
-            <p class="text-sm text-slate-500 mt-1.5 leading-relaxed">
-              @if (isAr()) {
-                هل أنت متأكد من حذف <b class="text-slate-800">"{{ displayName(d) }}"
-                  
-                </b>
-                <!-- ؟ يمكنك استعادتها لاحقاً. -->
-              } @else {
-                Are you sure you want to delete <b class="text-slate-800">"{{ displayName(d) }}"</b>? You can restore it later.
-              }
-            </p>
-          </div>
-        </div>
-
-        <div class="flex gap-3 mt-6">
-          <button type="button" (click)="confirmDelete()" [disabled]="busyId() === d.id"
-                  class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-colors">
-            @if (busyId() === d.id) { {{ isAr() ? 'جاري الحذف...' : 'Deleting...' }} }
-            @else { {{ isAr() ? 'نعم، حذف' : 'Yes, Delete' }} }
-          </button>
-          <button type="button" (click)="cancelDelete()" [disabled]="busyId() === d.id"
-                  class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-60 rounded-xl text-sm font-bold text-slate-700 transition-colors">
-            {{ isAr() ? 'إلغاء' : 'Cancel' }}
-          </button>
-        </div>
-      </div>
-    </div>
-  }
 </div>

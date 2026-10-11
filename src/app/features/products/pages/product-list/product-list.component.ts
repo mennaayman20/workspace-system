@@ -17,13 +17,14 @@ import {
   TableActionEvent,
   TableColumn,
 } from '../../../../shared/components/data-table';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
   imports: [
     CommonModule, LucideAngularModule, RouterLink, RouterLinkActive,
-    ProductFormModalComponent, DataTableComponent, CellTemplateDirective,
+    ProductFormModalComponent, DataTableComponent, CellTemplateDirective,ConfirmDialogComponent
   ],
   templateUrl: './product-list.component.html'
 })

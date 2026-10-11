@@ -12,6 +12,7 @@ import { PortalDirective } from '../../../shared/directives/portal.directive';
 import {
   DataTableComponent, TableAction, TableActionEvent, TableColumn,
 } from '../../../shared/components/data-table';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog';
 
 @Component({
   selector: 'app-service-list',
@@ -19,7 +20,7 @@ import {
   imports: [
     CommonModule, ReactiveFormsModule, LucideAngularModule,
     InputTextModule, TextareaModule, InputNumberModule, PortalDirective,
-    DataTableComponent,
+    DataTableComponent,ConfirmDialogComponent
   ],
   templateUrl: './service-list.component.html',
 })

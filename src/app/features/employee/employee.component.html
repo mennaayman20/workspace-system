@@ -293,7 +293,7 @@
   }
 
   <!-- تأكيد الحذف -->
-  @if (pendingDelete(); as d) {
+  <!-- @if (pendingDelete(); as d) {
     <div appPortal dir="rtl"
          class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
          (click)="cancelDelete()">
@@ -325,6 +325,16 @@
         </div>
       </div>
     </div>
-  }
+  } -->
+
+
+<app-confirm-dialog
+  [open]="!!pendingDelete()"
+  title="حذف الموظف"
+  [itemName]="pendingDelete()?.fullName ?? ''"
+  [loading]="isDeleting()"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()" />
+
 
 </div>

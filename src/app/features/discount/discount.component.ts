@@ -7,13 +7,13 @@ import { LucideAngularModule, Percent, Plus, Pencil, Trash2, RotateCcw, Package 
 import { DiscountService } from './discount.service';
 import { Discount, DISCOUNT_TYPE_LABELS } from './Idiscount';
 import { DiscountFormModalComponent } from './discount-form-modal/discount-form-modal';
-
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog';
 @Component({
   selector: 'app-discounts',
   standalone: true,
   imports: [
     CommonModule, LucideAngularModule, RouterLink, RouterLinkActive,
-    DiscountFormModalComponent,
+    DiscountFormModalComponent,ConfirmDialogComponent
   ],
   templateUrl: './discount.component.html',
 })

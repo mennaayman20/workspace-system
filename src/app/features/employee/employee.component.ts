@@ -34,7 +34,7 @@ import {
   TableActionEvent,
   TableColumn
 } from '../../shared/components/data-table';
-
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog';
 type StatusFilter = 'all' | EmployeeStatus;
 
 interface StatCard {
@@ -55,11 +55,14 @@ interface StatCard {
     CommonModule,
     ReactiveFormsModule,
     LucideAngularModule,
-    PortalDirective,
+  
     DataTableComponent,
     CellTemplateDirective,
     RowActionsDirective,
-    InputTextModule
+    InputTextModule,
+    ConfirmDialogComponent
+
+    
   ],
   templateUrl: './employee.component.html',
   styleUrls: ['./employee.component.scss']

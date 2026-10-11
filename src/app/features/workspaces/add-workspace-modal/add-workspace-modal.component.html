@@ -239,4 +239,23 @@
 
       <!-- Footer -->
       <div class="shrink-0 flex items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
-        <p class="hidden sm:block text-[11px] text-slate-400"><span class="text-rose-500">*</span> حقول
+        <p class="hidden sm:block text-[11px] text-slate-400">
+          <span class="text-rose-500">*</span> الحقول المطلوبة ملزمة
+        </p>
+        
+        <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <button type="button" (click)="onClose()" [disabled]="isSubmitting()"
+            class="px-5 h-11 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 disabled:opacity-50 transition-colors">
+            إلغاء
+          </button>
+          
+          <button type="submit" [disabled]="isSubmitting()"
+            class="px-6 h-11 rounded-xl bg-blue-600 text-white font-bold text-sm shadow-lg shadow-blue-500/25 hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center justify-center min-w-[7rem]">
+            @if (isSubmitting()) {
+              <span class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            } @else {
+              {{ isEditMode ? 'حفظ التعديلات' : 'حفظ المساحة' }}
+            }
+          </button>
+        </div>
+      </div>

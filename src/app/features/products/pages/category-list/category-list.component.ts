@@ -15,13 +15,14 @@ import {
   TableActionEvent,
   TableColumn,
 } from '../../../../shared/components/data-table';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog';
 
 @Component({
   selector: 'app-category-list',
   standalone: true,
   imports: [
     CommonModule, LucideAngularModule, RouterLink, RouterLinkActive,
-    CategoryFormModalComponent, DataTableComponent,
+    CategoryFormModalComponent, DataTableComponent,ConfirmDialogComponent
   ],
   templateUrl: './category-list.component.html'
 })
