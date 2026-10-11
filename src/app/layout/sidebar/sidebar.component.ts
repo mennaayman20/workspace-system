@@ -1,65 +1,80 @@
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-// import { LanguageService } from '../../core/services/lang.service';
-// استيراد وحدات Angular Material
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatRippleModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
-// import { TranslatePipe } from '@ngx-translate/core';
-// استيراد الـ Shared Components الخاصة بك
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
-import { ButtonComponent } from '../../shared/components/button/button.component';
 
 interface NavItem {
   label: string;
   route: string;
-  icon: string; // أسماء Material Icons (مثل: 'dashboard', 'meeting_room')
-  badge?: {
-    text: string;
-    variant: 'slate' | 'amber';
-  };
+  icon: string; // Material Icons
+  badge?: { text: string; variant: 'slate' | 'amber' };
 }
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
   imports: [
-    CommonModule, 
-    RouterLink, 
-    RouterLinkActive, 
-    BadgeComponent, 
-  
-    // إضافة وحدات الماتريال للـ imports
+    CommonModule,
+    RouterLink,
+    RouterLinkActive,
+    BadgeComponent,
     MatIconModule,
     MatRippleModule,
     MatButtonModule,
-
- ],
-  templateUrl: './sidebar.component.html' ,
-  styleUrl:'./sidebar.component.scss'
+  ],
+  templateUrl: './sidebar.component.html',
+  styleUrl: './sidebar.component.scss',
 })
 export class SidebarComponent {
-  // public langService = inject(LanguageService);
-  navItems: NavItem[] = [
-    // { label: 'لوحة التحكّم', route: 'control-panel', icon: 'dashboard' },
-    { label: 'مساحات العمل', route: 'Workspaces', icon: 'meeting_room' },
+  private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
-        { label: 'الجلسات الحيه', route: 'live-sessions', icon: 'dashboard' },
-        { label: ' الحجوزات و المواعيد', route: 'bookings', icon: 'dashboard' },
+  // الروابط اللي بتفضل برّه
+  mainItems: NavItem[] = [
+    { label: 'مساحات العمل', route: '/Workspaces', icon: 'meeting_room' },
+    { label: 'الجلسات الحيّة', route: '/live-sessions', icon: 'timer' },
+        { label: 'الحجوزات والمواعيد', route: '/bookings', icon: 'event' },
 
- { label: 'ادارة العملاء ', route: 'customers', icon: 'person_add' },
-   
-    { label: 'خطط التسعير ', route: '/pricing', icon: 'payments' },
-    { label: '  ادارة الموظفين', route: 'employee', icon: 'dashboard' },
-        { label: '  ادارة الخصومات و الباقات', route: 'discounts', icon: 'dashboard' },
-
-    { label: ' POS ', route: 'products', icon: 'dashboard' },
-{ label: 'ادارة الخدمات', route: '/services', icon: 'ConciergeBell' },
-    // { label: 'الخزينة والتقارير', route: 'payments', icon: 'account_balance_wallet' },
   ];
 
-  onContactSupport() {
-    // توجيه لخدمة الدعم الفني
+  // الروابط اللي جوه الإعدادات
+  settingsItems: NavItem[] = [
+    { label: 'إدارة العملاء', route: '/customers', icon: 'group' },
+ { label: 'إدارة الموظفين', route: '/employee', icon: 'badge' },
+
+    { label: 'خطط التسعير', route: '/pricing', icon: 'payments' },
+    { label: 'إدارة الخصومات والباقات', route: '/discounts', icon: 'percent' },
+    { label: 'POS', route: '/products', icon: 'point_of_sale' },
+    { label: 'إدارة الخدمات', route: '/services', icon: 'room_service' },
+  ];
+
+  // لازم تتعرف بعد settingsItems
+  settingsOpen = signal(this.isSettingsRoute(this.router.url));
+
+  constructor() {
+    // لو المستخدم راح لصفحة تابعة للإعدادات (من أي مكان) الجروب يتفتح لوحده
+    this.router.events
+      .pipe(
+        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((e) => {
+        if (this.isSettingsRoute(e.urlAfterRedirects)) this.settingsOpen.set(true);
+      });
   }
+
+  toggleSettings() {
+    this.settingsOpen.update((v) => !v);
+  }
+
+  private isSettingsRoute(url: string): boolean {
+    return this.settingsItems.some((i) => url.startsWith(i.route));
+  }
+
+  onContactSupport() {}
 }
