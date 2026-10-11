@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, input, output, DestroyRef } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, input, output, DestroyRef } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -10,10 +10,17 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, switchMap, tap } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
+import {
+  Building2, LayoutGrid, LucideAngularModule, MapPin, Minus, Plus, Users, FileText, X,
+} from 'lucide-angular';
 
 import { WorkspaceService } from '../../../core/services/workspace.service';
 import { CreateWorkspaceCommand, Workspace, WorkspaceType } from '../../../core/interfaces/Iworkspace';
-import { Building2, ChevronDown, LucideAngularModule, Minus, Plus, X } from 'lucide-angular';
 
 // ---------- Custom validators ----------
 /** Rejects values that are only whitespace (Validators.required accepts "   "). */
@@ -27,19 +34,27 @@ const integer: ValidatorFn = (c: AbstractControl): ValidationErrors | null =>
 @Component({
   selector: 'app-add-workspace-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, LucideAngularModule],
+  imports: [
+    ReactiveFormsModule, LucideAngularModule,
+    InputTextModule, TextareaModule, InputNumberModule, SelectModule,
+  ],
   templateUrl: './add-workspace-modal.component.html',
 })
 export class CreateWorkspaceModalComponent implements OnInit {
   readonly NEW_TYPE_VALUE = '__new__';
-// Icons
-readonly BuildingIcon = Building2;
-readonly ChevronIcon = ChevronDown;
-readonly MinusIcon = Minus;
-readonly PlusIcon = Plus;
-readonly CloseIcon = X;
 
-readonly capacityPresets = [2, 4, 8, 12, 20];
+  // Icons
+  readonly BuildingIcon = Building2;
+  readonly TypeIcon = LayoutGrid;
+  readonly PinIcon = MapPin;
+  readonly UsersIcon = Users;
+  readonly TextIcon = FileText;
+  readonly MinusIcon = Minus;
+  readonly PlusIcon = Plus;
+  readonly CloseIcon = X;
+
+  readonly capacityPresets = [2, 4, 8, 12, 20];
+
   workspaceTypes = input<WorkspaceType[]>([]);
   workspaceToEdit = input<Workspace | null>(null);
 
@@ -49,10 +64,17 @@ readonly capacityPresets = [2, 4, 8, 12, 20];
   private readonly fb = inject(FormBuilder);
   private readonly workspaceService = inject(WorkspaceService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly toastr = inject(ToastrService);
 
   isSubmitting = signal(false);
   errorMessage = signal<string | null>(null);
   addingNewType = signal(false);
+
+  /** خيارات الدروب داون: الأنواع + "إضافة نوع جديد" في الآخر */
+  readonly typeOptions = computed(() => [
+    ...this.workspaceTypes().map((t) => ({ label: t.name, value: t.id as number | string, isNew: false })),
+    { label: '+ إضافة نوع جديد', value: this.NEW_TYPE_VALUE as number | string, isNew: true },
+  ]);
 
   /** If the type was created but the workspace call failed, reuse it on retry (no duplicate types). */
   private createdType: { name: string; id: number } | null = null;
@@ -195,12 +217,15 @@ readonly capacityPresets = [2, 4, 8, 12, 20];
       .subscribe({
         next: () => {
           this.isSubmitting.set(false);
+          this.toastr.success(editData ? 'تم تعديل المساحة بنجاح' : 'تمت إضافة المساحة بنجاح');
           this.saved.emit();
           this.closeModal.emit();
         },
         error: (err: unknown) => {
+          const msg = this.resolveError(err, !!editData);
           this.isSubmitting.set(false);
-          this.errorMessage.set(this.resolveError(err, !!editData));
+          this.errorMessage.set(msg);
+          this.toastr.error(msg);
         }
       });
   }
@@ -221,18 +246,15 @@ readonly capacityPresets = [2, 4, 8, 12, 20];
     this.closeModal.emit();
   }
 
+  // ---------- Capacity ----------
+  changeCapacity(delta: number): void {
+    const current = Number(this.form.controls.capacity.value) || 1;
+    this.setCapacity(current + delta);
+  }
 
-
-
-
-changeCapacity(delta: number): void {
-  const current = Number(this.form.controls.capacity.value) || 1;
-  this.setCapacity(current + delta);
-}
-
-setCapacity(value: number): void {
-  const ctrl = this.form.controls.capacity;
-  ctrl.setValue(Math.min(1000, Math.max(1, value)));
-  ctrl.markAsDirty();
-}
+  setCapacity(value: number): void {
+    const ctrl = this.form.controls.capacity;
+    ctrl.setValue(Math.min(1000, Math.max(1, value)));
+    ctrl.markAsDirty();
+  }
 }

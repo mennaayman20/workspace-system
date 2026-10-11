@@ -9,15 +9,6 @@
 
 <div dir="rtl" class="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
 
-  <!-- Toast -->
-  @if (toast(); as t) {
-    <div role="status" aria-live="polite"
-      class="fixed top-4 left-1/2 -translate-x-1/2 z-[60] px-5 py-3 rounded-xl text-sm font-bold shadow-lg fade-up"
-      [class]="t.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'">
-      {{ t.text }}
-    </div>
-  }
-
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-up">
     <div class="flex items-center gap-4">
@@ -37,20 +28,6 @@
     </button>
   </div>
 
-  <!-- Loading skeleton -->
-  @if (isLoading()) {
-    <div class="space-y-4" aria-busy="true">
-      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        @for (i of [1, 2, 3, 4, 5]; track i) {
-          <div class="h-24 rounded-2xl bg-slate-100 animate-pulse"></div>
-        }
-      </div>
-      @for (i of [1, 2, 3, 4]; track i) {
-        <div class="h-16 rounded-2xl bg-slate-100 animate-pulse"></div>
-      }
-    </div>
-  }
-
   <!-- Error -->
   @if (errorMessage() && !isLoading()) {
     <div role="alert" class="p-5 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-2xl flex items-center justify-between gap-3 fade-up">
@@ -60,344 +37,292 @@
         إعادة المحاولة
       </button>
     </div>
-  }
-
-  @if (!isLoading() && !errorMessage()) {
+  } @else {
 
     <!-- Stat cards (بتشتغل كفلاتر سريعة) -->
-    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-      <button type="button" (click)="onFilterStatus('all')"
-        [class]="statusFilter() === 'all' ? 'ring-2 ring-blue-500 bg-blue-50/60 border-transparent' : 'bg-white border-slate-200 hover:border-slate-300'"
-        class="fade-up text-right p-4 sm:p-5 rounded-2xl border shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-        <div class="flex items-center gap-2 text-sm font-semibold text-slate-500">
-          <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> الكل
-        </div>
-        <div class="mt-2 text-3xl font-extrabold text-slate-900">{{ statusCounts()['all'] }}</div>
-      </button>
-
-      @for (s of statusOptions; track s.value; let i = $index) {
-        <button type="button" (click)="onFilterStatus(s.value)"
-          [style.animation-delay.ms]="(i + 1) * 50"
-          [class]="statusFilter() === s.value ? 'ring-2 ring-blue-500 bg-blue-50/60 border-transparent' : 'bg-white border-slate-200 hover:border-slate-300'"
-          class="fade-up text-right p-4 sm:p-5 rounded-2xl border shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-          <div class="flex items-center gap-2 text-sm font-semibold text-slate-500">
-            <span class="w-2.5 h-2.5 rounded-full" [class]="statusDotClass(s.value)"></span>
-            {{ s.label }}
-          </div>
-          <div class="mt-2 text-3xl font-extrabold text-slate-900">{{ statusCounts()[s.value] }}</div>
-        </button>
-      }
-    </div>
-
-    <!-- Search -->
-    <div class="bg-white p-2.5 sm:p-3 rounded-xl border border-slate-200/80 shadow-xs fade-up">
-      <div class="relative max-w-sm">
-        <lucide-icon [img]="SearchIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 right-3 pointer-events-none"></lucide-icon>
-        <input
-          type="search"
-          [value]="searchTerm()"
-          (input)="onSearch($any($event.target).value)"
-          placeholder="ابحث بالاسم أو البريد أو الهاتف..."
-          class="w-full pr-9 pl-3 py-2 bg-slate-50 border border-slate-200/90 rounded-lg text-xs placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-      </div>
-    </div>
-
-    <!-- Empty states -->
-    @if (filteredEmployees().length === 0) {
-      <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center space-y-4 fade-up">
-        <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
-          <lucide-icon [img]="UsersIcon" class="w-8 h-8"></lucide-icon>
-        </div>
-        @if (employees().length === 0) {
-          <p class="text-base font-bold text-slate-800">لا يوجد موظفين مضافين حتى الآن</p>
-          <button type="button" (click)="openCreateModal()"
-            class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors">
-            + أضف أول موظف
-          </button>
-        } @else {
-          <p class="text-base font-bold text-slate-800">لا توجد نتائج مطابقة للبحث</p>
-          <button type="button" (click)="resetFilters()"
-            class="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600 transition-colors">
-            مسح الفلاتر
-          </button>
+    @if (isLoading()) {
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4" aria-busy="true">
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <div class="h-24 rounded-2xl bg-slate-100 animate-pulse"></div>
         }
       </div>
     } @else {
-
-      <!-- Desktop table -->
-      <div class="hidden md:block bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs fade-up">
-        <div class="overflow-x-auto">
-          <table class="w-full text-right border-collapse min-w-[1000px]">
-            <thead>
-              <tr class="bg-slate-50/80 text-xs font-bold text-slate-500 tracking-wide">
-                <th scope="col" class="py-4 px-6">الموظف</th>
-                <th scope="col" class="py-4 px-6">البريد الإلكتروني</th>
-                <th scope="col" class="py-4 px-6">رقم الهاتف</th>
-                <th scope="col" class="py-4 px-6">مكان العمل</th>
-                <th scope="col" class="py-4 px-6">الحالة</th>
-                <th scope="col" class="py-4 px-6 text-center">الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-sm text-slate-600">
-              @for (emp of pagedEmployees(); track emp.id; let i = $index) {
-                <tr class="fade-up group hover:bg-blue-50/40 transition-colors duration-200"
-                    [style.animation-delay.ms]="i * 40"
-                    [class.opacity-50]="isBusy(emp.id)" [class.pointer-events-none]="isBusy(emp.id)">
-
-                  <td class="py-4 px-6">
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 font-extrabold flex items-center justify-center text-base">
-                        {{ emp.fullName.charAt(0) }}
-                      </div>
-                      <span class="font-bold text-slate-900 text-[15px]">{{ emp.fullName }}</span>
-                    </div>
-                  </td>
-
-                  <td class="py-4 px-6 font-mono text-[13px] text-slate-600">{{ emp.email || '-' }}</td>
-
-                  <td class="py-4 px-6 font-mono text-[13px] text-slate-600" dir="ltr">{{ emp.mobileNumber || '-' }}</td>
-
-                  <!-- مكان العمل -->
-                  <td class="py-4 px-6">
-                    <select
-                      [disabled]="isBusy(emp.id)"
-                      (change)="onWorkspaceChange(emp, $event)"
-                      aria-label="تغيير مكان العمل"
-                      class="h-10 w-full max-w-[180px] bg-white border border-slate-200 rounded-xl px-3 text-sm text-slate-700 hover:border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all">
-                      <option value="" disabled [selected]="emp.assignedWorkspaceId == null">غير محدد</option>
-                      @for (w of workspaces(); track w.id) {
-                        <option [value]="w.id" [selected]="w.id === emp.assignedWorkspaceId">{{ w.name }}</option>
-                      }
-                    </select>
-                  </td>
-
-                  <td class="py-4 px-6">
-                    <span [class]="getStatusBadgeClass(emp.status)"
-                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset">
-                      <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-                      {{ statusLabel(emp.status) }}
-                    </span>
-                  </td>
-
-                  <td class="py-4 px-6">
-                    <div class="flex items-center justify-center gap-2">
-                      <select
-                        [disabled]="isBusy(emp.id)"
-                        (change)="onStatusChange(emp, $event)"
-                        aria-label="تغيير الحالة"
-                        class="h-10 bg-white border border-slate-200 rounded-xl px-3 text-sm text-slate-700 hover:border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all">
-                        @for (s of statusOptions; track s.value) {
-                          <option [value]="s.value" [selected]="s.value === emp.status">{{ s.label }}</option>
-                        }
-                      </select>
-
-                      <button type="button" (click)="openEditModal(emp)" [disabled]="isBusy(emp.id)"
-                        title="تعديل" aria-label="تعديل"
-                        class="w-10 h-10 rounded-xl flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white hover:scale-105 transition-all duration-200">
-                        <lucide-icon [img]="EditIcon" class="w-4 h-4"></lucide-icon>
-                      </button>
-
-                      @if (isRemoved(emp)) {
-                        <button type="button" (click)="onRestore(emp)" [disabled]="isBusy(emp.id)"
-                          title="استعادة" aria-label="استعادة"
-                          class="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-600 bg-emerald-50 hover:bg-emerald-600 hover:text-white hover:scale-105 transition-all duration-200">
-                          <lucide-icon [img]="RotateCcwIcon" class="w-4 h-4"></lucide-icon>
-                        </button>
-                      } @else {
-                        <button type="button" (click)="onDelete(emp)" [disabled]="isBusy(emp.id)"
-                          title="حذف" aria-label="حذف"
-                          class="w-10 h-10 rounded-xl flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white hover:scale-105 transition-all duration-200">
-                          <lucide-icon [img]="TrashIcon" class="w-4 h-4"></lucide-icon>
-                        </button>
-                      }
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Mobile cards -->
-      <div class="block md:hidden space-y-4">
-        @for (emp of pagedEmployees(); track emp.id; let i = $index) {
-          <div class="fade-up bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4"
-               [style.animation-delay.ms]="i * 50" [class.opacity-50]="isBusy(emp.id)">
-            <div class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-3 min-w-0">
-                <div class="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 font-extrabold flex items-center justify-center text-lg">
-                  {{ emp.fullName.charAt(0) }}
-                </div>
-                <div class="min-w-0">
-                  <h3 class="font-bold text-slate-900 text-base truncate">{{ emp.fullName }}</h3>
-                  <span class="text-xs text-slate-500 font-mono block truncate">{{ emp.email || '-' }}</span>
-                </div>
-              </div>
-              <span [class]="getStatusBadgeClass(emp.status)"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset shrink-0">
-                <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-                {{ statusLabel(emp.status) }}
-              </span>
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 pb-5">
+        @for (c of statCards; track c.value; let i = $index) {
+          <button type="button" (click)="onFilterStatus(c.value)"
+            [attr.aria-pressed]="statusFilter() === c.value"
+            [style.animation-delay.ms]="i * 50"
+            [class]="c.border + ' ' + c.tint + (statusFilter() === c.value ? ' ring-2 ring-offset-1 ' + c.ring : '')"
+            class="fade-up flex items-center justify-between gap-3 text-start p-4 sm:p-5 rounded-2xl border border-slate-200 border-s-4 bg-gradient-to-br via-white to-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+            <div class="min-w-0">
+              <div class="text-sm font-semibold text-slate-600 leading-snug">{{ c.label }}</div>
+              <div class="mt-1 text-3xl font-extrabold text-slate-800 tabular-nums">{{ statusCounts()[c.value] }}</div>
             </div>
-
-            <div class="text-sm bg-slate-50 rounded-xl p-3 flex justify-between items-center">
-              <span class="text-slate-400 text-xs">رقم الهاتف</span>
-              <span class="font-semibold text-slate-700 font-mono" dir="ltr">{{ emp.mobileNumber || '-' }}</span>
-            </div>
-
-            <div class="space-y-2">
-              <!-- مكان العمل -->
-              <select
-                [disabled]="isBusy(emp.id)"
-                (change)="onWorkspaceChange(emp, $event)"
-                aria-label="تغيير مكان العمل"
-                class="w-full h-11 bg-white border border-slate-200 rounded-xl px-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
-                <option value="" disabled [selected]="emp.assignedWorkspaceId == null">مكان العمل: غير محدد</option>
-                @for (w of workspaces(); track w.id) {
-                  <option [value]="w.id" [selected]="w.id === emp.assignedWorkspaceId">{{ w.name }}</option>
-                }
-              </select>
-
-              <!-- الحالة -->
-              <select
-                [disabled]="isBusy(emp.id)"
-                (change)="onStatusChange(emp, $event)"
-                aria-label="تغيير الحالة"
-                class="w-full h-11 bg-white border border-slate-200 rounded-xl px-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
-                @for (s of statusOptions; track s.value) {
-                  <option [value]="s.value" [selected]="s.value === emp.status">{{ s.label }}</option>
-                }
-              </select>
-
-              <div class="grid grid-cols-2 gap-2">
-                <button type="button" (click)="openEditModal(emp)" [disabled]="isBusy(emp.id)"
-                  class="h-10 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-xs font-bold transition-colors">
-                  تعديل
-                </button>
-                @if (isRemoved(emp)) {
-                  <button type="button" (click)="onRestore(emp)" [disabled]="isBusy(emp.id)"
-                    class="h-10 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-xl text-xs font-bold transition-colors">
-                    استعادة
-                  </button>
-                } @else {
-                  <button type="button" (click)="onDelete(emp)" [disabled]="isBusy(emp.id)"
-                    class="h-10 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-colors">
-                    حذف
-                  </button>
-                }
-              </div>
-            </div>
-          </div>
+            <span [class]="c.chip" class="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center">
+              <lucide-icon [img]="c.icon" class="w-5 h-5"></lucide-icon>
+            </span>
+          </button>
         }
       </div>
-
-      <!-- Pagination -->
-      @if (totalPages() > 1) {
-        <div class="flex items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200/80 shadow-xs">
-          <button type="button" (click)="goToPage(page() + 1)" [disabled]="page() >= totalPages()"
-            class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-            التالي
-          </button>
-          <span class="text-xs font-semibold text-slate-500">
-            صفحة {{ page() }} من {{ totalPages() }}
-            <span class="text-slate-400">({{ filteredEmployees().length }} موظف)</span>
-          </span>
-          <button type="button" (click)="goToPage(page() - 1)" [disabled]="page() <= 1"
-            class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-            السابق
-          </button>
-        </div>
-      }
     }
+
+    <!-- الجدول المشترك (بحث لكل عمود + ترتيب + pagination) -->
+    <app-data-table
+      [value]="filteredEmployees()"
+      [columns]="columns"
+      [actions]="actions"
+      [loading]="isLoading()"
+            [searchable]="true"
+
+      [columnFilters]="true"
+      [rowClass]="rowClass"
+      [minWidth]="'64rem'"
+      [emptyTitle]="employees().length === 0 ? 'لا يوجد موظفين مضافين حتى الآن' : 'لا توجد نتائج مطابقة'"
+      (action)="onAction($event)">
+
+      <!-- عمود الموظف: أفاتار + الاسم -->
+      <ng-template appCell="fullName" let-emp>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 font-extrabold flex items-center justify-center text-base">
+            {{ emp.fullName?.charAt(0) }}
+          </div>
+          <span class="font-bold text-slate-900 text-[15px]">{{ emp.fullName }}</span>
+        </div>
+      </ng-template>
+
+      <!-- عمود مكان العمل: تغيير مباشر -->
+      <ng-template appCell="assignedWorkspaceName" let-emp>
+        <select
+          [disabled]="isBusy(emp.id)"
+          (change)="onWorkspaceChange(emp, $event)"
+          aria-label="تغيير مكان العمل"
+          class="h-10 w-full max-w-[180px] bg-white border border-slate-200 rounded-xl px-3 text-sm text-slate-700 hover:border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all">
+          <option value="" disabled [selected]="emp.assignedWorkspaceId == null">غير محدد</option>
+          @for (w of workspaces(); track w.id) {
+            <option [value]="w.id" [selected]="w.id === emp.assignedWorkspaceId">{{ w.name }}</option>
+          }
+        </select>
+      </ng-template>
+
+      <!-- تغيير الحالة: قبل قايمة الإجراءات -->
+      <ng-template appRowActions let-emp>
+        <select
+          [disabled]="isBusy(emp.id)"
+          (change)="onStatusChange(emp, $event)"
+          (click)="$event.stopPropagation()"
+          aria-label="تغيير الحالة"
+          class="h-9 bg-white border border-slate-200 rounded-xl px-2 text-xs text-slate-700 hover:border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all">
+          @for (s of statusOptions; track s.value) {
+            <option [value]="s.value" [selected]="s.value === emp.status">{{ s.label }}</option>
+          }
+        </select>
+      </ng-template>
+
+      @if (employees().length === 0) {
+        <button tableEmptyAction type="button" (click)="openCreateModal()"
+          class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors">
+          + أضف أول موظف
+        </button>
+      }
+    </app-data-table>
   }
 
   <!-- Modal -->
   @if (isModalOpen()) {
-    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 fade-up"
+    <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-up"
          (click)="onBackdropClick($event)">
       <div role="dialog" aria-modal="true" aria-labelledby="employee-modal-title"
-           class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 space-y-6">
-        <div class="flex justify-between items-center border-b border-slate-100 pb-4">
-          <h3 id="employee-modal-title" class="text-lg font-bold text-slate-900">
-            {{ isEditMode() ? 'تعديل بيانات الموظف' : 'إضافة موظف جديد' }}
-          </h3>
-          <button type="button" (click)="closeModal()" aria-label="إغلاق"
-            class="text-slate-400 hover:text-slate-600 rounded-lg p-1">✕</button>
+           class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col overflow-hidden">
+
+        <!-- Header -->
+        <div class="px-6 sm:px-8 py-5 border-b border-slate-100 bg-gradient-to-l from-blue-50/70 to-white shrink-0">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
+                <lucide-icon [img]="UserIcon" class="w-6 h-6"></lucide-icon>
+              </div>
+              <div>
+                <h3 id="employee-modal-title" class="text-lg font-extrabold text-slate-900 leading-tight">
+                  {{ isEditMode() ? 'تعديل بيانات الموظف' : 'إضافة موظف جديد' }}
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  {{ isEditMode() ? 'عدّلي البيانات ثم احفظي التغييرات' : 'أدخلي بيانات الموظف وبيانات الدخول للنظام' }}
+                </p>
+              </div>
+            </div>
+            <button type="button" (click)="closeModal()" aria-label="إغلاق"
+                    class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white transition-colors">
+              <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
+            </button>
+          </div>
         </div>
 
-        @if (formError()) {
-          <div role="alert" class="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl font-medium">
-            {{ formError() }}
-          </div>
-        }
+        <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()" class="flex flex-col min-h-0 flex-1" novalidate>
 
-        <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()" class="space-y-4" novalidate>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label for="firstName" class="block text-xs font-bold text-slate-700 mb-1.5">الاسم الأول</label>
-              <input id="firstName" type="text" formControlName="firstName"
-                [class.border-rose-400]="showError('firstName')"
-                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-              @if (showError('firstName')) {
-                <p class="text-xs text-rose-600 mt-1">{{ errorOf('firstName') }}</p>
-              }
-            </div>
+          <!-- Body -->
+          <div class="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-5 bg-slate-50/50">
 
-            <div>
-              <label for="lastName" class="block text-xs font-bold text-slate-700 mb-1.5">اسم العائلة</label>
-              <input id="lastName" type="text" formControlName="lastName"
-                [class.border-rose-400]="showError('lastName')"
-                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-              @if (showError('lastName')) {
-                <p class="text-xs text-rose-600 mt-1">{{ errorOf('lastName') }}</p>
-              }
-            </div>
-          </div>
+            @if (formError()) {
+              <div role="alert" class="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-2xl font-medium">
+                {{ formError() }}
+              </div>
+            }
 
-          <div>
-            <label for="email" class="block text-xs font-bold text-slate-700 mb-1.5">البريد الإلكتروني</label>
-            <input id="email" type="email" formControlName="email" dir="ltr"
-              [class.border-rose-400]="showError('email')"
-              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-right focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-            @if (showError('email')) {
-              <p class="text-xs text-rose-600 mt-1">{{ errorOf('email') }}</p>
+            <!-- ① الاسم -->
+            <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+              <div class="flex items-center gap-2.5 mb-4">
+                <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                  <lucide-icon [img]="UserIcon" class="w-4 h-4"></lucide-icon>
+                </span>
+                <h4 class="text-sm font-extrabold text-slate-800">اسم الموظف</h4>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="firstName" class="block text-xs font-bold text-slate-700 mb-1.5">
+                    الاسم الأول <span class="text-rose-500">*</span>
+                  </label>
+                  <input pInputText id="firstName" formControlName="firstName"
+                         class="w-full !h-10 !rounded-xl" placeholder="مثال: أحمد"
+                         [class.ng-invalid]="showError('firstName')" [class.ng-dirty]="showError('firstName')" />
+                  @if (showError('firstName')) {
+                    <p class="text-xs text-rose-600 mt-1">{{ errorOf('firstName') }}</p>
+                  }
+                </div>
+
+                <div>
+                  <label for="lastName" class="block text-xs font-bold text-slate-700 mb-1.5">
+                    اسم العائلة <span class="text-rose-500">*</span>
+                  </label>
+                  <input pInputText id="lastName" formControlName="lastName"
+                         class="w-full !h-10 !rounded-xl" placeholder="مثال: محمود"
+                         [class.ng-invalid]="showError('lastName')" [class.ng-dirty]="showError('lastName')" />
+                  @if (showError('lastName')) {
+                    <p class="text-xs text-rose-600 mt-1">{{ errorOf('lastName') }}</p>
+                  }
+                </div>
+              </div>
+            </section>
+
+            <!-- ② بيانات التواصل -->
+            <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+              <div class="flex items-center gap-2.5 mb-4">
+                <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                  <lucide-icon [img]="PhoneIcon" class="w-4 h-4"></lucide-icon>
+                </span>
+                <h4 class="text-sm font-extrabold text-slate-800">بيانات التواصل</h4>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="mobileNumber" class="block text-xs font-bold text-slate-700 mb-1.5">
+                    رقم الهاتف <span class="text-rose-500">*</span>
+                  </label>
+                  <div class="relative">
+                    <lucide-icon [img]="PhoneIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"></lucide-icon>
+                    <input pInputText id="mobileNumber" type="tel" formControlName="mobileNumber" dir="ltr"
+                           class="w-full !h-10 !rounded-xl !ps-10 text-left" placeholder="01012345678"
+                           [class.ng-invalid]="showError('mobileNumber')" [class.ng-dirty]="showError('mobileNumber')" />
+                  </div>
+                  @if (showError('mobileNumber')) {
+                    <p class="text-xs text-rose-600 mt-1">{{ errorOf('mobileNumber') }}</p>
+                  }
+                </div>
+
+                <div>
+                  <label for="email" class="block text-xs font-bold text-slate-700 mb-1.5">
+                    البريد الإلكتروني <span class="text-rose-500">*</span>
+                  </label>
+                  <div class="relative">
+                    <lucide-icon [img]="MailIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"></lucide-icon>
+                    <input pInputText id="email" type="email" formControlName="email" dir="ltr"
+                           class="w-full !h-10 !rounded-xl !ps-10 text-left" placeholder="example@domain.com"
+                           [class.ng-invalid]="showError('email')" [class.ng-dirty]="showError('email')" />
+                  </div>
+                  @if (showError('email')) {
+                    <p class="text-xs text-rose-600 mt-1">{{ errorOf('email') }}</p>
+                  }
+                </div>
+              </div>
+            </section>
+
+            <!-- ③ بيانات الدخول (عند الإضافة فقط) -->
+            @if (!isEditMode()) {
+              <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                <div class="flex items-center gap-2.5 mb-4">
+                  <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+                    <lucide-icon [img]="LockIcon" class="w-4 h-4"></lucide-icon>
+                  </span>
+                  <h4 class="text-sm font-extrabold text-slate-800">بيانات الدخول</h4>
+                </div>
+
+                <label for="password" class="block text-xs font-bold text-slate-700 mb-1.5">
+                  كلمة المرور <span class="text-rose-500">*</span>
+                </label>
+                <div class="relative">
+                  <lucide-icon [img]="LockIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"></lucide-icon>
+                  <input pInputText id="password" type="password" formControlName="password" dir="ltr"
+                         class="w-full !h-10 !rounded-xl !ps-10 text-left" placeholder="6 أحرف على الأقل"
+                         [class.ng-invalid]="showError('password')" [class.ng-dirty]="showError('password')" />
+                </div>
+                @if (showError('password')) {
+                  <p class="text-xs text-rose-600 mt-1">{{ errorOf('password') }}</p>
+                }
+              </section>
             }
           </div>
 
-          <div>
-            <label for="mobileNumber" class="block text-xs font-bold text-slate-700 mb-1.5">رقم الهاتف</label>
-            <input id="mobileNumber" type="tel" formControlName="mobileNumber" dir="ltr"
-              [class.border-rose-400]="showError('mobileNumber')"
-              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-right focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-            @if (showError('mobileNumber')) {
-              <p class="text-xs text-rose-600 mt-1">{{ errorOf('mobileNumber') }}</p>
-            }
-          </div>
-
-          @if (!isEditMode()) {
-            <div>
-              <label for="password" class="block text-xs font-bold text-slate-700 mb-1.5">كلمة المرور</label>
-              <input id="password" type="password" formControlName="password" dir="ltr"
-                [class.border-rose-400]="showError('password')"
-                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-right focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-              @if (showError('password')) {
-                <p class="text-xs text-rose-600 mt-1">{{ errorOf('password') }}</p>
-              }
+          <!-- Footer -->
+          <div class="shrink-0 flex items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
+            <p class="hidden sm:block text-[11px] text-slate-400"><span class="text-rose-500">*</span> حقول مطلوبة</p>
+            <div class="flex items-center gap-3 ms-auto">
+              <button type="button" (click)="closeModal()" [disabled]="isSubmitting()"
+                      class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
+                إلغاء
+              </button>
+              <button type="submit" [disabled]="isSubmitting()"
+                      class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2">
+                <lucide-icon [img]="SaveIcon" class="w-4 h-4"></lucide-icon>
+                {{ isSubmitting() ? 'جاري الحفظ...' : (isEditMode() ? 'حفظ التعديلات' : 'حفظ الموظف') }}
+              </button>
             </div>
-          }
-
-          <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-            <button type="button" (click)="closeModal()" [disabled]="isSubmitting()"
-              class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
-              إلغاء
-            </button>
-            <button type="submit" [disabled]="isSubmitting()"
-              class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-500/20 transition-all disabled:opacity-50">
-              {{ isSubmitting() ? 'جاري الحفظ...' : 'حفظ' }}
-            </button>
           </div>
         </form>
+      </div>
+    </div>
+  }
+
+  <!-- تأكيد الحذف -->
+  @if (pendingDelete(); as d) {
+    <div appPortal dir="rtl"
+         class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
+         (click)="cancelDelete()">
+      <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl" dir="rtl"
+           role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
+
+        <div class="flex items-start gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+            <lucide-icon [img]="TrashIcon" class="w-5 h-5"></lucide-icon>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">حذف الموظف</h3>
+            <p class="text-sm text-slate-500 mt-1.5 leading-relaxed">
+              هل أنت متأكد من حذف
+              <b class="text-slate-800">"{{ d.fullName }}"</b>؟
+            </p>
+          </div>
+        </div>
+
+        <div class="flex gap-3 mt-6">
+          <button type="button" (click)="confirmDelete()" [disabled]="isDeleting()"
+                  class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-colors">
+            {{ isDeleting() ? 'جاري الحذف...' : 'نعم، حذف' }}
+          </button>
+          <button type="button" (click)="cancelDelete()" [disabled]="isDeleting()"
+                  class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-60 rounded-xl text-sm font-bold text-slate-700 transition-colors">
+            إلغاء
+          </button>
+        </div>
       </div>
     </div>
   }

@@ -32,3 +32,45 @@ body {
   border-radius: 1.5rem !important; /* rounded-3xl */
   overflow: hidden !important;
 }
+
+
+/* ===== الجدول المشترك ===== */
+.app-table .p-datatable-thead > tr > th {
+  background: #f5f8ff;
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 800;
+padding: 0.5rem 0.75rem; /* تصغير الـ padding العلوي والسفلي والجانبي */
+  white-space: nowrap;
+  border-width: 0 0 1px 0;
+  border-color: #dbe5f7;
+}
+
+.app-table .p-datatable-thead > tr > th.p-datatable-column-sorted {
+  color: #1d4ed8;
+}
+
+.app-table .p-datatable-sort-icon,
+.app-table .p-datatable-thead > tr > th svg {
+  color: #94a3b8;
+}
+
+.app-table .p-datatable-tbody > tr > td {
+  font-size: 0.875rem;
+  color: #1e293b;
+  border-width: 0 0 1px 0;
+  border-color: #e8eef9;
+}
+
+.app-table .p-datatable-tbody > tr:last-child > td {
+  border-bottom-width: 0;
+}
+
+.app-table .p-datatable-tbody > tr:hover {
+  background: #f8faff;
+}
+
+.app-table .p-paginator {
+  border-top: 1px solid #e8eef9;
+  padding: 0.75rem 1rem;
+}

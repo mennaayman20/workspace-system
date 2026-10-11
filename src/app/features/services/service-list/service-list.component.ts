@@ -9,13 +9,17 @@ import { LucideAngularModule, ConciergeBell, Plus, X, Pencil, Trash2, Save, Spar
 import { ServiceCatalogService } from '../service-catalog.service';
 import { CreateServiceCommand, ServiceItem, ServiceTranslations } from '../Iservice';
 import { PortalDirective } from '../../../shared/directives/portal.directive';
+import {
+  DataTableComponent, TableAction, TableActionEvent, TableColumn,
+} from '../../../shared/components/data-table';
 
 @Component({
   selector: 'app-service-list',
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, LucideAngularModule,
-    InputTextModule, TextareaModule, InputNumberModule,PortalDirective
+    InputTextModule, TextareaModule, InputNumberModule, PortalDirective,
+    DataTableComponent,
   ],
   templateUrl: './service-list.component.html',
 })
@@ -31,6 +35,24 @@ readonly BriefcaseIcon=BriefcaseIcon;
   readonly EditIcon = Pencil;
   readonly TrashIcon = Trash2;
   readonly SaveIcon = Save;
+
+  // ---------- إعداد الجدول ----------
+  readonly columns: TableColumn<ServiceItem>[] = [
+    { key: 'name', header: 'الخدمة', align: 'start', cellClass: 'font-bold text-slate-900', value: (s) => this.displayName(s) },
+    { key: 'description', header: 'الوصف', align: 'start', cellClass: 'text-slate-600' },
+    { key: 'price', header: 'السعر', type: 'currency', currency: 'EGP', sortable: true },
+    { key: 'isActive', header: 'الحالة', type: 'status', trueLabel: 'نشطة', falseLabel: 'غير نشطة', sortable: true },
+  ];
+
+  readonly actions: TableAction<ServiceItem>[] = [
+    { key: 'edit', label: 'تعديل', icon: Pencil, tone: 'primary' },
+    { key: 'delete', label: 'حذف', icon: Trash2, tone: 'danger' },
+  ];
+
+  onAction(e: TableActionEvent<ServiceItem>) {
+    if (e.key === 'edit') this.editService(e.row);
+    if (e.key === 'delete') this.askDelete(e.row);
+  }
 
   isFormOpen = signal(false);
   selectedService = signal<ServiceItem | null>(null);

@@ -1,39 +1,138 @@
 import { Component, OnInit, inject, signal, computed, DestroyRef } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ToastrService } from 'ngx-toastr';
+import { SelectModule } from 'primeng/select';
 import { forkJoin } from 'rxjs';
+import {
+  LucideAngularModule, Building2, Plus, Pencil, Trash2, CheckCircle2, Users, CalendarClock, Wrench
+} from 'lucide-angular';
 
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { Workspace, WorkspaceType, WorkspaceStatus } from '../../core/interfaces/Iworkspace';
 import { CreateWorkspaceModalComponent } from './add-workspace-modal/add-workspace-modal.component';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-import { LucideAngularModule, Building2, Plus } from 'lucide-angular';
+import {
+  BADGE,
+  CellTemplateDirective,
+  DataTableComponent,
+  RowActionsDirective,
+  TableAction,
+  TableActionEvent,
+  TableColumn
+} from '../../shared/components/data-table';
+
+interface StatCard {
+  value: WorkspaceStatus | 'all';
+  label: string;
+  icon: any;
+  /** كلاسات Tailwind لازم تتكتب كاملة عشان تتلقط في الـ build */
+  border: string;
+  tint: string;
+  chip: string;
+  ring: string;
+}
+
 @Component({
   selector: 'app-workspaces',
   standalone: true,
-  imports: [CreateWorkspaceModalComponent, MatSnackBarModule, MatDialogModule ,LucideAngularModule] ,
+  imports: [
+    FormsModule,
+    SelectModule,
+    LucideAngularModule,
+    CreateWorkspaceModalComponent,
+    DataTableComponent,
+    CellTemplateDirective,
+    RowActionsDirective
+  ],
   templateUrl: './workspaces.component.html'
 })
 export class WorkspacesComponent implements OnInit {
   private readonly workspaceService = inject(WorkspaceService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly snackBar = inject(MatSnackBar);
-  private readonly dialog = inject(MatDialog);
+  private readonly toastr = inject(ToastrService);
 
+  // icons
+  readonly BuildingIcon = Building2;
+  readonly PlusIcon = Plus;
+  readonly TrashIcon = Trash2;
 
-  //icons
-readonly BuildingIcon = Building2;
-readonly PlusIcon = Plus;
-  
-
-
-readonly statusOptions: { value: WorkspaceStatus; label: string }[] = [
+  readonly statusOptions: { value: WorkspaceStatus; label: string }[] = [
     { value: 'Available', label: 'متاحة' },
     { value: 'Occupied', label: 'مشغولة' },
     { value: 'Reserved', label: 'محجوزة' },
     { value: 'Maintenance', label: 'صيانة' }
   ];
+
+  // ---------- كروت الإحصائيات (بتشتغل كفلتر سريع) ----------
+  readonly statCards: StatCard[] = [
+    {
+      value: 'all', label: 'إجمالي المساحات', icon: Building2,
+      border: 'border-s-blue-500', tint: 'from-blue-50',
+      chip: 'bg-blue-100 text-blue-600', ring: 'ring-blue-400'
+    },
+    {
+      value: 'Available', label: 'متاحة', icon: CheckCircle2,
+      border: 'border-s-emerald-500', tint: 'from-emerald-50',
+      chip: 'bg-emerald-100 text-emerald-600', ring: 'ring-emerald-400'
+    },
+    {
+      value: 'Occupied', label: 'مشغولة', icon: Users,
+      border: 'border-s-rose-500', tint: 'from-rose-50',
+      chip: 'bg-rose-100 text-rose-600', ring: 'ring-rose-400'
+    },
+    {
+      value: 'Reserved', label: 'محجوزة', icon: CalendarClock,
+      border: 'border-s-amber-500', tint: 'from-amber-50',
+      chip: 'bg-amber-100 text-amber-600', ring: 'ring-amber-400'
+    },
+    {
+      value: 'Maintenance', label: 'صيانة', icon: Wrench,
+      border: 'border-s-slate-500', tint: 'from-slate-100',
+      chip: 'bg-slate-200 text-slate-600', ring: 'ring-slate-400'
+    }
+  ];
+
+  // ---------- إعداد الجدول ----------
+  readonly columns: TableColumn<Workspace>[] = [
+    { key: 'name', header: 'المساحة', sortable: true, align: 'start' },
+    { key: 'code', header: 'الكود', sortable: true },
+    {
+      key: 'floor',
+      header: 'الطابق / الموقع',
+      value: (w) => [w.floor, w.location].filter(Boolean).join(' • ') || null
+    },
+    {
+      key: 'capacity',
+      header: 'السعة',
+      sortable: true,
+      value: (w) => (w.capacity != null ? `${w.capacity} أفراد` : null)
+    },
+    {
+      key: 'status',
+      header: 'الحالة',
+      type: 'badge',
+      // الـ badges هي كمان مصدر اختيارات فلتر الحالة
+      badges: {
+        Available: { label: 'متاحة', class: BADGE.green },
+        Occupied: { label: 'مشغولة', class: BADGE.red },
+        Reserved: { label: 'محجوزة', class: BADGE.amber },
+        Maintenance: { label: 'صيانة', class: BADGE.slate }
+      }
+    }
+  ];
+
+  readonly actions: TableAction<Workspace>[] = [
+    { key: 'edit', label: 'تعديل', icon: Pencil, tone: 'primary', disabled: (w) => this.isBusy(w.id) },
+    { key: 'delete', label: 'حذف', icon: Trash2, tone: 'danger', disabled: (w) => this.isBusy(w.id) }
+  ];
+
+  readonly rowClass = (w: Workspace): string =>
+    this.isBusy(w.id) ? 'opacity-50 pointer-events-none' : '';
+
+  onAction(e: TableActionEvent<Workspace>): void {
+    if (e.key === 'edit') this.openEditModal(e.row);
+    if (e.key === 'delete') this.askDelete(e.row);
+  }
 
   // Data
   workspaces = signal<Workspace[]>([]);
@@ -45,23 +144,21 @@ readonly statusOptions: { value: WorkspaceStatus; label: string }[] = [
   isModalOpen = signal(false);
   editingWorkspace = signal<Workspace | null>(null);
 
-  // Filters
-  searchTerm = signal('');
+  // Delete confirmation
+  pendingDelete = signal<Workspace | null>(null);
+  isDeleting = signal(false);
+
+  // Quick filter (stat cards)
   statusFilter = signal<WorkspaceStatus | 'all'>('all');
 
   // ids of rows currently being changed/deleted (prevents double clicks)
   busyIds = signal<ReadonlySet<number>>(new Set());
 
+  /** الجدول نفسه بيتكفل بالبحث والفلاتر والـ pagination؛ هنا بس فلتر الكروت */
   filteredWorkspaces = computed(() => {
-    const term = this.searchTerm().trim().toLowerCase();
     const status = this.statusFilter();
-    return this.workspaces().filter((ws) => {
-      const matchesStatus = status === 'all' || ws.status === status;
-      const matchesTerm =
-        !term ||
-        [ws.name, ws.code, ws.floor, ws.location].some((v) => (v ?? '').toLowerCase().includes(term));
-      return matchesStatus && matchesTerm;
-    });
+    const list = this.workspaces();
+    return status === 'all' ? list : list.filter((ws) => ws.status === status);
   });
 
   statusCounts = computed(() => {
@@ -110,7 +207,7 @@ readonly statusOptions: { value: WorkspaceStatus; label: string }[] = [
           this.workspaceTypes.set(types);
           this.workspaces.set(workspaces);
         },
-        error: () => this.showToast('تم الحفظ لكن تعذر تحديث القائمة، حدّث الصفحة', 'إغلاق')
+        error: () => this.toastr.warning('تم الحفظ لكن تعذر تحديث القائمة، حدّث الصفحة')
       });
   }
 
@@ -134,7 +231,7 @@ readonly statusOptions: { value: WorkspaceStatus; label: string }[] = [
         },
         error: () => {
           this.setBusy(ws.id, false);
-          this.showToast('تعذر تحميل بيانات المساحة، حاول مرة أخرى', 'إغلاق');
+          this.toastr.error('تعذر تحميل بيانات المساحة، حاول مرة أخرى');
         }
       });
   }
@@ -146,7 +243,7 @@ readonly statusOptions: { value: WorkspaceStatus; label: string }[] = [
 
   // ---------- Status ----------
   onStatusChange(ws: Workspace, newStatus: WorkspaceStatus): void {
-    if (ws.status === newStatus || this.isBusy(ws.id)) return;
+    if (!newStatus || ws.status === newStatus || this.isBusy(ws.id)) return;
 
     const previousStatus = ws.status;
     this.setBusy(ws.id, true);
@@ -158,61 +255,55 @@ readonly statusOptions: { value: WorkspaceStatus; label: string }[] = [
       .subscribe({
         next: () => {
           this.setBusy(ws.id, false);
-          this.showToast('تم تغيير حالة المساحة بنجاح', 'حسناً');
+          this.toastr.success('تم تغيير حالة المساحة بنجاح');
         },
-        error: () => {
+        error: (err) => {
           this.setBusy(ws.id, false);
           this.patchStatus(ws.id, previousStatus);
-          this.showToast('حدث خطأ أثناء تغيير الحالة، تم التراجع', 'إغلاق');
+          this.toastr.error(err?.error?.message || 'حدث خطأ أثناء تغيير الحالة، تم التراجع');
         }
       });
   }
 
   // ---------- Delete ----------
-  onDelete(ws: Workspace): void {
-    const ref = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: 'تأكيد الحذف',
-        message: `هل أنت متأكد من حذف المساحة "${ws.name}"؟`
-      }
-    });
-
-    ref.afterClosed().subscribe((confirmed) => {
-      if (confirmed) this.executeDelete(ws.id);
-    });
+  askDelete(ws: Workspace): void {
+    this.pendingDelete.set(ws);
   }
 
-  private executeDelete(id: number): void {
-    this.setBusy(id, true);
+  cancelDelete(): void {
+    if (this.isDeleting()) return;
+    this.pendingDelete.set(null);
+  }
+
+  confirmDelete(): void {
+    const ws = this.pendingDelete();
+    if (!ws) return;
+
+    this.isDeleting.set(true);
+    this.setBusy(ws.id, true);
+
     this.workspaceService
-      .deleteWorkspace(id)
+      .deleteWorkspace(ws.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.setBusy(id, false);
-          this.workspaces.update((items) => items.filter((i) => i.id !== id));
-          this.showToast('تم حذف المساحة بنجاح', 'حسناً');
+          this.isDeleting.set(false);
+          this.setBusy(ws.id, false);
+          this.pendingDelete.set(null);
+          this.workspaces.update((items) => items.filter((i) => i.id !== ws.id));
+          this.toastr.success('تم حذف المساحة بنجاح');
         },
-        error: () => {
-          this.setBusy(id, false);
-          this.showToast('حدث خطأ أثناء الحذف، يرجى المحاولة لاحقاً', 'إغلاق');
+        error: (err) => {
+          this.isDeleting.set(false);
+          this.setBusy(ws.id, false);
+          this.toastr.error(err?.error?.message || 'حدث خطأ أثناء الحذف، يرجى المحاولة لاحقاً');
         }
       });
   }
 
   // ---------- Filters ----------
-  onSearch(value: string): void {
-    this.searchTerm.set(value);
-  }
-
   onFilterStatus(value: string): void {
     this.statusFilter.set(value as WorkspaceStatus | 'all');
-  }
-
-  resetFilters(): void {
-    this.searchTerm.set('');
-    this.statusFilter.set('all');
   }
 
   // ---------- Helpers ----------
@@ -230,32 +321,5 @@ readonly statusOptions: { value: WorkspaceStatus; label: string }[] = [
 
   private patchStatus(id: number, status: WorkspaceStatus): void {
     this.workspaces.update((items) => items.map((i) => (i.id === id ? { ...i, status } : i)));
-  }
-
-  private showToast(message: string, action = 'إغلاق'): void {
-    this.snackBar.open(message, action, {
-      duration: 3000,
-      horizontalPosition: 'end',
-      verticalPosition: 'bottom'
-    });
-  }
-
-  statusLabel(status: WorkspaceStatus): string {
-    return this.statusOptions.find((s) => s.value === status)?.label ?? status;
-  }
-
-  getStatusBadgeClass(status: WorkspaceStatus): string {
-    switch (status) {
-      case 'Available':
-        return 'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
-      case 'Occupied':
-        return 'bg-rose-50 text-rose-700 ring-rose-600/20';
-      case 'Reserved':
-        return 'bg-amber-50 text-amber-700 ring-amber-600/20';
-      case 'Maintenance':
-        return 'bg-slate-100 text-slate-700 ring-slate-500/20';
-      default:
-        return 'bg-slate-100 text-slate-600 ring-slate-500/20';
-    }
   }
 }

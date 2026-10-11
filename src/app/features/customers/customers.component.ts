@@ -1,17 +1,19 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { CustomerService } from './customer.service';
-import { Customer, CustomerType, CUSTOMER_TYPE_LABELS } from './Icustomer';
+import { Customer, CUSTOMER_TYPE_LABELS } from './Icustomer';
 import { AddCustomerModalComponent } from './add-customer-modal/add-customer-modal.component';
-import { LucideAngularModule, Plus, Users, BuildingIcon, Trash2 } from 'lucide-angular';
+import { LucideAngularModule, Plus, Users, BuildingIcon, Trash2, Pencil } from 'lucide-angular';
 import { PortalDirective } from '../../shared/directives/portal.directive';
+import {
+  BADGE, DataTableComponent, TableAction, TableActionEvent, TableColumn,
+} from '../../shared/components/data-table';
 
 @Component({
   selector: 'app-customers',
   standalone: true,
-  imports: [CommonModule, AddCustomerModalComponent, LucideAngularModule , PortalDirective],
+  imports: [AddCustomerModalComponent, LucideAngularModule, PortalDirective, DataTableComponent],
   templateUrl: './customers.component.html'
 })
 export class CustomersComponent implements OnInit {
@@ -27,6 +29,7 @@ export class CustomersComponent implements OnInit {
   customers = signal<Customer[]>([]);
   isLoading = signal<boolean>(false);
   errorMessage = signal<string>('');
+  searchTerm = signal<string>('');
 
   // Modal State
   isModalOpen = signal<boolean>(false);
@@ -35,6 +38,33 @@ export class CustomersComponent implements OnInit {
   // Delete confirmation
   pendingDelete = signal<Customer | null>(null);
   isDeleting = signal<boolean>(false);
+
+  // ---------- تعريف الجدول ----------
+  readonly columns: TableColumn<Customer>[] = [
+    { key: 'fullName', header: 'الاسم', sortable: true, cellClass: 'font-bold text-slate-900' },
+    { key: 'mobileNumber', header: 'رقم الموبايل', type: 'mono' },
+    {
+      key: 'customerType', header: 'النوع', type: 'badge', sortable: true,
+      badges: {
+        Individual: { label: CUSTOMER_TYPE_LABELS.Individual.ar, class: BADGE.blue },
+        Corporate:  { label: CUSTOMER_TYPE_LABELS.Corporate.ar,  class: BADGE.purple },
+        Member:     { label: CUSTOMER_TYPE_LABELS.Member.ar,     class: BADGE.green },
+        WalkIn:     { label: CUSTOMER_TYPE_LABELS.WalkIn.ar,     class: BADGE.orange },
+      },
+    },
+    { key: 'companyName', header: 'الشركة التابع لها' },
+    { key: 'email', header: 'الإيميل', type: 'mono', cellClass: 'text-xs text-slate-500' },
+  ];
+
+  readonly actions: TableAction<Customer>[] = [
+    { key: 'edit',   label: 'تعديل', icon: Pencil, tone: 'primary' },
+    { key: 'delete', label: 'حذف',   icon: Trash2, tone: 'danger' },
+  ];
+
+  onAction(e: TableActionEvent<Customer>): void {
+    if (e.key === 'edit') this.openEditModal(e.row);
+    if (e.key === 'delete') this.askDelete(e.row);
+  }
 
   ngOnInit() {
     this.loadCustomers();
@@ -75,6 +105,7 @@ export class CustomersComponent implements OnInit {
   }
 
   onSearch(term: string) {
+    this.searchTerm.set(term.trim());
     this.loadCustomers(term);
   }
 
@@ -95,7 +126,7 @@ export class CustomersComponent implements OnInit {
 
   refreshAfterSave() {
     this.closeModal();
-    this.loadCustomers();
+    this.loadCustomers(this.searchTerm());
   }
 
   // ---------- الحذف ----------
@@ -118,7 +149,7 @@ export class CustomersComponent implements OnInit {
         this.isDeleting.set(false);
         this.pendingDelete.set(null);
         this.toastr.success('تم حذف العميل بنجاح');
-        this.loadCustomers();
+        this.loadCustomers(this.searchTerm());
       },
       error: (err) => {
         this.isDeleting.set(false);
@@ -127,23 +158,5 @@ export class CustomersComponent implements OnInit {
         );
       }
     });
-  }
-
-  // ---------- العرض ----------
-  typeLabel(t: CustomerType): string {
-    return CUSTOMER_TYPE_LABELS[t]?.ar ?? t;
-  }
-
-  getCustomerTypeBadgeClass(type: CustomerType): string {
-    switch (type) {
-      case 'Corporate':
-        return 'bg-purple-100 text-purple-700 border border-purple-200';
-      case 'Member':
-        return 'bg-green-100 text-green-700 border border-green-200';
-      case 'WalkIn':
-        return 'bg-orange-100 text-orange-700 border border-orange-200';
-      default:
-        return 'bg-blue-100 text-blue-700 border border-blue-200';
-    }
   }
 }

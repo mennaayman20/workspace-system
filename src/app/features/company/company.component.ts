@@ -4,16 +4,39 @@ import { ToastrService } from 'ngx-toastr';
 import { CompanyService } from './company.service';
 import { Company } from './Icompany';
 import { AddCompanyModalComponent } from './add-company-modal/add-company-modal.component';
-import { LucideAngularModule, Building2, Plus, Trash2 } from 'lucide-angular';
+import { LucideAngularModule, Building2, Plus, Trash2,Pencil } from 'lucide-angular';
 import { PortalDirective } from '../../shared/directives/portal.directive';
+import { DataTableComponent, TableAction, TableActionEvent, TableColumn } from '../../shared/components/data-table';
 
 @Component({
   selector: 'app-company',
   standalone: true,
-  imports: [CommonModule, AddCompanyModalComponent, LucideAngularModule , PortalDirective],
+  imports: [CommonModule, AddCompanyModalComponent, LucideAngularModule , PortalDirective , DataTableComponent],
   templateUrl: './company.component.html'
 })
 export class CompanyComponent implements OnInit {
+
+  readonly columns: TableColumn<Company>[] = [
+  { key: 'name',          header: 'اسم الشركة',    sortable: true, cellClass: 'font-bold text-blue' },
+  { key: 'contactPerson', header: 'الشخص المسؤول' },
+  { key: 'phone',         header: 'رقم الهاتف',    type: 'mono' },
+  { key: 'taxNumber',     header: 'الرقم الضريبي' },
+  { key: 'creditLimit',   header: 'الحد الائتماني', type: 'currency', sortable: true },
+  { key: 'isActive',      header: 'الحالة',        type: 'status' },
+];
+
+readonly actions: TableAction<Company>[] = [
+  { key: 'edit',   label: 'تعديل', icon: Pencil, tone: 'primary' },
+  { key: 'delete', label: 'حذف',   icon: Trash2, tone: 'danger' },
+];
+
+onAction(e: TableActionEvent<Company>): void {
+  if (e.key === 'edit') this.openEditModal(e.row);
+  if (e.key === 'delete') this.askDelete(e.row);
+}
+
+
+
   private companyService = inject(CompanyService);
   private toastr = inject(ToastrService);
 

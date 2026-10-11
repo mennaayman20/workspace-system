@@ -51,107 +51,23 @@
     </button>
   </div>
 
-  <!-- Empty State -->
-  @if (categoryService.categories().length === 0) {
-    <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center space-y-4 fade-up">
-      <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
-        <lucide-icon [img]="FolderTreeIcon" class="w-8 h-8"></lucide-icon>
-      </div>
-      <p class="text-base font-bold text-slate-800">لا توجد تصنيفات مضافة حتى الآن</p>
-      <button type="button" (click)="openAddForm()"
+  <!-- الجدول المشترك (بحث لكل عمود + ترتيب + pagination) -->
+  <app-data-table
+    [value]="categoryService.categories()"
+    [columns]="columns"
+    [actions]="actions"
+    [columnFilters]="true"
+    [minWidth]="'48rem'"
+    [emptyTitle]="categoryService.categories().length === 0 ? 'لا توجد تصنيفات مضافة حتى الآن' : 'لا توجد نتائج مطابقة'"
+    (action)="onAction($event)">
+
+    @if (categoryService.categories().length === 0) {
+      <button tableEmptyAction type="button" (click)="openAddForm()"
         class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors">
         + أضف أول تصنيف
       </button>
-    </div>
-  } @else {
-
-    <!-- Desktop Table -->
-    <div class="hidden md:block bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs fade-up">
-      <div class="overflow-x-auto">
-        <table class="w-full text-right border-collapse min-w-[700px]">
-          <thead>
-            <tr class="bg-slate-50/80 text-xs font-bold text-slate-500 tracking-wide border-b border-slate-100">
-              <th scope="col" class="py-4 px-6">#</th>
-              <th scope="col" class="py-4 px-6">التصنيف</th>
-              <th scope="col" class="py-4 px-6">الوصف</th>
-              <th scope="col" class="py-4 px-6">الحالة</th>
-              <th scope="col" class="py-4 px-6 text-center">الإجراءات</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 text-sm text-slate-600">
-            @for (cat of categoryService.categories(); track cat.id; let i = $index) {
-              <tr class="fade-up group hover:bg-blue-50/40 transition-colors duration-200"
-                  [style.animation-delay.ms]="i * 40">
-
-                <td class="py-4 px-6 font-mono text-[13px] text-slate-400">#{{ cat.id }}</td>
-
-                <td class="py-4 px-6 font-bold text-slate-900 text-[15px]">{{ displayName(cat) }}</td>
-
-                <td class="py-4 px-6 text-slate-500 max-w-xs truncate">{{ displayDescription(cat) || '-' }}</td>
-
-                <td class="py-4 px-6">
-                  <span [class]="cat.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-rose-50 text-rose-700 ring-rose-600/20'"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset">
-                    <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-                    {{ cat.isActive ? 'نشط' : 'غير نشط' }}
-                  </span>
-                </td>
-
-                <td class="py-4 px-6">
-                  <div class="flex items-center justify-center gap-2">
-                    <button type="button" (click)="editCategory(cat)" title="تعديل" aria-label="تعديل"
-                      class="w-10 h-10 rounded-xl flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white hover:scale-105 transition-all duration-200">
-                      <lucide-icon [img]="EditIcon" class="w-4 h-4"></lucide-icon>
-                    </button>
-
-                    <button type="button" (click)="askDelete(cat)" title="حذف" aria-label="حذف"
-                      class="w-10 h-10 rounded-xl flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white hover:scale-105 transition-all duration-200">
-                      <lucide-icon [img]="TrashIcon" class="w-4 h-4"></lucide-icon>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Mobile Cards -->
-    <div class="block md:hidden space-y-4">
-      @for (cat of categoryService.categories(); track cat.id; let i = $index) {
-        <div class="fade-up bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4"
-             [style.animation-delay.ms]="i * 50">
-          <div class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-2 min-w-0">
-              <span class="font-mono text-xs text-slate-400">#{{ cat.id }}</span>
-              <h3 class="font-bold text-slate-900 text-base truncate">{{ displayName(cat) }}</h3>
-            </div>
-            <span [class]="cat.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-rose-50 text-rose-700 ring-rose-600/20'"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset shrink-0">
-              <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-              {{ cat.isActive ? 'نشط' : 'غير نشط' }}
-            </span>
-          </div>
-
-          @if (displayDescription(cat); as desc) {
-            <p class="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl">{{ desc }}</p>
-          }
-
-          <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100">
-            <button type="button" (click)="editCategory(cat)"
-              class="h-10 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-xs font-bold transition-colors">
-              تعديل
-            </button>
-            <button type="button" (click)="askDelete(cat)"
-              class="h-10 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-colors">
-              حذف
-            </button>
-          </div>
-        </div>
-      }
-    </div>
-  }
+    }
+  </app-data-table>
 
   <!-- مودال الإضافة والتعديل -->
   @if (isFormOpen()) {

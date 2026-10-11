@@ -9,13 +9,19 @@ import {
 import { ProductCategoryService } from '../../services/product-category.service';
 import { ProductCategory } from '../../interfaces/product';
 import { CategoryFormModalComponent } from '../../components/category-form-modal/category-form-modal.component';
+import {
+  DataTableComponent,
+  TableAction,
+  TableActionEvent,
+  TableColumn,
+} from '../../../../shared/components/data-table';
 
 @Component({
   selector: 'app-category-list',
   standalone: true,
   imports: [
     CommonModule, LucideAngularModule, RouterLink, RouterLinkActive,
-    CategoryFormModalComponent,
+    CategoryFormModalComponent, DataTableComponent,
   ],
   templateUrl: './category-list.component.html'
 })
@@ -28,6 +34,30 @@ export class CategoryListComponent implements OnInit {
   readonly EditIcon = EditIcon;
   readonly TrashIcon = TrashIcon;
   readonly PackageIcon = PackageIcon;
+
+  // ---------- إعداد الجدول ----------
+  readonly columns: TableColumn<ProductCategory>[] = [
+    {
+      key: 'id', header: '#', type: 'mono', sortable: true, width: '6rem',
+      cellClass: 'text-slate-400', value: (c) => `#${c.id}`
+    },
+    { key: 'name', header: 'التصنيف', align: 'start', cellClass: 'font-bold text-slate-900', value: (c) => this.displayName(c) },
+    {
+      key: 'description', header: 'الوصف', align: 'start', cellClass: 'text-slate-500',
+      value: (c) => this.displayDescription(c)
+    },
+    { key: 'isActive', header: 'الحالة', type: 'status', sortable: true },
+  ];
+
+  readonly actions: TableAction<ProductCategory>[] = [
+    { key: 'edit', label: 'تعديل', icon: EditIcon, tone: 'primary' },
+    { key: 'delete', label: 'حذف', icon: TrashIcon, tone: 'danger' },
+  ];
+
+  onAction(e: TableActionEvent<ProductCategory>): void {
+    if (e.key === 'edit') this.editCategory(e.row);
+    if (e.key === 'delete') this.askDelete(e.row);
+  }
 
   // Form modal
   isFormOpen = signal<boolean>(false);

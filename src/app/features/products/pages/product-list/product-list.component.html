@@ -51,135 +51,35 @@
     </button>
   </div>
 
-  @if (productService.isLoading() && productService.products().length === 0) {
-    <!-- Loading -->
-    <div class="space-y-3" aria-busy="true">
-      @for (i of [1, 2, 3, 4]; track i) {
-        <div class="h-16 rounded-2xl bg-slate-100 animate-pulse"></div>
+  <!-- الجدول المشترك (بحث لكل عمود + ترتيب + pagination) -->
+  <app-data-table
+    [value]="productService.products()"
+    [columns]="columns"
+    [actions]="actions"
+    [loading]="productService.isLoading()"
+    [columnFilters]="true"
+    [minWidth]="'56rem'"
+    [emptyTitle]="productService.products().length === 0 ? 'لا توجد منتجات مضافة حتى الآن' : 'لا توجد نتائج مطابقة'"
+    (action)="onAction($event)">
+
+    <!-- عمود التصنيف: بادج -->
+    <ng-template appCell="productCategoryName" let-p>
+      @if (p.productCategoryName) {
+        <span class="inline-flex px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold">
+          {{ p.productCategoryName }}
+        </span>
+      } @else {
+        <span class="text-slate-300">-</span>
       }
-    </div>
-  } @else if (productService.products().length === 0) {
-    <!-- Empty State -->
-    <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center space-y-4 fade-up">
-      <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
-        <lucide-icon [img]="PackageIcon" class="w-8 h-8"></lucide-icon>
-      </div>
-      <p class="text-base font-bold text-slate-800">لا توجد منتجات مضافة حتى الآن</p>
-      <button type="button" (click)="openAddForm()"
+    </ng-template>
+
+    @if (productService.products().length === 0) {
+      <button tableEmptyAction type="button" (click)="openAddForm()"
         class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors">
         + أضف أول منتج
       </button>
-    </div>
-  } @else {
-
-    <!-- Desktop Table -->
-    <div class="hidden md:block bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs fade-up">
-      <div class="overflow-x-auto">
-        <table class="w-full text-right border-collapse min-w-[800px]">
-          <thead>
-            <tr class="bg-slate-50/80 text-xs font-bold text-slate-500 tracking-wide">
-              <th scope="col" class="py-4 px-6">المنتج</th>
-              <th scope="col" class="py-4 px-6">SKU</th>
-              <th scope="col" class="py-4 px-6">التصنيف</th>
-              <th scope="col" class="py-4 px-6">سعر البيع</th>
-              <th scope="col" class="py-4 px-6">الحالة</th>
-              <th scope="col" class="py-4 px-6 text-center">الإجراءات</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 text-sm text-slate-600">
-            @for (p of productService.products(); track p.id; let i = $index) {
-              <tr class="fade-up group hover:bg-blue-50/40 transition-colors duration-200"
-                  [style.animation-delay.ms]="i * 40">
-
-                <td class="py-4 px-6 font-bold text-slate-900 text-[15px]">{{ displayName(p) }}</td>
-
-                <td class="py-4 px-6 font-mono text-[13px] text-slate-500" dir="ltr">{{ p.sku || '-' }}</td>
-
-                <td class="py-4 px-6">
-                  @if (p.productCategoryName) {
-                    <span class="inline-flex px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold">
-                      {{ p.productCategoryName }}
-                    </span>
-                  } @else {
-                    <span class="text-slate-300">-</span>
-                  }
-                </td>
-
-                <td class="py-4 px-6 font-mono text-[13px] font-bold text-slate-800" dir="ltr">
-                  {{ p.sellingPrice | currency:'EGP' }}
-                </td>
-
-                <td class="py-4 px-6">
-                  <span [class]="p.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-rose-50 text-rose-700 ring-rose-600/20'"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset">
-                    <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-                    {{ p.isActive ? 'نشط' : 'غير نشط' }}
-                  </span>
-                </td>
-
-                <td class="py-4 px-6">
-                  <div class="flex items-center justify-center gap-2">
-                    <button type="button" (click)="editProduct(p)" title="تعديل" aria-label="تعديل"
-                      class="w-10 h-10 rounded-xl flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white hover:scale-105 transition-all duration-200">
-                      <lucide-icon [img]="EditIcon" class="w-4 h-4"></lucide-icon>
-                    </button>
-
-                    <button type="button" (click)="askDelete(p)" title="حذف" aria-label="حذف"
-                      class="w-10 h-10 rounded-xl flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white hover:scale-105 transition-all duration-200">
-                      <lucide-icon [img]="TrashIcon" class="w-4 h-4"></lucide-icon>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Mobile Cards -->
-    <div class="block md:hidden space-y-4">
-      @for (p of productService.products(); track p.id; let i = $index) {
-        <div class="fade-up bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4"
-             [style.animation-delay.ms]="i * 50">
-          <div class="flex items-center justify-between gap-3">
-            <h3 class="font-bold text-slate-900 text-base truncate">{{ displayName(p) }}</h3>
-            <span [class]="p.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-rose-50 text-rose-700 ring-rose-600/20'"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset shrink-0">
-              <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-              {{ p.isActive ? 'نشط' : 'غير نشط' }}
-            </span>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 rounded-xl p-3">
-            <div>
-              <span class="text-slate-400 block mb-0.5">رمز المنتج (SKU)</span>
-              <span class="font-semibold text-slate-700 font-mono" dir="ltr">{{ p.sku || '-' }}</span>
-            </div>
-            <div>
-              <span class="text-slate-400 block mb-0.5">سعر البيع</span>
-              <span class="font-bold text-slate-900 font-mono" dir="ltr">{{ p.sellingPrice | currency:'EGP' }}</span>
-            </div>
-            <div class="col-span-2">
-              <span class="text-slate-400 block mb-0.5">التصنيف</span>
-              <span class="font-semibold text-slate-700">{{ p.productCategoryName || '-' }}</span>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2 pt-1">
-            <button type="button" (click)="editProduct(p)"
-              class="h-10 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-xs font-bold transition-colors">
-              تعديل
-            </button>
-            <button type="button" (click)="askDelete(p)"
-              class="h-10 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-colors">
-              حذف
-            </button>
-          </div>
-        </div>
-      }
-    </div>
-  }
+    }
+  </app-data-table>
 
   <!-- مودال الإضافة والتعديل -->
   @if (isFormOpen()) {

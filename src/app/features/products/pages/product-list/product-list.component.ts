@@ -10,13 +10,20 @@ import { ProductService } from '../../services/product.service';
 import { ProductCategoryService } from '../../services/product-category.service';
 import { Product } from '../../interfaces/product';
 import { ProductFormModalComponent } from '../../components/product-form-modal/product-form-modal.component';
+import {
+  CellTemplateDirective,
+  DataTableComponent,
+  TableAction,
+  TableActionEvent,
+  TableColumn,
+} from '../../../../shared/components/data-table';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
   imports: [
     CommonModule, LucideAngularModule, RouterLink, RouterLinkActive,
-    ProductFormModalComponent,
+    ProductFormModalComponent, DataTableComponent, CellTemplateDirective,
   ],
   templateUrl: './product-list.component.html'
 })
@@ -30,6 +37,25 @@ export class ProductListComponent implements OnInit {
   readonly EditIcon = EditIcon;
   readonly TrashIcon = TrashIcon;
   readonly FolderTreeIcon = FolderTreeIcon;
+
+  // ---------- إعداد الجدول ----------
+  readonly columns: TableColumn<Product>[] = [
+    { key: 'name', header: 'المنتج', align: 'start', cellClass: 'font-bold text-slate-900', value: (p) => this.displayName(p) },
+    { key: 'sku', header: 'SKU', type: 'mono', sortable: true },
+    { key: 'productCategoryName', header: 'التصنيف', sortable: true },
+    { key: 'sellingPrice', header: 'سعر البيع', type: 'currency', currency: 'EGP', sortable: true },
+    { key: 'isActive', header: 'الحالة', type: 'status', sortable: true },
+  ];
+
+  readonly actions: TableAction<Product>[] = [
+    { key: 'edit', label: 'تعديل', icon: EditIcon, tone: 'primary' },
+    { key: 'delete', label: 'حذف', icon: TrashIcon, tone: 'danger' },
+  ];
+
+  onAction(e: TableActionEvent<Product>): void {
+    if (e.key === 'edit') this.editProduct(e.row);
+    if (e.key === 'delete') this.askDelete(e.row);
+  }
 
   // Form modal
   isFormOpen = signal<boolean>(false);

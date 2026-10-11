@@ -8,152 +8,188 @@
 </style>
 
 <div dir="rtl"
-  class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 fade-up">
+  class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 fade-up">
 
-  <div
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="workspace-modal-title"
-    class="bg-white rounded-3xl border border-slate-100 shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[92vh]">
+  <div role="dialog" aria-modal="true" aria-labelledby="workspace-modal-title"
+    class="bg-white rounded-3xl border border-slate-100 shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[92vh]">
 
     <!-- Header -->
-    <div class="shrink-0 flex items-center justify-between gap-3 px-6 sm:px-8 pt-6 sm:pt-8 pb-5 border-b border-slate-100">
-      <div class="flex items-center gap-3.5">
-        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
-          <lucide-icon [img]="BuildingIcon" class="w-6 h-6"></lucide-icon>
+    <div class="shrink-0 px-6 sm:px-8 py-5 border-b border-slate-100 bg-gradient-to-l from-blue-50/70 to-white">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
+            <lucide-icon [img]="BuildingIcon" class="w-6 h-6"></lucide-icon>
+          </div>
+          <div>
+            <h3 id="workspace-modal-title" class="text-lg font-extrabold text-slate-900 leading-tight">
+              {{ isEditMode ? 'تعديل مساحة العمل' : 'إضافة مساحة عمل جديدة' }}
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">
+              {{ isEditMode ? 'عدّلي بيانات المساحة ثم احفظي' : 'أدخلي بيانات المساحة الجديدة' }}
+            </p>
+          </div>
         </div>
-        <div>
-          <h3 id="workspace-modal-title" class="text-lg font-bold text-slate-900 leading-tight">
-            {{ isEditMode ? 'تعديل مساحة العمل' : 'إضافة مساحة عمل جديدة' }}
-          </h3>
-          <p class="text-xs text-slate-500 mt-0.5">
-            {{ isEditMode ? 'عدّلي بيانات المساحة ثم احفظي' : 'أدخلي بيانات المساحة الجديدة' }}
-          </p>
-        </div>
+        <button type="button" (click)="onClose()" [disabled]="isSubmitting()" aria-label="إغلاق"
+          class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white disabled:opacity-50 transition-colors">
+          <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
+        </button>
       </div>
-      <button type="button" (click)="onClose()" aria-label="إغلاق"
-        class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
-        <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
-      </button>
     </div>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="flex flex-col min-h-0 flex-1">
 
-      <!-- Body (بيعمل scroll) -->
-      <div class="px-6 sm:px-8 py-6 space-y-5 overflow-y-auto">
+      <!-- Body -->
+      <div class="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-5 bg-slate-50/50">
 
         @if (errorMessage()) {
-          <div role="alert" class="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl font-medium">
+          <div role="alert" class="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-2xl font-medium">
             {{ errorMessage() }}
           </div>
         }
 
-        <!-- Type -->
-        <div>
-          <label for="ws-type" class="block text-xs font-bold text-slate-700 mb-1.5">
-            نوع المساحة <span class="text-rose-500">*</span>
-          </label>
-          <div class="relative">
-            <select id="ws-type" formControlName="workspaceTypeId"
-              [class.border-rose-400]="fieldError('workspaceTypeId')"
-              class="w-full h-11 pr-4 pl-10 appearance-none bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
-              <option [ngValue]="null" disabled>اختر نوع المساحة</option>
-              @for (type of workspaceTypes(); track type.id) {
-                <option [ngValue]="type.id">{{ type.name }}</option>
-              }
-              <option [ngValue]="NEW_TYPE_VALUE">+ إضافة نوع جديد</option>
-            </select>
-            <lucide-icon [img]="ChevronIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"></lucide-icon>
+        <!-- ① النوع -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+              <lucide-icon [img]="TypeIcon" class="w-4 h-4"></lucide-icon>
+            </span>
+            <h4 class="text-sm font-extrabold text-slate-800">نوع المساحة</h4>
           </div>
-          @if (fieldError('workspaceTypeId'); as msg) {
+
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">
+            النوع <span class="text-rose-500">*</span>
+          </label>
+          <p-select formControlName="workspaceTypeId"
+                    [options]="typeOptions()"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="اختر نوع المساحة"
+                    [filter]="true"
+                    filterBy="label"
+                    filterPlaceholder="ابحث عن نوع..."
+                    appendTo="body"
+                    [fluid]="true"
+                    styleClass="!rounded-xl !h-10"
+                    [class.ng-invalid]="!!fieldError('workspaceTypeId')"
+                    [class.ng-dirty]="!!fieldError('workspaceTypeId')">
+            <ng-template #item let-opt>
+              @if (opt.isNew) {
+                <span class="font-bold text-blue-600">{{ opt.label }}</span>
+              } @else {
+                <span class="text-slate-800">{{ opt.label }}</span>
+              }
+            </ng-template>
+          </p-select>
+          @if (fieldError('workspaceTypeId')) {
             <p class="text-xs text-rose-600 mt-1">يرجى اختيار نوع المساحة</p>
           }
 
           @if (addingNewType()) {
             <div class="mt-3 p-3.5 rounded-2xl bg-blue-50/60 border border-blue-100 fade-up">
               <label for="ws-new-type" class="block text-[11px] font-bold text-blue-800 mb-1.5">اسم النوع الجديد</label>
-              <input id="ws-new-type" type="text" formControlName="newTypeName" maxlength="50"
+              <input pInputText id="ws-new-type" formControlName="newTypeName" maxlength="50"
                 placeholder="مثال: مكتب فردي"
-                [class.border-rose-400]="fieldError('newTypeName')"
-                class="w-full h-11 px-4 bg-white border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+                class="w-full !h-10 !rounded-xl"
+                [class.ng-invalid]="!!fieldError('newTypeName')" [class.ng-dirty]="!!fieldError('newTypeName')" />
               @if (fieldError('newTypeName'); as msg) {
                 <p class="text-xs text-rose-600 mt-1">{{ msg }}</p>
               }
             </div>
           }
-        </div>
+        </section>
 
-        <!-- Name + code -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label for="ws-name" class="block text-xs font-bold text-slate-700 mb-1.5">
-              اسم المساحة <span class="text-rose-500">*</span>
-            </label>
-            <input id="ws-name" type="text" formControlName="name" maxlength="100" placeholder="مثال: قاعة الأمل"
-              [class.border-rose-400]="fieldError('name')"
-              class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-            @if (fieldError('name'); as msg) {
-              <p class="text-xs text-rose-600 mt-1">{{ msg }}</p>
-            }
+        <!-- ② البيانات الأساسية -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+              <lucide-icon [img]="BuildingIcon" class="w-4 h-4"></lucide-icon>
+            </span>
+            <h4 class="text-sm font-extrabold text-slate-800">البيانات الأساسية</h4>
           </div>
 
-          <div>
-            <label for="ws-code" class="block text-xs font-bold text-slate-700 mb-1.5">
-              كود المساحة <span class="text-rose-500">*</span>
-            </label>
-            <input id="ws-code" type="text" formControlName="code" maxlength="20" dir="ltr" placeholder="WS-101"
-              [class.border-rose-400]="fieldError('code')"
-              class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono uppercase placeholder:normal-case placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-            @if (fieldError('code'); as msg) {
-              <p class="text-xs text-rose-600 mt-1">{{ msg }}</p>
-            }
-          </div>
-        </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="ws-name" class="block text-xs font-bold text-slate-700 mb-1.5">
+                اسم المساحة <span class="text-rose-500">*</span>
+              </label>
+              <input pInputText id="ws-name" formControlName="name" maxlength="100" placeholder="مثال: قاعة الأمل"
+                class="w-full !h-10 !rounded-xl"
+                [class.ng-invalid]="!!fieldError('name')" [class.ng-dirty]="!!fieldError('name')" />
+              @if (fieldError('name'); as msg) {
+                <p class="text-xs text-rose-600 mt-1">{{ msg }}</p>
+              }
+            </div>
 
-        <!-- Floor + location -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label for="ws-floor" class="block text-xs font-bold text-slate-700 mb-1.5">
-              الطابق <span class="text-rose-500">*</span>
-            </label>
-            <input id="ws-floor" type="text" formControlName="floor" maxlength="50" placeholder="الأول"
-              [class.border-rose-400]="fieldError('floor')"
-              class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-            @if (fieldError('floor'); as msg) {
-              <p class="text-xs text-rose-600 mt-1">{{ msg }}</p>
-            }
+            <div>
+              <label for="ws-code" class="block text-xs font-bold text-slate-700 mb-1.5">
+                كود المساحة <span class="text-rose-500">*</span>
+              </label>
+              <input pInputText id="ws-code" formControlName="code" maxlength="20" dir="ltr" placeholder="WS-101"
+                class="w-full !h-10 !rounded-xl font-mono uppercase placeholder:normal-case"
+                [class.ng-invalid]="!!fieldError('code')" [class.ng-dirty]="!!fieldError('code')" />
+              @if (fieldError('code'); as msg) {
+                <p class="text-xs text-rose-600 mt-1">{{ msg }}</p>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- ③ الموقع -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
+              <lucide-icon [img]="PinIcon" class="w-4 h-4"></lucide-icon>
+            </span>
+            <h4 class="text-sm font-extrabold text-slate-800">الموقع</h4>
           </div>
 
-          <div>
-            <label for="ws-location" class="block text-xs font-bold text-slate-700 mb-1.5">
-              الموقع <span class="text-rose-500">*</span>
-            </label>
-            <input id="ws-location" type="text" formControlName="location" maxlength="100" placeholder="المبنى الرئيسي"
-              [class.border-rose-400]="fieldError('location')"
-              class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-            @if (fieldError('location'); as msg) {
-              <p class="text-xs text-rose-600 mt-1">{{ msg }}</p>
-            }
-          </div>
-        </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="ws-floor" class="block text-xs font-bold text-slate-700 mb-1.5">
+                الطابق <span class="text-rose-500">*</span>
+              </label>
+              <input pInputText id="ws-floor" formControlName="floor" maxlength="50" placeholder="الأول"
+                class="w-full !h-10 !rounded-xl"
+                [class.ng-invalid]="!!fieldError('floor')" [class.ng-dirty]="!!fieldError('floor')" />
+              @if (fieldError('floor'); as msg) {
+                <p class="text-xs text-rose-600 mt-1">{{ msg }}</p>
+              }
+            </div>
 
-        <!-- Capacity -->
-        <div>
-          <label for="ws-capacity" class="block text-xs font-bold text-slate-700 mb-1.5">
-            السعة (عدد الأفراد) <span class="text-rose-500">*</span>
-          </label>
+            <div>
+              <label for="ws-location" class="block text-xs font-bold text-slate-700 mb-1.5">
+                الموقع <span class="text-rose-500">*</span>
+              </label>
+              <input pInputText id="ws-location" formControlName="location" maxlength="100" placeholder="المبنى الرئيسي"
+                class="w-full !h-10 !rounded-xl"
+                [class.ng-invalid]="!!fieldError('location')" [class.ng-dirty]="!!fieldError('location')" />
+              @if (fieldError('location'); as msg) {
+                <p class="text-xs text-rose-600 mt-1">{{ msg }}</p>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- ④ السعة -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+              <lucide-icon [img]="UsersIcon" class="w-4 h-4"></lucide-icon>
+            </span>
+            <h4 class="text-sm font-extrabold text-slate-800">السعة (عدد الأفراد) <span class="text-rose-500">*</span></h4>
+          </div>
 
           <div class="flex flex-wrap items-center gap-3">
-            <div class="inline-flex items-center gap-1 p-1 bg-slate-50 border border-slate-200 rounded-xl"
-                 [class.border-rose-400]="fieldError('capacity')">
+            <div class="inline-flex items-center gap-1 p-1 bg-slate-50 border rounded-xl"
+                 [class]="fieldError('capacity') ? 'border-rose-400' : 'border-slate-200'">
               <button type="button" (click)="changeCapacity(-1)" aria-label="تقليل"
                 [disabled]="(form.controls.capacity.value ?? 1) <= 1"
                 class="w-9 h-9 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none">
                 <lucide-icon [img]="MinusIcon" class="w-4 h-4"></lucide-icon>
               </button>
 
-              <input id="ws-capacity" type="number" formControlName="capacity" min="1" max="1000" step="1" inputmode="numeric" dir="ltr"
-                class="w-16 h-9 text-center bg-transparent text-sm font-bold text-slate-900 focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
+              <p-inputNumber formControlName="capacity" [min]="1" [max]="1000" [useGrouping]="false"
+                             inputStyleClass="!w-16 !h-9 !text-center !font-bold !border-0 !bg-transparent !shadow-none" />
 
               <button type="button" (click)="changeCapacity(1)" aria-label="زيادة"
                 [disabled]="(form.controls.capacity.value ?? 1) >= 1000"
@@ -176,44 +212,31 @@
           </div>
 
           @if (fieldError('capacity'); as msg) {
-            <p class="text-xs text-rose-600 mt-1">{{ msg }}</p>
+            <p class="text-xs text-rose-600 mt-2">{{ msg }}</p>
           }
-        </div>
+        </section>
 
-        <!-- Description -->
-        <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <label for="ws-desc" class="block text-xs font-bold text-slate-700">
-              الوصف <span class="font-normal text-slate-400">(اختياري)</span>
-            </label>
+        <!-- ⑤ الوصف -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center">
+                <lucide-icon [img]="TextIcon" class="w-4 h-4"></lucide-icon>
+              </span>
+              <h4 class="text-sm font-extrabold text-slate-800">الوصف <span class="font-normal text-slate-400">(اختياري)</span></h4>
+            </div>
             <span class="text-[11px] text-slate-400">{{ (form.controls.description.value?.length ?? 0) }}/500</span>
           </div>
-          <textarea id="ws-desc" formControlName="description" rows="3" maxlength="500"
+
+          <textarea pTextarea id="ws-desc" formControlName="description" rows="3" maxlength="500"
             placeholder="تفاصيل إضافية عن المساحة..."
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"></textarea>
+            class="w-full !rounded-xl resize-none"></textarea>
           @if (fieldError('description'); as msg) {
             <p class="text-xs text-rose-600 mt-1">{{ msg }}</p>
           }
-        </div>
+        </section>
       </div>
 
-      <!-- Actions (ثابتة تحت) -->
-      <div class="shrink-0 flex items-center justify-end gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
-        <button type="button" (click)="onClose()" [disabled]="isSubmitting()"
-          class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
-          إلغاء
-        </button>
-
-        <button type="submit" [disabled]="isSubmitting()"
-          class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0">
-          @if (isSubmitting()) {
-            {{ isEditMode ? 'جاري الحفظ...' : 'جاري الإضافة...' }}
-          } @else {
-            {{ isEditMode ? 'حفظ التعديلات' : 'حفظ المساحة' }}
-          }
-        </button>
-      </div>
-
-    </form>
-  </div>
-</div>
+      <!-- Footer -->
+      <div class="shrink-0 flex items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
+        <p class="hidden sm:block text-[11px] text-slate-400"><span class="text-rose-500">*</span> حقول

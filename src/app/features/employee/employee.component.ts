@@ -1,7 +1,6 @@
 import {
   Component,
   HostListener,
-  OnDestroy,
   OnInit,
   computed,
   inject,
@@ -16,44 +15,71 @@ import {
   Validators
 } from '@angular/forms';
 import {
-  LucideAngularModule,
-  Users,
-  Plus,
-  Search,
-  Edit3,
-  Trash2,
-  RotateCcw
+  LucideAngularModule, Users, Plus, Edit3, Trash2, RotateCcw, X, User, Save, Phone, Mail, Lock,
+  CheckCircle2, UserX, PauseCircle, Ban
 } from 'lucide-angular';
+import { InputTextModule } from 'primeng/inputtext';
+import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
 import { EmployeeService } from './employee.service';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { Employee, EmployeeStatus } from './Iimployee';
+import { PortalDirective } from '../../shared/directives/portal.directive';
+import {
+  BADGE,
+  CellTemplateDirective,
+  DataTableComponent,
+  RowActionsDirective,
+  TableAction,
+  TableActionEvent,
+  TableColumn
+} from '../../shared/components/data-table';
 
 type StatusFilter = 'all' | EmployeeStatus;
-interface Toast {
-  type: 'success' | 'error';
-  text: string;
+
+interface StatCard {
+  value: StatusFilter;
+  label: string;
+  icon: any;
+  /** كلاسات Tailwind لازم تتكتب كاملة عشان تتلقط في الـ build */
+  border: string;
+  tint: string;
+  chip: string;
+  ring: string;
 }
 
 @Component({
   selector: 'app-employee',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    LucideAngularModule,
+    PortalDirective,
+    DataTableComponent,
+    CellTemplateDirective,
+    RowActionsDirective,
+    InputTextModule
+  ],
   templateUrl: './employee.component.html',
   styleUrls: ['./employee.component.scss']
 })
-export class EmployeeComponent implements OnInit, OnDestroy {
+export class EmployeeComponent implements OnInit {
   private employeeService = inject(EmployeeService);
   private workspaceService = inject(WorkspaceService);
+  private toastr = inject(ToastrService);
   private fb = inject(FormBuilder);
 
   // Icons
   readonly UsersIcon = Users;
   readonly PlusIcon = Plus;
-  readonly SearchIcon = Search;
-  readonly EditIcon = Edit3;
   readonly TrashIcon = Trash2;
-  readonly RotateCcwIcon = RotateCcw;
+  readonly CloseIcon = X;
+  readonly UserIcon = User;
+  readonly SaveIcon = Save;
+  readonly PhoneIcon = Phone;
+  readonly MailIcon = Mail;
+  readonly LockIcon = Lock;
 
   // Data state
   employees = signal<Employee[]>([]);
@@ -69,15 +95,12 @@ export class EmployeeComponent implements OnInit, OnDestroy {
   selectedEmployeeId = signal<number | null>(null);
   formError = signal<string | null>(null);
 
-  // Toast
-  toast = signal<Toast | null>(null);
-  private toastTimer?: ReturnType<typeof setTimeout>;
+  // Delete confirmation
+  pendingDelete = signal<Employee | null>(null);
+  isDeleting = signal(false);
 
-  // Search / filter / pagination
-  searchTerm = signal('');
+  // Quick filter (stat cards)
   statusFilter = signal<StatusFilter>('all');
-  page = signal(1);
-  readonly pageSize = 10;
 
   readonly statusOptions: { value: EmployeeStatus; label: string }[] = [
     { value: 'Active', label: 'نشط' },
@@ -85,6 +108,84 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     { value: 'Suspended', label: 'معلق' },
     { value: 'Terminated', label: 'منتهي' }
   ];
+
+  // ---------- كروت الإحصائيات (بتشتغل كفلتر سريع) ----------
+  readonly statCards: StatCard[] = [
+    {
+      value: 'all', label: 'إجمالي الموظفين', icon: Users,
+      border: 'border-s-blue-500', tint: 'from-blue-50',
+      chip: 'bg-blue-100 text-blue-600', ring: 'ring-blue-400'
+    },
+    {
+      value: 'Active', label: 'نشط', icon: CheckCircle2,
+      border: 'border-s-emerald-500', tint: 'from-emerald-50',
+      chip: 'bg-emerald-100 text-emerald-600', ring: 'ring-emerald-400'
+    },
+    {
+      value: 'Inactive', label: 'غير نشط', icon: UserX,
+      border: 'border-s-slate-500', tint: 'from-slate-100',
+      chip: 'bg-slate-200 text-slate-600', ring: 'ring-slate-400'
+    },
+    {
+      value: 'Suspended', label: 'معلق', icon: PauseCircle,
+      border: 'border-s-amber-500', tint: 'from-amber-50',
+      chip: 'bg-amber-100 text-amber-600', ring: 'ring-amber-400'
+    },
+    {
+      value: 'Terminated', label: 'منتهي', icon: Ban,
+      border: 'border-s-rose-500', tint: 'from-rose-50',
+      chip: 'bg-rose-100 text-rose-600', ring: 'ring-rose-400'
+    }
+  ];
+
+  // ---------- Table config ----------
+  readonly columns: TableColumn<Employee>[] = [
+    { key: 'fullName', header: 'الموظف', sortable: true, align: 'start' },
+    { key: 'email', header: 'البريد الإلكتروني', type: 'mono', sortable: true },
+    { key: 'mobileNumber', header: 'رقم الهاتف', type: 'mono' },
+    {
+      key: 'assignedWorkspaceName',
+      header: 'مكان العمل',
+      fallback: 'غير محدد',
+      // لو الـ API رجّع الـ id بس، نجيب الاسم من قايمة الـ workspaces
+      value: e =>
+        e.assignedWorkspaceName ??
+        this.workspaces().find(w => w.id === e.assignedWorkspaceId)?.name
+    },
+    {
+      key: 'status',
+      header: 'الحالة',
+      type: 'badge',
+      // الـ badges هي كمان مصدر اختيارات فلتر الحالة
+      badges: {
+        Active: { label: 'نشط', class: BADGE.green },
+        Inactive: { label: 'غير نشط', class: BADGE.slate },
+        Suspended: { label: 'معلق', class: BADGE.amber },
+        Terminated: { label: 'منتهي', class: BADGE.red }
+      }
+    }
+  ];
+
+  readonly actions: TableAction<Employee>[] = [
+    { key: 'edit', label: 'تعديل', icon: Edit3, tone: 'primary', disabled: e => this.isBusy(e.id) },
+    {
+      key: 'delete', label: 'حذف', icon: Trash2, tone: 'danger',
+      visible: e => !this.isRemoved(e), disabled: e => this.isBusy(e.id)
+    },
+    {
+      key: 'restore', label: 'استعادة', icon: RotateCcw, tone: 'success',
+      visible: e => this.isRemoved(e), disabled: e => this.isBusy(e.id)
+    }
+  ];
+
+  readonly rowClass = (e: Employee): string =>
+    this.isBusy(e.id) ? 'opacity-50 pointer-events-none' : '';
+
+  onAction(e: TableActionEvent<Employee>): void {
+    if (e.key === 'edit') this.openEditModal(e.row);
+    if (e.key === 'delete') this.askDelete(e.row);
+    if (e.key === 'restore') this.onRestore(e.row);
+  }
 
   employeeForm: FormGroup = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2)]],
@@ -95,32 +196,11 @@ export class EmployeeComponent implements OnInit, OnDestroy {
   });
 
   // ---------- Computed ----------
+  /** الجدول نفسه بيتكفل بالبحث والفلاتر والـ pagination؛ هنا بس فلتر الكروت */
   filteredEmployees = computed(() => {
-    let list = this.employees();
-    const search = this.searchTerm().trim().toLowerCase();
     const status = this.statusFilter();
-
-    if (status !== 'all') {
-      list = list.filter(e => e.status === status);
-    }
-    if (search) {
-      list = list.filter(
-        e =>
-          e.fullName?.toLowerCase().includes(search) ||
-          e.email?.toLowerCase().includes(search) ||
-          e.mobileNumber?.includes(search)
-      );
-    }
-    return list;
-  });
-
-  totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.filteredEmployees().length / this.pageSize))
-  );
-
-  pagedEmployees = computed(() => {
-    const start = (this.page() - 1) * this.pageSize;
-    return this.filteredEmployees().slice(start, start + this.pageSize);
+    const list = this.employees();
+    return status === 'all' ? list : list.filter(e => e.status === status);
   });
 
   statusCounts = computed(() => {
@@ -141,10 +221,6 @@ export class EmployeeComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadEmployees();
     this.loadWorkspaces();
-  }
-
-  ngOnDestroy(): void {
-    clearTimeout(this.toastTimer);
   }
 
   // ---------- Loading ----------
@@ -184,37 +260,14 @@ export class EmployeeComponent implements OnInit, OnDestroy {
 
   private refreshSilently(): void {
     this.employeeService.getEmployees().subscribe({
-      next: data => {
-        this.employees.set(data);
-        this.clampPage();
-      },
+      next: data => this.employees.set(data),
       error: err => console.error('Silent refresh failed:', err)
     });
   }
 
-  // ---------- Search / Filters / Paging ----------
-  onSearch(term: string): void {
-    this.searchTerm.set(term);
-    this.page.set(1);
-  }
-
+  // ---------- Quick filter ----------
   onFilterStatus(status: StatusFilter): void {
     this.statusFilter.set(status);
-    this.page.set(1);
-  }
-
-  resetFilters(): void {
-    this.searchTerm.set('');
-    this.statusFilter.set('all');
-    this.page.set(1);
-  }
-
-  goToPage(p: number): void {
-    this.page.set(Math.min(Math.max(1, p), this.totalPages()));
-  }
-
-  private clampPage(): void {
-    if (this.page() > this.totalPages()) this.page.set(this.totalPages());
   }
 
   // ---------- Modal ----------
@@ -315,8 +368,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
       next: () => {
         this.isSubmitting.set(false);
         this.closeModal();
-        this.showToast(
-          'success',
+        this.toastr.success(
           editingId !== null ? 'تم تعديل بيانات الموظف' : 'تمت إضافة الموظف بنجاح'
         );
         this.refreshSilently();
@@ -342,13 +394,12 @@ export class EmployeeComponent implements OnInit, OnDestroy {
           list.map(e => (e.id === emp.id ? { ...e, status: newStatus } : e))
         );
         this.setBusy(emp.id, false);
-        this.showToast('success', 'تم تغيير الحالة');
-        this.clampPage();
+        this.toastr.success('تم تغيير الحالة');
       },
       error: err => {
         selectEl.value = emp.status;
         this.setBusy(emp.id, false);
-        this.showToast('error', this.extractError(err, 'تعذر تغيير الحالة.'));
+        this.toastr.error(this.extractError(err, 'تعذر تغيير الحالة.'));
       }
     });
   }
@@ -370,29 +421,41 @@ export class EmployeeComponent implements OnInit, OnDestroy {
           )
         );
         this.setBusy(emp.id, false);
-        this.showToast('success', 'تم تغيير مكان العمل');
+        this.toastr.success('تم تغيير مكان العمل');
       },
       error: err => {
         selectEl.value = emp.assignedWorkspaceId != null ? String(emp.assignedWorkspaceId) : '';
         this.setBusy(emp.id, false);
-        this.showToast('error', this.extractError(err, 'تعذر تغيير مكان العمل.'));
+        this.toastr.error(this.extractError(err, 'تعذر تغيير مكان العمل.'));
       }
     });
   }
 
-  onDelete(emp: Employee): void {
-    if (!confirm(`هل أنت متأكد من حذف الموظف "${emp.fullName}"؟`)) return;
+  // ---------- الحذف (مع تأكيد) ----------
+  askDelete(emp: Employee): void {
+    this.pendingDelete.set(emp);
+  }
 
-    this.setBusy(emp.id, true);
+  cancelDelete(): void {
+    if (this.isDeleting()) return;
+    this.pendingDelete.set(null);
+  }
+
+  confirmDelete(): void {
+    const emp = this.pendingDelete();
+    if (!emp) return;
+
+    this.isDeleting.set(true);
     this.employeeService.deleteEmployee(emp.id).subscribe({
       next: () => {
-        this.setBusy(emp.id, false);
-        this.showToast('success', 'تم حذف الموظف');
+        this.isDeleting.set(false);
+        this.pendingDelete.set(null);
+        this.toastr.success('تم حذف الموظف');
         this.refreshSilently();
       },
       error: err => {
-        this.setBusy(emp.id, false);
-        this.showToast('error', this.extractError(err, 'تعذر حذف الموظف.'));
+        this.isDeleting.set(false);
+        this.toastr.error(this.extractError(err, 'تعذر حذف الموظف.'));
       }
     });
   }
@@ -402,12 +465,12 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     this.employeeService.restoreEmployee(emp.id).subscribe({
       next: () => {
         this.setBusy(emp.id, false);
-        this.showToast('success', 'تمت استعادة الموظف');
+        this.toastr.success('تمت استعادة الموظف');
         this.refreshSilently();
       },
       error: err => {
         this.setBusy(emp.id, false);
-        this.showToast('error', this.extractError(err, 'تعذر استعادة الموظف.'));
+        this.toastr.error(this.extractError(err, 'تعذر استعادة الموظف.'));
       }
     });
   }
@@ -426,43 +489,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     this.busyEmployeeIds.set(next);
   }
 
-  // ---------- UI helpers ----------
-  getStatusBadgeClass(status?: string): string {
-    switch (status) {
-      case 'Active':
-        return 'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
-      case 'Suspended':
-        return 'bg-amber-50 text-amber-700 ring-amber-600/20';
-      case 'Terminated':
-        return 'bg-rose-50 text-rose-700 ring-rose-600/20';
-      default:
-        return 'bg-slate-50 text-slate-600 ring-slate-500/20';
-    }
-  }
-
-  statusLabel(status?: string): string {
-    return this.statusOptions.find(s => s.value === status)?.label ?? (status || 'غير معروف');
-  }
-
-  statusDotClass(status: string): string {
-    switch (status) {
-      case 'Active':
-        return 'bg-emerald-500';
-      case 'Inactive':
-        return 'bg-slate-400';
-      case 'Suspended':
-        return 'bg-amber-500';
-      default:
-        return 'bg-rose-500';
-    }
-  }
-
-  private showToast(type: Toast['type'], text: string): void {
-    clearTimeout(this.toastTimer);
-    this.toast.set({ type, text });
-    this.toastTimer = setTimeout(() => this.toast.set(null), 3500);
-  }
-
+  // ---------- Helpers ----------
   private extractError(err: any, fallback: string): string {
     const e = err?.error;
     if (typeof e === 'string' && e.trim()) return e;
