@@ -108,7 +108,8 @@
     </app-add-company-modal>
   }
 @if (pendingDelete(); as d) {
-  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
+  <div appPortal dir="rtl"
+   class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
        (click)="cancelDelete()">
     <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl" dir="rtl"
          role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">

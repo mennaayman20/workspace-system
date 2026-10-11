@@ -1,9 +1,12 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, map, tap } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, forkJoin, map, tap } from 'rxjs';
 
 import { environment } from '../../core/environments/environment'; // عدّلي المسار
-import { PACKAGE_TYPES, PackageItem, PackagePayload } from './Ipackage';
+import {
+  PACKAGE_TYPES, PACKAGE_TYPE_BY_LABEL,
+  PackageItem, PackagePayload, PackageTranslations, PackageType,
+} from './Ipackage';
 
 @Injectable({ providedIn: 'root' })
 export class PackageService {
@@ -13,14 +16,33 @@ export class PackageService {
   readonly packages = signal<PackageItem[]>([]);
 
   getPackages(): Observable<PackageItem[]> {
-    return this.http.get<any>(this.url).pipe(
+    const params = new HttpParams().set('pageNumber', 1).set('pageSize', 100);
+
+    return this.http.get<any>(this.url, { params }).pipe(
       map((res) => {
-        const list = Array.isArray(res)
+        const raw = Array.isArray(res)
           ? res
-          : res?.data?.items || res?.data || res?.items || [];
-        return list.map((r: any) => this.normalize(r));
+          : res?.data?.items ?? res?.data ?? res?.items ?? [];
+        return (Array.isArray(raw) ? raw : []).map((r: any) => this.normalize(r));
       }),
       tap((list) => this.packages.set(list)),
+    );
+  }
+
+  /** الاسم والوصف باللغتين للتعديل (خام لو الباك رجّعه، وإلا طلب بكل لغة) */
+  getTranslations(id: number): Observable<PackageTranslations> {
+    const fetchLang = (lang: 'ar' | 'en') =>
+      this.http
+        .get<any>(`${this.url}/${id}`, { headers: { 'Accept-Language': lang } })
+        .pipe(map((res) => res?.data ?? res));
+
+    return forkJoin([fetchLang('ar'), fetchLang('en')]).pipe(
+      map(([ar, en]) => ({
+        nameAr: ar?.nameAr ?? ar?.name ?? '',
+        nameEn: en?.nameEn ?? en?.name ?? '',
+        descriptionAr: ar?.descriptionAr ?? ar?.description ?? '',
+        descriptionEn: en?.descriptionEn ?? en?.description ?? '',
+      })),
     );
   }
 
@@ -48,22 +70,29 @@ export class PackageService {
     return this.http.patch<any>(`${this.url}/${id}/restore`, {}).pipe(map(() => void 0));
   }
 
-  /** بيظبط شكل الداتا: الـ enum ممكن يجي رقم أو بادئة "PackageType_" */
+  /** بيظبط شكل الداتا: الـ enum ممكن يجي رقم أو بادئة "PackageType_" أو نص مترجم */
   private normalize(r: any): PackageItem {
-    const type =
-      typeof r.packageType === 'number'
-        ? PACKAGE_TYPES[r.packageType]
-        : String(r.packageType).replace(/^PackageType_/, '');
-
     return {
       ...r,
       id: Number(r.id),
-      packageType: type,
+      packageType: this.toType(r.packageType),
       totalHours: Number(r.totalHours),
       durationDays: r.durationDays ?? null,
       price: Number(r.price),
       isActive: r.isActive ?? true,
       isDeleted: r.isDeleted ?? false,
     };
+  }
+
+  private toType(value: unknown): PackageType {
+    if (typeof value === 'number') return PACKAGE_TYPES[value] ?? 'WorkspaceHours';
+
+    const raw = String(value ?? '').replace(/^PackageType_/, '').trim();
+    if ((PACKAGE_TYPES as string[]).includes(raw)) return raw as PackageType;
+    if (PACKAGE_TYPE_BY_LABEL[raw]) return PACKAGE_TYPE_BY_LABEL[raw];
+
+    const lower = raw.replace(/\s+/g, '').toLowerCase();
+    const match = PACKAGE_TYPES.find((t) => t.toLowerCase() === lower);
+    return match ?? 'WorkspaceHours';
   }
 }

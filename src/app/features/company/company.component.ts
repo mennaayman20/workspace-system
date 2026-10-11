@@ -5,11 +5,12 @@ import { CompanyService } from './company.service';
 import { Company } from './Icompany';
 import { AddCompanyModalComponent } from './add-company-modal/add-company-modal.component';
 import { LucideAngularModule, Building2, Plus, Trash2 } from 'lucide-angular';
+import { PortalDirective } from '../../shared/directives/portal.directive';
 
 @Component({
   selector: 'app-company',
   standalone: true,
-  imports: [CommonModule, AddCompanyModalComponent, LucideAngularModule],
+  imports: [CommonModule, AddCompanyModalComponent, LucideAngularModule , PortalDirective],
   templateUrl: './company.component.html'
 })
 export class CompanyComponent implements OnInit {

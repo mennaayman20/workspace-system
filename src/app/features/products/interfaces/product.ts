@@ -1,37 +1,56 @@
 export interface ProductCategory {
   id: number;
-  name: string;
-  description?: string;
+  name?: string | null;               // المترجم (للعرض)
+  description?: string | null;
+  nameAr?: string | null;
+  nameEn?: string | null;
+  descriptionAr?: string | null;
+  descriptionEn?: string | null;
   isActive: boolean;
 }
 
 export interface CreateProductCategoryCommand {
-  name: string;
-  description?: string;
+  nameAr: string;
+  nameEn: string;
+  descriptionAr: string | null;
+  descriptionEn: string | null;
   isActive: boolean;
 }
 
 export interface Product {
   id: number;
   productCategoryId: number;
-  englishName: string;
-  description?: string;
-  sku?: string;
+  productCategoryName?: string | null;
+  name?: string | null;               // المترجم (للعرض)
+  description?: string | null;
+  nameAr?: string | null;
+  nameEn?: string | null;
+  descriptionAr?: string | null;
+  descriptionEn?: string | null;
+  englishName?: string | null;        // قديم، لو الباك لسه بيرجّعه
+  sku?: string | null;
   sellingPrice: number;
-  productCategoryName:string;
-
   costPrice: number;
   isActive: boolean;
 }
 
 export interface CreateProductCommand {
   productCategoryId: number;
-  englishName: string;
-  description?: string;
-  sku?: string;
+  nameAr: string;
+  nameEn: string;
+  descriptionAr: string | null;
+  descriptionEn: string | null;
+  sku: string | null;
   sellingPrice: number;
   costPrice: number;
   isActive: boolean;
+}
+
+export interface Translations {
+  nameAr: string;
+  nameEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
 }
 
 export interface AddProductCommand {
@@ -39,7 +58,6 @@ export interface AddProductCommand {
   productId: number;
   quantity: number;
 }
-
 
 export interface ApiResponse<T> {
   succeeded: boolean;

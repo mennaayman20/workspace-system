@@ -1,66 +1,60 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
 import {
-  LucideAngularModule, Package, Plus, Pencil, Trash2, X, RotateCcw, Power,
-  Percent,
+  LucideAngularModule, Package, Plus, Pencil, Trash2, RotateCcw, Power, Percent,
 } from 'lucide-angular';
 
 import { PackageService } from './package.service';
-import {
-  PACKAGE_TYPES, PACKAGE_TYPE_LABELS, PackageItem, PackagePayload, PackageType,
-} from './Ipackage';
+import { PACKAGE_TYPE_LABELS, PackageItem, PackageType } from './Ipackage';
 import { LanguageService } from '../../core/services/lang.service'; // عدلي المسار حسب مشروعك
+import { PackageFormModalComponent } from './package-form-modal/package-form-modal';
 
 @Component({
   selector: 'app-packages',
   standalone: true,
-  imports: [CurrencyPipe, ReactiveFormsModule, RouterLink, RouterLinkActive,LucideAngularModule],
+  imports: [
+    CurrencyPipe, RouterLink, RouterLinkActive, LucideAngularModule,
+    PackageFormModalComponent,
+  ],
   templateUrl: './packages.component.html',
 })
-export class PackagesComponent implements OnInit {
-  private readonly fb = inject(NonNullableFormBuilder);
+export class PackagesComponent {
   private readonly packageService = inject(PackageService);
   private readonly toastr = inject(ToastrService);
-  public readonly langService = inject(LanguageService); // حقن خدمة اللغة
+  readonly langService = inject(LanguageService);
 
   readonly PercentIcon = Percent;
   readonly PackageIcon = Package;
   readonly PlusIcon = Plus;
   readonly EditIcon = Pencil;
   readonly TrashIcon = Trash2;
-  readonly CloseIcon = X;
   readonly RestoreIcon = RotateCcw;
   readonly PowerIcon = Power;
 
-  readonly typeOptions = PACKAGE_TYPES;
-  readonly typeLabels = PACKAGE_TYPE_LABELS;
+  readonly isAr = computed(() => this.langService.currentLang() === 'ar');
 
   readonly packages = this.packageService.packages;
   readonly count = computed(() => this.packages().length);
 
   readonly isLoading = signal(false);
+
+  // Form modal
   readonly isFormOpen = signal(false);
-  readonly isSaving = signal(false);
   readonly editing = signal<PackageItem | null>(null);
+
+  // Delete confirmation
   readonly pendingDelete = signal<PackageItem | null>(null);
   readonly busyId = signal<number | null>(null);
 
-  // حقل الاسم الوهمي اللي هيربط بالـ HTML
-  readonly form = this.fb.group({
-    name: ['', Validators.required],
-    description: [''],
-    packageType: this.fb.control<PackageType>('WorkspaceHours'),
-    totalHours: this.fb.control<number | null>(null, [Validators.required, Validators.min(0.01)]),
-    durationDays: this.fb.control<number | null>(null, Validators.min(1)),
-    price: this.fb.control<number | null>(null, [Validators.required, Validators.min(0)]),
-  });
-
-  ngOnInit() {
-    this.load();
+  constructor() {
+    // بيحمّل أول مرة، وبيعيد التحميل لما اللغة تتغير (الباك بيترجم الاسم حسب اللغة)
+    effect(() => {
+      this.langService.currentLang();
+      untracked(() => this.load());
+    });
   }
 
   load() {
@@ -69,107 +63,39 @@ export class PackagesComponent implements OnInit {
       next: () => this.isLoading.set(false),
       error: () => {
         this.isLoading.set(false);
-        this.toastr.error('تعذر تحميل الباقات');
+        this.toastr.error(this.isAr() ? 'تعذر تحميل الباقات' : 'Failed to load packages');
       },
     });
   }
 
+  // ---------- الفورم ----------
   openCreate() {
     this.editing.set(null);
-    this.form.reset({ packageType: 'WorkspaceHours' });
     this.isFormOpen.set(true);
   }
 
-openEdit(p: PackageItem) {
-  this.editing.set(p);
-  const isAr = this.langService.currentLang() === 'ar';
-  
-  // اختيار الاسم والوصف المتاحين بناءً على اللغة الحالية
-  // لو الاسم باللغة الحالية غير موجود، يأخذ الاسم باللغة الثانية كـ Fallback
-  const existingName = isAr 
-    ? (p.nameAr || p.nameEn || '') 
-    : (p.nameEn || p.nameAr || '');
-
-  const existingDesc = isAr 
-    ? (p.descriptionAr || p.descriptionEn || '') 
-    : (p.descriptionEn || p.descriptionAr || '');
-
-  this.form.patchValue({
-    name: existingName,
-    description: existingDesc,
-    packageType: p.packageType,
-    totalHours: p.totalHours,
-    durationDays: p.durationDays,
-    price: p.price,
-  });
-
-  this.isFormOpen.set(true);
-}
+  openEdit(p: PackageItem) {
+    this.editing.set(p);
+    this.isFormOpen.set(true);
+  }
 
   closeForm() {
-    if (this.isSaving()) return;
     this.isFormOpen.set(false);
+    this.editing.set(null);
   }
 
-save() {
-  if (this.form.invalid) {
-    this.form.markAllAsTouched();
-    return;
+  onSaved() {
+    this.closeForm();
+    this.load();
   }
 
-  const v = this.form.getRawValue();
-  const enteredName = v.name.trim();
-  const enteredDesc = v.description.trim() || null;
-
-  // إرسال الاسم المدخل للحقل الإجباري في الباك إند، ونفس القيمة للحقل الآخر كـ Fallback
-  const payload: PackagePayload = {
-    nameAr: enteredName,
-    nameEn: enteredName, // يمنع خطأ "The NameEn field is required"
-    descriptionAr: enteredDesc,
-    descriptionEn: enteredDesc,
-    packageType: v.packageType,
-    totalHours: v.totalHours!,
-    durationDays: v.durationDays,
-    price: v.price!,
-  };
-
-  const current = this.editing();
-  const request$ = current
-    ? this.packageService.update(current.id, payload)
-    : this.packageService.create(payload);
-
-  this.isSaving.set(true);
-  request$.subscribe({
-    next: () => {
-      this.isSaving.set(false);
-      this.isFormOpen.set(false);
-      this.toastr.success(current ? 'تم تعديل الباقة' : 'تمت إضافة الباقة');
-      this.load();
-    },
-    error: (err) => {
-      this.isSaving.set(false);
-      this.toastr.error(err?.error?.message || 'فشل حفظ الباقة');
-    },
-  });
-}
-  toggleActive(p: PackageItem) {
-    this.runAction(
-      p.id,
-      p.isActive ? this.packageService.deactivate(p.id) : this.packageService.activate(p.id),
-      p.isActive ? 'تم إيقاف الباقة' : 'تم تفعيل الباقة',
-    );
-  }
-
-  restore(p: PackageItem) {
-    this.runAction(p.id, this.packageService.restore(p.id), 'تمت استعادة الباقة');
-  }
-
- askDelete(p: PackageItem) {
-    console.log('Delete clicked for package:', p); // للتأكد في الـ Console
+  // ---------- الحذف ----------
+  askDelete(p: PackageItem) {
     this.pendingDelete.set(p);
   }
 
   cancelDelete() {
+    if (this.busyId() !== null) return;
     this.pendingDelete.set(null);
   }
 
@@ -182,38 +108,53 @@ save() {
       next: () => {
         this.busyId.set(null);
         this.pendingDelete.set(null);
-        this.toastr.success('تم حذف الباقة بنجاح');
-        this.load(); // إعادة تحميل القائمة
+        this.toastr.success(this.isAr() ? 'تم حذف الباقة بنجاح' : 'Package deleted');
+        this.load();
       },
       error: (err) => {
         this.busyId.set(null);
-        this.toastr.error(err?.error?.message || 'فشل حذف الباقة');
+        this.toastr.error(err?.error?.message || (this.isAr() ? 'فشل حذف الباقة' : 'Failed to delete package'));
       },
     });
   }
 
-  // عرض الاسم باللغة المفعلة أولاً، وإذا لم توجد يُعرض الاسم باللغة الثانية
+  // ---------- التفعيل والاستعادة ----------
+  toggleActive(p: PackageItem) {
+    this.runAction(
+      p.id,
+      p.isActive ? this.packageService.deactivate(p.id) : this.packageService.activate(p.id),
+      p.isActive ? 'تم إيقاف الباقة' : 'تم تفعيل الباقة',
+    );
+  }
+
+  restore(p: PackageItem) {
+    this.runAction(p.id, this.packageService.restore(p.id), 'تمت استعادة الباقة');
+  }
+
+  // ---------- العرض ----------
+  /** الباك بيرجّع name مترجم، وبنرجع للحقول الخام لو مش موجود */
   displayName(p: PackageItem): string {
-    const isAr = this.langService.currentLang() === 'ar';
-    if (isAr) {
-      return p.nameAr || p.nameEn || `باقة #${p.id}`;
-    }
-    return p.nameEn || p.nameAr || `Package #${p.id}`;
+    const fallback = this.isAr() ? p.nameAr || p.nameEn : p.nameEn || p.nameAr;
+    return p.name || fallback || (this.isAr() ? `باقة #${p.id}` : `Package #${p.id}`);
   }
 
-  // عرض الوصف باللغة المفعلة أولاً
   displayDescription(p: PackageItem): string | null {
-    const isAr = this.langService.currentLang() === 'ar';
-    return isAr ? (p.descriptionAr || p.descriptionEn) : (p.descriptionEn || p.descriptionAr);
+    const fallback = this.isAr()
+      ? p.descriptionAr || p.descriptionEn
+      : p.descriptionEn || p.descriptionAr;
+    return p.description || fallback || null;
   }
 
-  private runAction(id: number, request$: Observable<void>, successMsg: string, done?: () => void) {
+  typeLabel(t: PackageType): string {
+    return PACKAGE_TYPE_LABELS[t]?.[this.isAr() ? 'ar' : 'en'] ?? t;
+  }
+
+  private runAction(id: number, request$: Observable<void>, successMsg: string) {
     this.busyId.set(id);
     request$.subscribe({
       next: () => {
         this.busyId.set(null);
         this.toastr.success(successMsg);
-        done?.();
         this.load();
       },
       error: (err) => {

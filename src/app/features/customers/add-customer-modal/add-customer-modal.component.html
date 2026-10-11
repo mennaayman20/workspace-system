@@ -68,7 +68,7 @@
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
               </label>
               <input pInputText id="fullNameAr" formControlName="fullNameAr" dir="rtl"
-                     class="w-full !h-11 !rounded-xl" placeholder="اسم العميل الرباعي"
+                     class="w-full !h-10 !rounded-xl" placeholder="اسم العميل الرباعي"
                      [class.ng-invalid]="isInvalid('fullNameAr')" [class.ng-dirty]="isInvalid('fullNameAr')" />
               @if (isInvalid('fullNameAr')) {
                 <p class="text-xs text-rose-600 mt-1">الاسم بالعربي مطلوب</p>
@@ -81,7 +81,7 @@
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
               </label>
               <input pInputText id="fullNameEn" formControlName="fullNameEn" dir="ltr"
-                     class="w-full !h-11 !rounded-xl" placeholder="Customer full name"
+                     class="w-full !h-10 !rounded-xl" placeholder="Customer full name"
                      [class.ng-invalid]="isInvalid('fullNameEn')" [class.ng-dirty]="isInvalid('fullNameEn')" />
               @if (isInvalid('fullNameEn')) {
                 <p class="text-xs text-rose-600 mt-1">English name is required</p>
@@ -104,12 +104,13 @@
               <label for="mobileNumber" class="block text-xs font-bold text-slate-700 mb-1.5">
                 رقم الموبايل <span class="text-rose-500">*</span>
               </label>
-              <div class="relative">
-                <lucide-icon [img]="PhoneIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
-                <input pInputText id="mobileNumber" formControlName="mobileNumber" dir="ltr"
-                       class="w-full !h-11 !rounded-xl !ps-10 text-right" placeholder="01012345678"
-                       [class.ng-invalid]="isInvalid('mobileNumber')" [class.ng-dirty]="isInvalid('mobileNumber')" />
-              </div>
+<div class="relative">
+  <lucide-icon [img]="PhoneIcon"
+    class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"></lucide-icon>
+  <input pInputText id="mobileNumber" formControlName="mobileNumber" dir="ltr"
+         class="w-full !h-10 !rounded-xl !ps-10 text-right" placeholder="01012345678"
+         [class.ng-invalid]="isInvalid('mobileNumber')" [class.ng-dirty]="isInvalid('mobileNumber')" />
+</div>
               @if (isInvalid('mobileNumber')) {
                 <p class="text-xs text-rose-600 mt-1">رقم الموبايل مطلوب</p>
               }
@@ -122,7 +123,7 @@
               <div class="relative">
                 <lucide-icon [img]="MailIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
                 <input pInputText id="email" formControlName="email" type="email" dir="ltr"
-                       class="w-full !h-11 !rounded-xl !ps-10 text-left" placeholder="example@domain.com"
+                       class="w-full !h-10 !rounded-xl !ps-10 text-left" placeholder="example@domain.com"
                        [class.ng-invalid]="isInvalid('email')" [class.ng-dirty]="isInvalid('email')" />
               </div>
               @if (isInvalid('email')) {
@@ -148,7 +149,7 @@
                     optionValue="value"
                     appendTo="body"
                     [fluid]="true"
-                    styleClass="!rounded-xl !h-12">
+                    styleClass="!rounded-xl !h-10">
 
             <!-- القيمة المختارة -->
             <ng-template #selectedItem let-opt>
@@ -191,7 +192,7 @@
                           [showClear]="true"
                           appendTo="body"
                           [fluid]="true"
-                          styleClass="!rounded-xl !h-11"
+                          styleClass="!rounded-xl !h-10"
                           [class.ng-invalid]="isInvalid('companyId')"
                           [class.ng-dirty]="isInvalid('companyId')">
                 </p-select>

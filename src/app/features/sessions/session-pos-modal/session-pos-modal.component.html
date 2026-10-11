@@ -102,7 +102,7 @@
                         {{ quantityOf(p.id) }}
                       </span>
                     }
-                    <p class="font-bold text-slate-800 text-sm truncate">{{ p.englishName }}</p>
+<p class="font-bold text-slate-800 text-sm truncate">{{ p.name ?? p.nameEn ?? p.nameAr ?? p.englishName }}</p>
                     <p dir="ltr" class="text-xs font-mono font-bold text-emerald-600 mt-1 text-right">
                       {{ p.sellingPrice | currency:'EGP' }}
                     </p>

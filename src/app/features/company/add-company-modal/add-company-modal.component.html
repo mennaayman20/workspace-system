@@ -13,7 +13,7 @@
               {{ companyToEdit() ? 'تعديل بيانات الشركة' : 'إضافة شركة جديدة' }}
             </h3>
             <p class="text-xs text-slate-500 mt-0.5">
-              {{ companyToEdit() ? 'عدّلي البيانات ثم احفظي التغييرات' : 'أدخلي بيانات الشركة بالعربي والإنجليزي' }}
+              {{ companyToEdit() ? 'عدّل البيانات ثم احفظ التغييرات' : 'أدخل بيانات الشركة بالعربي والإنجليزي' }}
             </p>
           </div>
         </div>
@@ -58,7 +58,7 @@
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
               </label>
               <input pInputText id="nameAr" formControlName="nameAr" dir="rtl"
-                     class="w-full !h-11 !rounded-xl" placeholder="شركة الأمل للحلول الذكية"
+                     class="w-full !h-10 !rounded-xl" placeholder="شركة الأمل للحلول الذكية"
                      [class.ng-invalid]="isFieldInvalid('nameAr')" [class.ng-dirty]="isFieldInvalid('nameAr')" />
               @if (isFieldInvalid('nameAr')) {
                 <span class="text-xs text-rose-600 mt-1 block">الاسم بالعربي مطلوب (حرفين على الأقل)</span>
@@ -71,7 +71,7 @@
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
               </label>
               <input pInputText id="nameEn" formControlName="nameEn" dir="ltr"
-                     class="w-full !h-11 !rounded-xl" placeholder="Al Amal Smart Solutions"
+                     class="w-full !h-10 !rounded-xl" placeholder="Al Amal Smart Solutions"
                      [class.ng-invalid]="isFieldInvalid('nameEn')" [class.ng-dirty]="isFieldInvalid('nameEn')" />
               @if (isFieldInvalid('nameEn')) {
                 <span class="text-xs text-rose-600 mt-1 block">English name is required</span>
@@ -96,7 +96,7 @@
               <div class="relative">
                 <lucide-icon [img]="UserIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
                 <input pInputText id="contactPerson" formControlName="contactPerson"
-                       class="w-full !h-11 !rounded-xl !ps-10" placeholder="اسم المسؤول" />
+                       class="w-full !h-10 !rounded-xl !ps-10" placeholder="اسم المسؤول" />
               </div>
             </div>
 
@@ -106,7 +106,7 @@
               <div class="relative">
                 <lucide-icon [img]="PhoneIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
                 <input pInputText id="phone" formControlName="phone" dir="ltr"
-                       class="w-full !h-11 !rounded-xl !ps-10 text-right" placeholder="01000000000"
+                       class="w-full !h-10 !rounded-xl !ps-10 text-right" placeholder="01000000000"
                        [class.ng-invalid]="isFieldInvalid('phone')" [class.ng-dirty]="isFieldInvalid('phone')" />
               </div>
               @if (isFieldInvalid('phone')) {
@@ -120,7 +120,7 @@
               <div class="relative">
                 <lucide-icon [img]="MailIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
                 <input pInputText id="email" formControlName="email" type="email" dir="ltr"
-                       class="w-full !h-11 !rounded-xl !ps-10 text-left" placeholder="company@domain.com"
+                       class="w-full !h-10 !rounded-xl !ps-10 text-left" placeholder="company@domain.com"
                        [class.ng-invalid]="isFieldInvalid('email')" [class.ng-dirty]="isFieldInvalid('email')" />
               </div>
               @if (isFieldInvalid('email')) {
@@ -145,14 +145,14 @@
               <div class="relative">
                 <lucide-icon [img]="HashIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
                 <input pInputText id="taxNumber" formControlName="taxNumber" dir="ltr"
-                       class="w-full !h-11 !rounded-xl !ps-10 text-left" placeholder="xxx-xxx-xxx" />
+                       class="w-full !h-10 !rounded-xl !ps-10 text-left" placeholder="xxx-xxx-xxx" />
               </div>
             </div>
 
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1.5">الحد الائتماني</label>
               <p-inputNumber formControlName="creditLimit" mode="currency" currency="EGP" locale="en-EG"
-                             [min]="0" [fluid]="true" inputStyleClass="!h-11 !rounded-xl">
+                             [min]="0" [fluid]="true" inputStyleClass="!h-10 !rounded-xl">
               </p-inputNumber>
               @if (isFieldInvalid('creditLimit')) {
                 <span class="text-xs text-rose-600 mt-1 block">يجب أن تكون القيمة 0 أو أكثر</span>

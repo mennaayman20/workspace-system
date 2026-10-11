@@ -1,8 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map, switchMap, tap } from 'rxjs';
+import { Observable, forkJoin, map, switchMap, tap } from 'rxjs';
 import {
-  ApiResponse, PagedResult,
+  ApiResponse, PagedResult, Translations,
   Product, CreateProductCommand, AddProductCommand
 } from '../interfaces/product';
 import { environment } from '../../../core/environments/environment';
@@ -33,13 +33,30 @@ export class ProductService {
       );
   }
 
+  /** الاسم والوصف باللغتين للتعديل (خام لو الباك رجّعه، وإلا طلب بكل لغة) */
+  getTranslations(id: number): Observable<Translations> {
+    const fetchLang = (lang: 'ar' | 'en') =>
+      this.http
+        .get<any>(`${this.baseUrl}/${id}`, { headers: { 'Accept-Language': lang } })
+        .pipe(map((res) => res?.data ?? res));
+
+    return forkJoin([fetchLang('ar'), fetchLang('en')]).pipe(
+      map(([ar, en]) => ({
+        nameAr: ar?.nameAr ?? ar?.name ?? '',
+        nameEn: en?.nameEn ?? en?.name ?? en?.englishName ?? '',
+        descriptionAr: ar?.descriptionAr ?? ar?.description ?? '',
+        descriptionEn: en?.descriptionEn ?? en?.description ?? '',
+      })),
+    );
+  }
+
   createProduct(command: CreateProductCommand): Observable<Product> {
     return this.http.post<ApiResponse<Product>>(this.baseUrl, command).pipe(
       switchMap((res) => this.getProducts().pipe(map(() => res.data)))
     );
   }
 
-  updateProduct(id: number, command: Partial<CreateProductCommand>): Observable<void> {
+  updateProduct(id: number, command: CreateProductCommand): Observable<void> {
     return this.http.put<ApiResponse<unknown>>(`${this.baseUrl}/${id}`, command).pipe(
       switchMap(() => this.getProducts()),
       map(() => void 0)

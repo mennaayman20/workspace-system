@@ -1,112 +1,99 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ProductCategoryService } from '../../services/product-category.service';
-import { ProductCategory, CreateProductCategoryCommand } from '../../interfaces/product';
-import { 
-  LucideAngularModule, 
-  FolderTreeIcon, 
-  PlusIcon, 
-  EditIcon, 
-  TrashIcon, 
-  SaveIcon, 
-  XIcon ,
-  PackageIcon
-} from 'lucide-angular';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+import {
+  LucideAngularModule, FolderTreeIcon, PlusIcon, EditIcon, TrashIcon, PackageIcon,
+} from 'lucide-angular';
+
+import { ProductCategoryService } from '../../services/product-category.service';
+import { ProductCategory } from '../../interfaces/product';
+import { CategoryFormModalComponent } from '../../components/category-form-modal/category-form-modal.component';
 
 @Component({
   selector: 'app-category-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule , RouterLink,RouterLinkActive],
+  imports: [
+    CommonModule, LucideAngularModule, RouterLink, RouterLinkActive,
+    CategoryFormModalComponent,
+  ],
   templateUrl: './category-list.component.html'
 })
 export class CategoryListComponent implements OnInit {
   categoryService = inject(ProductCategoryService);
-  private fb = inject(NonNullableFormBuilder);
+  private toastr = inject(ToastrService);
 
-  // Icons
   readonly FolderTreeIcon = FolderTreeIcon;
   readonly PlusIcon = PlusIcon;
   readonly EditIcon = EditIcon;
   readonly TrashIcon = TrashIcon;
-  readonly SaveIcon = SaveIcon;
-  readonly XIcon = XIcon;
   readonly PackageIcon = PackageIcon;
 
-  // Signals State Management
+  // Form modal
   isFormOpen = signal<boolean>(false);
-  selectedCategoryForEdit = signal<ProductCategory | null>(null);
+  editing = signal<ProductCategory | null>(null);
 
-  // Form Group
-  categoryForm = this.fb.group({
-    name: ['', [Validators.required]],
-    description: [''],
-    isActive: [true]
-  });
+  // Delete confirmation
+  pendingDelete = signal<ProductCategory | null>(null);
+  isDeleting = signal<boolean>(false);
 
   ngOnInit(): void {
-    this.categoryService.getCategories().subscribe();
+    this.categoryService.getCategories().subscribe({
+      error: () => this.toastr.error('تعذر تحميل التصنيفات'),
+    });
   }
 
-  onSubmit(): void {
-    if (this.categoryForm.invalid) {
-      this.categoryForm.markAllAsTouched();
-      return;
-    }
-
-    const command = this.categoryForm.getRawValue() as CreateProductCategoryCommand;
-    const currentCategory = this.selectedCategoryForEdit();
-
-    if (currentCategory) {
-      // Update Mode
-      this.categoryService.updateCategory(currentCategory.id, command).subscribe({
-        next: () => this.resetForm()
-      });
-    } else {
-      // Create Mode
-      this.categoryService.createCategory(command).subscribe({
-        next: () => this.resetForm()
-      });
-    }
+  displayName(c: ProductCategory): string {
+    return c.name || c.nameAr || c.nameEn || `#${c.id}`;
   }
 
+  displayDescription(c: ProductCategory): string | null {
+    return c.description || c.descriptionAr || c.descriptionEn || null;
+  }
+
+  // ---------- الفورم ----------
   openAddForm(): void {
-    this.resetForm();
+    this.editing.set(null);
     this.isFormOpen.set(true);
   }
 
   editCategory(category: ProductCategory): void {
-    this.selectedCategoryForEdit.set(category);
-    this.categoryForm.patchValue({
-      name: category.name ?? '',
-      description: category.description ?? '',
-      isActive: category.isActive ?? true
-    });
+    this.editing.set(category);
     this.isFormOpen.set(true);
   }
 
-  deleteCategory(id: number): void {
-    if (confirm('هل أنت تأكد من حذف هذا التصنيف؟')) {
-      this.categoryService.deleteCategory(id).subscribe();
-    }
-  }
-
-  restoreCategory(id: number): void {
-    this.httpPatchRestore(id);
-  }
-
-  private httpPatchRestore(id: number): void {
-    this.categoryService.getCategories().subscribe();
-  }
-
-  resetForm(): void {
-    this.selectedCategoryForEdit.set(null);
-    this.categoryForm.reset({
-      name: '',
-      description: '',
-      isActive: true
-    });
+  closeForm(): void {
     this.isFormOpen.set(false);
+    this.editing.set(null);
+  }
+
+  // ---------- الحذف ----------
+  askDelete(category: ProductCategory): void {
+    this.pendingDelete.set(category);
+  }
+
+  cancelDelete(): void {
+    if (this.isDeleting()) return;
+    this.pendingDelete.set(null);
+  }
+
+  confirmDelete(): void {
+    const c = this.pendingDelete();
+    if (!c) return;
+
+    this.isDeleting.set(true);
+    this.categoryService.deleteCategory(c.id).subscribe({
+      next: () => {
+        this.isDeleting.set(false);
+        this.pendingDelete.set(null);
+        this.toastr.success('تم حذف التصنيف بنجاح');
+      },
+      error: (err) => {
+        this.isDeleting.set(false);
+        this.toastr.error(
+          err?.error?.message || 'تعذر حذف التصنيف، قد يكون مرتبطاً بمنتجات.'
+        );
+      },
+    });
   }
 }

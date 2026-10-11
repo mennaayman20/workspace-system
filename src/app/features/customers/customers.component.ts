@@ -6,11 +6,12 @@ import { CustomerService } from './customer.service';
 import { Customer, CustomerType, CUSTOMER_TYPE_LABELS } from './Icustomer';
 import { AddCustomerModalComponent } from './add-customer-modal/add-customer-modal.component';
 import { LucideAngularModule, Plus, Users, BuildingIcon, Trash2 } from 'lucide-angular';
+import { PortalDirective } from '../../shared/directives/portal.directive';
 
 @Component({
   selector: 'app-customers',
   standalone: true,
-  imports: [CommonModule, AddCustomerModalComponent, LucideAngularModule],
+  imports: [CommonModule, AddCustomerModalComponent, LucideAngularModule , PortalDirective],
   templateUrl: './customers.component.html'
 })
 export class CustomersComponent implements OnInit {

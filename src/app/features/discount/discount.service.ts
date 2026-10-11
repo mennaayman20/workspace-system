@@ -1,7 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map, switchMap, tap } from 'rxjs';
-import { Discount, CreateDiscountCommand, UpdateDiscountCommand } from './Idiscount';
+import { Observable, forkJoin, map, switchMap, tap } from 'rxjs';
+import {
+  Discount, CreateDiscountCommand, UpdateDiscountCommand, DiscountTranslations,
+} from './Idiscount';
 import { environment } from '../../core/environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -29,6 +31,23 @@ export class DiscountService {
         },
         error: () => this.isLoading.set(false),
       })
+    );
+  }
+
+  /** الاسم والوصف باللغتين للتعديل (خام لو الباك رجّعه، وإلا طلب بكل لغة) */
+  getTranslations(id: number): Observable<DiscountTranslations> {
+    const fetchLang = (lang: 'ar' | 'en') =>
+      this.http
+        .get<any>(`${this.baseUrl}/${id}`, { headers: { 'Accept-Language': lang } })
+        .pipe(map((res) => res?.data ?? res));
+
+    return forkJoin([fetchLang('ar'), fetchLang('en')]).pipe(
+      map(([ar, en]) => ({
+        nameAr: ar?.nameAr ?? ar?.name ?? '',
+        nameEn: en?.nameEn ?? en?.name ?? '',
+        descriptionAr: ar?.descriptionAr ?? ar?.description ?? '',
+        descriptionEn: en?.descriptionEn ?? en?.description ?? '',
+      })),
     );
   }
 

@@ -195,18 +195,19 @@ export class SessionPosModalComponent implements OnInit {
     return this.draftItems().find((i) => i.productId === productId)?.quantity ?? 0;
   }
 
-  addProduct(p: Product) {
-    this.draftItems.update((list) => {
-      const exists = list.some((i) => i.productId === p.id);
-      if (exists) {
-        return list.map((i) => (i.productId === p.id ? { ...i, quantity: i.quantity + 1 } : i));
-      }
-      return [
-        ...list,
-        { productId: p.id, productName: p.englishName, unitPrice: p.sellingPrice, quantity: 1 },
-      ];
-    });
-  }
+addProduct(p: Product) {
+  const displayName = p.name ?? p.nameEn ?? p.nameAr ?? p.englishName ?? '';
+  this.draftItems.update((list) => {
+    const exists = list.some((i) => i.productId === p.id);
+    if (exists) {
+      return list.map((i) => (i.productId === p.id ? { ...i, quantity: i.quantity + 1 } : i));
+    }
+    return [
+      ...list,
+      { productId: p.id, productName: displayName, unitPrice: p.sellingPrice, quantity: 1 },
+    ];
+  });
+}
 
   changeQuantity(item: SessionProductDto, delta: number) {
     const newQty = item.quantity + delta;
@@ -232,15 +233,16 @@ export class SessionPosModalComponent implements OnInit {
     return this.draftServices().find((i) => i.serviceId === serviceId)?.quantity ?? 0;
   }
 
-  addService(s: ServiceItem) {
-    this.draftServices.update((list) => {
-      const exists = list.some((i) => i.serviceId === s.id);
-      if (exists) {
-        return list.map((i) => (i.serviceId === s.id ? { ...i, quantity: i.quantity + 1 } : i));
-      }
-      return [...list, { serviceId: s.id, serviceName: s.name, unitPrice: s.price, quantity: 1 }];
-    });
-  }
+addService(s: ServiceItem) {
+  const displayName = s.name ?? s.nameAr ?? s.nameEn ?? '';
+  this.draftServices.update((list) => {
+    const exists = list.some((i) => i.serviceId === s.id);
+    if (exists) {
+      return list.map((i) => (i.serviceId === s.id ? { ...i, quantity: i.quantity + 1 } : i));
+    }
+    return [...list, { serviceId: s.id, serviceName: displayName, unitPrice: s.price, quantity: 1 }];
+  });
+}
 
   changeServiceQuantity(item: SessionServiceDto, delta: number) {
     const newQty = item.quantity + delta;

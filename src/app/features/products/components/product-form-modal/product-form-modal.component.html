@@ -1,83 +1,233 @@
-<div *ngIf="isOpen()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity dir-rtl">
-  
-  <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-2xl overflow-hidden transform transition-all text-right">
-    
-    <!-- Modal Header -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-      <h3 class="text-lg font-bold text-slate-800">
-        {{ productToEdit() ? 'تعديل المنتج' : 'إضافة منتج جديد' }}
-      </h3>
-      <button (click)="onClose()" class="text-slate-400 hover:text-slate-600 rounded-lg p-1 text-xl font-bold leading-none">
-        &times;
-      </button>
+<style>
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp .35s ease-out both; }
+  @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
+</style>
+
+<div dir="rtl" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-up">
+  <div role="dialog" aria-modal="true"
+       class="bg-white rounded-3xl w-full max-w-3xl shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <div class="px-6 sm:px-8 py-5 border-b border-slate-100 bg-gradient-to-l from-blue-50/70 to-white shrink-0">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
+            <lucide-icon [img]="PackageIcon" class="w-6 h-6"></lucide-icon>
+          </div>
+          <div>
+            <h3 class="text-lg font-extrabold text-slate-900 leading-tight">
+              {{ isEdit ? 'تعديل المنتج' : 'إضافة منتج جديد' }}
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">المنتجات اللي بتتباع للعملاء داخل الجلسات</p>
+          </div>
+        </div>
+        <button type="button" (click)="cancel()" [disabled]="isSaving()" aria-label="إغلاق"
+                class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white disabled:opacity-50 transition-colors">
+          <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
+        </button>
+      </div>
     </div>
 
-    <!-- Modal Body / Form -->
-    <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="p-6 space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
-        <!-- Category Dropdown -->
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-slate-700 mb-1">التصنيف (Category) *</label>
-          <select formControlName="productCategoryId">
-  <option [ngValue]="null" disabled>اختر التصنيف</option>
-  @for (cat of categoryService.categories(); track cat.id) {
-    <option [ngValue]="cat.id">{{ cat.name }}</option>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col min-h-0 flex-1" novalidate>
+
+      <div class="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-5 bg-slate-50/50">
+
+        @if (errorMessage()) {
+          <div role="alert" class="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-2xl font-medium">
+            {{ errorMessage() }}
+          </div>
+        }
+
+        @if (isLoadingTranslations()) {
+          <div class="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
+            <span class="inline-block w-3.5 h-3.5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></span>
+            جاري تحميل الترجمات...
+          </div>
+        }
+
+        <!-- ① الاسم والتصنيف -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+              <lucide-icon [img]="PackageIcon" class="w-4 h-4"></lucide-icon>
+            </span>
+            <h4 class="text-sm font-extrabold text-slate-800">بيانات المنتج</h4>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="prod-name-ar" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+                <span>الاسم بالعربي <span class="text-rose-500">*</span></span>
+                <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
+              </label>
+              <input pInputText id="prod-name-ar" formControlName="nameAr" dir="rtl" maxlength="100"
+                     class="w-full !h-10 !rounded-xl" placeholder="مثال: قهوة تركي"
+                     [class.ng-invalid]="isInvalid('nameAr')" [class.ng-dirty]="isInvalid('nameAr')" />
+              @if (isInvalid('nameAr')) {
+                <p class="text-xs text-rose-600 mt-1">الاسم بالعربي مطلوب</p>
+              }
+            </div>
+
+            <div>
+              <label for="prod-name-en" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+                <span>Product Name <span class="text-rose-500">*</span></span>
+                <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
+              </label>
+              <input pInputText id="prod-name-en" formControlName="nameEn" dir="ltr" maxlength="100"
+                     class="w-full !h-10 !rounded-xl" placeholder="e.g. Turkish Coffee"
+                     [class.ng-invalid]="isInvalid('nameEn')" [class.ng-dirty]="isInvalid('nameEn')" />
+              @if (isInvalid('nameEn')) {
+                <p class="text-xs text-rose-600 mt-1">English name is required</p>
+              }
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                التصنيف <span class="text-rose-500">*</span>
+              </label>
+              <p-select formControlName="productCategoryId"
+                        [options]="categoryOptions()"
+                        optionLabel="label"
+                        optionValue="id"
+                        placeholder="اختر التصنيف"
+                        [filter]="true"
+                        filterBy="label"
+                        filterPlaceholder="ابحث عن تصنيف..."
+                        appendTo="body"
+                        [fluid]="true"
+                        styleClass="!rounded-xl !h-10"
+                        [class.ng-invalid]="isInvalid('productCategoryId')"
+                        [class.ng-dirty]="isInvalid('productCategoryId')">
+              </p-select>
+              @if (isInvalid('productCategoryId')) {
+                <p class="text-xs text-rose-600 mt-1">اختاري التصنيف</p>
+              }
+            </div>
+
+<div>
+  <label for="prod-sku" class="block text-xs font-bold text-slate-700 mb-1.5">
+    رمز المنتج (SKU) <span class="text-rose-500">*</span>
+  </label>
+  <div class="relative">
+    <lucide-icon [img]="HashIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
+    <input pInputText id="prod-sku" formControlName="sku" dir="ltr" maxlength="50"
+           class="w-full !h-10 !rounded-xl !ps-10 text-left font-mono" placeholder="SKU-1001"
+           [class.ng-invalid]="isInvalid('sku')" [class.ng-dirty]="isInvalid('sku')" />
+  </div>
+  @if (isInvalid('sku')) {
+    <p class="text-xs text-rose-600 mt-1">رمز المنتج (SKU) مطلوب</p>
   }
-</select>
-        </div>
+</div>
+          </div>
+        </section>
 
-        <!-- English Name -->
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">اسم المنتج *</label>
-          <input type="text" formControlName="englishName" class="w-full rounded-xl border border-slate-300 p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Product Name" />
-        </div>
+        <!-- ② الوصف -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+              <lucide-icon [img]="TextIcon" class="w-4 h-4"></lucide-icon>
+            </span>
+            <h4 class="text-sm font-extrabold text-slate-800">الوصف <span class="font-normal text-slate-400">(اختياري)</span></h4>
+          </div>
 
-        <!-- SKU -->
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">رمز المنتج (SKU)</label>
-          <input type="text" formControlName="sku" class="w-full rounded-xl border border-slate-300 p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="SKU-1001" />
-        </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+                <span>الوصف</span>
+                <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
+              </label>
+              <textarea pTextarea formControlName="descriptionAr" rows="3" dir="rtl" maxlength="500"
+                        class="w-full !rounded-xl resize-none" placeholder="وصف المنتج..."></textarea>
+            </div>
+            <div>
+              <label class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+                <span>Description</span>
+                <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
+              </label>
+              <textarea pTextarea formControlName="descriptionEn" rows="3" dir="ltr" maxlength="500"
+                        class="w-full !rounded-xl resize-none" placeholder="Product description..."></textarea>
+            </div>
+          </div>
+        </section>
 
-        <!-- Selling Price -->
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">سعر البيع *</label>
-          <input type="number" formControlName="sellingPrice" class="w-full rounded-xl border border-slate-300 p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" />
-        </div>
+        <!-- ③ الأسعار -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+              <lucide-icon [img]="WalletIcon" class="w-4 h-4"></lucide-icon>
+            </span>
+            <h4 class="text-sm font-extrabold text-slate-800">الأسعار</h4>
+          </div>
 
-        <!-- Cost Price -->
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">سعر التكلفة *</label>
-          <input type="number" formControlName="costPrice" class="w-full rounded-xl border border-slate-300 p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" />
-        </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                سعر البيع <span class="text-rose-500">*</span>
+              </label>
+              <p-inputNumber formControlName="sellingPrice" mode="currency" currency="EGP" locale="en-EG"
+                             [min]="0" placeholder="0"
+                             styleClass="w-full" inputStyleClass="w-full !h-11 !rounded-xl" />
+              @if (isInvalid('sellingPrice')) {
+                <p class="text-xs text-rose-600 mt-1">سعر البيع مطلوب</p>
+              }
+            </div>
 
-        <!-- Description -->
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-slate-700 mb-1">الوصف</label>
-          <textarea formControlName="description" rows="2" class="w-full rounded-xl border border-slate-300 p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="وصف المنتج..."></textarea>
-        </div>
+<div>
+  <label class="block text-xs font-bold text-slate-700 mb-1.5">
+    سعر التكلفة <span class="font-normal text-slate-400">(اختياري)</span>
+  </label>
+  <p-inputNumber formControlName="costPrice" mode="currency" currency="EGP" locale="en-EG"
+                 [min]="0" placeholder="0"
+                 styleClass="w-full" inputStyleClass="w-full !h-10 !rounded-xl" />
+  @if (isInvalid('costPrice')) {
+    <p class="text-xs text-rose-600 mt-1">سعر التكلفة لازم يكون 0 أو أكثر</p>
+  }
+</div>
+          </div>
 
-        <!-- Active Toggle -->
-        <div class="md:col-span-2 flex items-center pt-1">
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" formControlName="isActive" class="sr-only peer" />
-            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-            <span class="mr-3 text-sm font-medium text-slate-700">تفعيل المنتج</span>
-          </label>
-        </div>
+          @if (margin; as m) {
+            <div class="mt-4 flex items-center justify-between rounded-2xl border border-dashed px-4 py-3 fade-up"
+                 [class]="m.isLoss ? 'border-rose-200 bg-rose-50/70' : 'border-emerald-200 bg-emerald-50/60'">
+              <span class="text-xs font-bold" [class]="m.isLoss ? 'text-rose-700' : 'text-emerald-700'">
+                {{ m.isLoss ? 'تنبيه: سعر البيع أقل من التكلفة' : 'هامش الربح التقريبي' }}
+              </span>
+              <span class="text-sm font-extrabold" dir="ltr" [class]="m.isLoss ? 'text-rose-700' : 'text-emerald-700'">
+                {{ m.profit }} EGP ({{ m.pct }}%)
+              </span>
+            </div>
+          }
+        </section>
 
+        <!-- ④ الحالة -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <p class="text-sm font-extrabold text-slate-800">منتج نشط</p>
+              <p class="text-xs text-slate-500 mt-0.5">لو اتقفل مش هيظهر عند إضافة منتجات للجلسة</p>
+            </div>
+            <p-toggleswitch formControlName="isActive" />
+          </div>
+        </section>
       </div>
 
-      <!-- Modal Footer -->
-      <div class="flex items-center justify-end space-x-3 space-x-reverse pt-4 border-t border-slate-100">
-        <button type="button" (click)="onClose()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 font-medium transition-colors">
-          إلغاء
-        </button>
-        <button type="submit" [disabled]="productForm.invalid" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium transition-colors">
-          {{ productToEdit() ? 'تحديث' : 'حفظ' }}
-        </button>
+      <div class="shrink-0 flex items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
+        <p class="hidden sm:block text-[11px] text-slate-400"><span class="text-rose-500">*</span> حقول مطلوبة</p>
+        <div class="flex items-center gap-3 ms-auto">
+          <button type="button" (click)="cancel()" [disabled]="isSaving()"
+                  class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
+            إلغاء
+          </button>
+          <button type="submit" [disabled]="isSaving() || isLoadingTranslations()"
+                  class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2">
+            <lucide-icon [img]="SaveIcon" class="w-4 h-4"></lucide-icon>
+            {{ isSaving() ? 'جاري الحفظ...' : isEdit ? 'حفظ التعديلات' : 'حفظ المنتج' }}
+          </button>
+        </div>
       </div>
     </form>
-
   </div>
 </div>

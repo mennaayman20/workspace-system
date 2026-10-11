@@ -7,13 +7,10 @@
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
 </style>
 
-
 <div class="w-full mb-6">
   <div class="max-w-7xl mx-auto px-1 sm:px-2">
-    <!-- حاوية التبويبات بخلفية شفافة وبوردر هادئ -->
     <nav class="inline-flex items-center gap-1.5 p-1.5 bg-slate-200/40 backdrop-blur-md rounded-2xl border border-slate-200/60 overflow-x-auto no-scrollbar" aria-label="Tabs">
-      
-      <!-- Tab 1: المنتجات -->
+
       <a [routerLink]="['/products/list']"
          routerLinkActive="bg-white text-blue-600 shadow-sm border-slate-200/80 font-bold"
          [routerLinkActiveOptions]="{ exact: true }"
@@ -22,7 +19,6 @@
         <span>قائمة المنتجات</span>
       </a>
 
-      <!-- Tab 2: التصنيفات -->
       <a [routerLink]="['/products/categories']"
          routerLinkActive="bg-white text-blue-600 shadow-sm border-slate-200/80 font-bold"
          class="group inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 border border-transparent transition-all duration-200 shrink-0 cursor-pointer select-none">
@@ -36,7 +32,6 @@
 
 <div dir="rtl" class="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
 
-
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-up">
     <div class="flex items-center gap-4">
@@ -49,68 +44,12 @@
       </div>
     </div>
 
-    <!-- Add Category Button -->
     <button type="button" (click)="openAddForm()"
-      class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-500/20 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer shrink-0">
+      class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 shrink-0">
       <lucide-icon [img]="PlusIcon" class="w-4 h-4"></lucide-icon>
       <span>إضافة تصنيف جديد</span>
     </button>
   </div>
-
-  <!-- Form Section Card (ظهر فقط عند فتح النموذج) -->
-  @if (isFormOpen()) {
-    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs fade-up space-y-6">
-      <div class="flex justify-between items-center border-b border-slate-100 pb-4">
-        <h2 class="text-lg font-bold text-slate-900">
-          {{ selectedCategoryForEdit() ? 'تعديل بيانات التصنيف' : 'إضافة تصنيف جديد' }}
-        </h2>
-        <button type="button" (click)="resetForm()"
-          class="w-9 h-9 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-colors cursor-pointer"
-          title="إغلاق">
-          <lucide-icon [img]="XIcon" class="w-4 h-4"></lucide-icon>
-        </button>
-      </div>
-
-      <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-2 gap-5" novalidate>
-
-        <!-- Category Name -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1.5">اسم التصنيف (Category Name)</label>
-          <input type="text" formControlName="name" placeholder="مثال: مشروبات ساخنة"
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-        </div>
-
-        <!-- Description -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1.5">الوصف (اختياري)</label>
-          <input type="text" formControlName="description" placeholder="وصف مختصر للتصنيف..."
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-        </div>
-
-        <!-- Active Toggle -->
-        <div class="flex items-center pt-2 md:col-span-2">
-          <label class="relative inline-flex items-center cursor-pointer gap-3 select-none">
-            <input type="checkbox" formControlName="isActive" class="sr-only peer" />
-            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            <span class="text-xs font-bold text-slate-700">تفعيل التصنيف بالنظام</span>
-          </label>
-        </div>
-
-        <!-- Actions -->
-        <div class="md:col-span-2 flex justify-end gap-3 pt-4 border-t border-slate-100">
-          <button type="button" (click)="resetForm()"
-            class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors cursor-pointer">
-            إلغاء
-          </button>
-          <button type="submit" [disabled]="categoryForm.invalid"
-            class="group inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none cursor-pointer">
-            <lucide-icon [img]="selectedCategoryForEdit() ? SaveIcon : PlusIcon" class="w-4 h-4"></lucide-icon>
-            <span>{{ selectedCategoryForEdit() ? 'تحديث البيانات' : 'حفظ التصنيف' }}</span>
-          </button>
-        </div>
-      </form>
-    </div>
-  }
 
   <!-- Empty State -->
   @if (categoryService.categories().length === 0) {
@@ -119,6 +58,10 @@
         <lucide-icon [img]="FolderTreeIcon" class="w-8 h-8"></lucide-icon>
       </div>
       <p class="text-base font-bold text-slate-800">لا توجد تصنيفات مضافة حتى الآن</p>
+      <button type="button" (click)="openAddForm()"
+        class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors">
+        + أضف أول تصنيف
+      </button>
     </div>
   } @else {
 
@@ -128,7 +71,7 @@
         <table class="w-full text-right border-collapse min-w-[700px]">
           <thead>
             <tr class="bg-slate-50/80 text-xs font-bold text-slate-500 tracking-wide border-b border-slate-100">
-              <th scope="col" class="py-4 px-6">المعرف (ID)</th>
+              <th scope="col" class="py-4 px-6">#</th>
               <th scope="col" class="py-4 px-6">التصنيف</th>
               <th scope="col" class="py-4 px-6">الوصف</th>
               <th scope="col" class="py-4 px-6">الحالة</th>
@@ -140,17 +83,11 @@
               <tr class="fade-up group hover:bg-blue-50/40 transition-colors duration-200"
                   [style.animation-delay.ms]="i * 40">
 
-                <td class="py-4 px-6 font-mono text-[13px] text-slate-400">
-                  #{{ cat.id }}
-                </td>
+                <td class="py-4 px-6 font-mono text-[13px] text-slate-400">#{{ cat.id }}</td>
 
-                <td class="py-4 px-6 font-bold text-slate-900 text-[15px]">
-                  {{ cat.name }}
-                </td>
+                <td class="py-4 px-6 font-bold text-slate-900 text-[15px]">{{ displayName(cat) }}</td>
 
-                <td class="py-4 px-6 text-slate-500">
-                  {{ cat.description || '-' }}
-                </td>
+                <td class="py-4 px-6 text-slate-500 max-w-xs truncate">{{ displayDescription(cat) || '-' }}</td>
 
                 <td class="py-4 px-6">
                   <span [class]="cat.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-rose-50 text-rose-700 ring-rose-600/20'"
@@ -163,12 +100,12 @@
                 <td class="py-4 px-6">
                   <div class="flex items-center justify-center gap-2">
                     <button type="button" (click)="editCategory(cat)" title="تعديل" aria-label="تعديل"
-                      class="w-10 h-10 rounded-xl flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white hover:scale-105 transition-all duration-200 cursor-pointer">
+                      class="w-10 h-10 rounded-xl flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white hover:scale-105 transition-all duration-200">
                       <lucide-icon [img]="EditIcon" class="w-4 h-4"></lucide-icon>
                     </button>
 
-                    <button type="button" (click)="deleteCategory(cat.id)" title="حذف" aria-label="حذف"
-                      class="w-10 h-10 rounded-xl flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white hover:scale-105 transition-all duration-200 cursor-pointer">
+                    <button type="button" (click)="askDelete(cat)" title="حذف" aria-label="حذف"
+                      class="w-10 h-10 rounded-xl flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white hover:scale-105 transition-all duration-200">
                       <lucide-icon [img]="TrashIcon" class="w-4 h-4"></lucide-icon>
                     </button>
                   </div>
@@ -180,7 +117,7 @@
       </div>
     </div>
 
-    <!-- Mobile Cards View -->
+    <!-- Mobile Cards -->
     <div class="block md:hidden space-y-4">
       @for (cat of categoryService.categories(); track cat.id; let i = $index) {
         <div class="fade-up bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4"
@@ -188,7 +125,7 @@
           <div class="flex items-center justify-between gap-3">
             <div class="flex items-center gap-2 min-w-0">
               <span class="font-mono text-xs text-slate-400">#{{ cat.id }}</span>
-              <h3 class="font-bold text-slate-900 text-base truncate">{{ cat.name }}</h3>
+              <h3 class="font-bold text-slate-900 text-base truncate">{{ displayName(cat) }}</h3>
             </div>
             <span [class]="cat.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-rose-50 text-rose-700 ring-rose-600/20'"
               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset shrink-0">
@@ -197,19 +134,17 @@
             </span>
           </div>
 
-          @if (cat.description) {
-            <p class="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl">
-              {{ cat.description }}
-            </p>
+          @if (displayDescription(cat); as desc) {
+            <p class="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl">{{ desc }}</p>
           }
 
           <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100">
             <button type="button" (click)="editCategory(cat)"
-              class="h-10 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1 cursor-pointer">
+              class="h-10 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-xs font-bold transition-colors">
               تعديل
             </button>
-            <button type="button" (click)="deleteCategory(cat.id)"
-              class="h-10 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1 cursor-pointer">
+            <button type="button" (click)="askDelete(cat)"
+              class="h-10 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-colors">
               حذف
             </button>
           </div>
@@ -218,4 +153,46 @@
     </div>
   }
 
+  <!-- مودال الإضافة والتعديل -->
+  @if (isFormOpen()) {
+    <app-category-form-modal
+      [category]="editing()"
+      (saved)="closeForm()"
+      (closeModal)="closeForm()">
+    </app-category-form-modal>
+  }
+
+  <!-- مودال تأكيد الحذف -->
+  @if (pendingDelete(); as d) {
+    <div class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
+         (click)="cancelDelete()">
+      <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl" dir="rtl"
+           role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
+
+        <div class="flex items-start gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+            <lucide-icon [img]="TrashIcon" class="w-5 h-5"></lucide-icon>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">حذف التصنيف</h3>
+            <p class="text-sm text-slate-500 mt-1.5 leading-relaxed">
+              هل أنت متأكد من حذف
+              <b class="text-slate-800">"{{ displayName(d) }}"</b>؟
+            </p>
+          </div>
+        </div>
+
+        <div class="flex gap-3 mt-6">
+          <button type="button" (click)="confirmDelete()" [disabled]="isDeleting()"
+                  class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-colors">
+            {{ isDeleting() ? 'جاري الحذف...' : 'نعم، حذف' }}
+          </button>
+          <button type="button" (click)="cancelDelete()" [disabled]="isDeleting()"
+                  class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-60 rounded-xl text-sm font-bold text-slate-700 transition-colors">
+            إلغاء
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

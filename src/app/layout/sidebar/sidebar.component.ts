@@ -56,7 +56,7 @@ export class SidebarComponent {
 
     { label: ' POS ', route: 'products', icon: 'dashboard' },
 { label: 'ادارة الخدمات', route: '/services', icon: 'ConciergeBell' },
-    { label: 'الخزينة والتقارير', route: 'payments', icon: 'account_balance_wallet' },
+    // { label: 'الخزينة والتقارير', route: 'payments', icon: 'account_balance_wallet' },
   ];
 
   onContactSupport() {
