@@ -19,8 +19,9 @@ import {
   Building2, LayoutGrid, LucideAngularModule, MapPin, Minus, Plus, Users, FileText, X,
 } from 'lucide-angular';
 
-import { WorkspaceService } from '../../../core/services/workspace.service';
 import { CreateWorkspaceCommand, Workspace, WorkspaceType } from '../../../core/interfaces/Iworkspace';
+import { WorkspaceService } from '../../../core/services/workspace.service';
+
 
 // ---------- Custom validators ----------
 /** Rejects values that are only whitespace (Validators.required accepts "   "). */
@@ -67,22 +68,29 @@ export class CreateWorkspaceModalComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
 
   isSubmitting = signal(false);
+  isLoadingTranslations = signal(false);
   errorMessage = signal<string | null>(null);
   addingNewType = signal(false);
 
   /** خيارات الدروب داون: الأنواع + "إضافة نوع جديد" في الآخر */
   readonly typeOptions = computed(() => [
-    ...this.workspaceTypes().map((t) => ({ label: t.name, value: t.id as number | string, isNew: false })),
+    ...this.workspaceTypes().map((t) => ({
+      label: t.name || t.nameAr || t.nameEn || `#${t.id}`,
+      value: t.id as number | string,
+      isNew: false,
+    })),
     { label: '+ إضافة نوع جديد', value: this.NEW_TYPE_VALUE as number | string, isNew: true },
   ]);
 
   /** If the type was created but the workspace call failed, reuse it on retry (no duplicate types). */
-  private createdType: { name: string; id: number } | null = null;
+  private createdType: { key: string; id: number } | null = null;
 
   readonly form = this.fb.group({
     workspaceTypeId: this.fb.control<number | string | null>(null, [Validators.required]),
-    newTypeName: [''],
-    name: ['', [Validators.required, notBlank, Validators.minLength(2), Validators.maxLength(100)]],
+    newTypeNameAr: [''],
+    newTypeNameEn: [''],
+    nameAr: ['', [Validators.required, notBlank, Validators.minLength(2), Validators.maxLength(100)]],
+    nameEn: ['', [Validators.required, notBlank, Validators.minLength(2), Validators.maxLength(100)]],
     code: [
       '',
       [Validators.required, Validators.maxLength(20), Validators.pattern(/^[A-Za-z0-9_-]+$/)]
@@ -95,7 +103,8 @@ export class CreateWorkspaceModalComponent implements OnInit {
       Validators.max(1000),
       integer
     ]),
-    description: ['', [Validators.maxLength(500)]]
+    descriptionAr: ['', [Validators.maxLength(500)]],
+    descriptionEn: ['', [Validators.maxLength(500)]]
   });
 
   get isEditMode(): boolean {
@@ -105,45 +114,66 @@ export class CreateWorkspaceModalComponent implements OnInit {
   ngOnInit(): void {
     const edit = this.workspaceToEdit();
     if (edit) {
+      // بيانات فورية
       this.form.patchValue({
         workspaceTypeId: edit.workspaceTypeId,
-        name: edit.name,
+        nameAr: edit.nameAr ?? '',
+        nameEn: edit.nameEn ?? '',
         code: edit.code,
         floor: edit.floor,
         location: edit.location,
         capacity: edit.capacity,
-        description: edit.description ?? ''
+        descriptionAr: edit.descriptionAr ?? '',
+        descriptionEn: edit.descriptionEn ?? ''
       });
+
+      // الاسم والوصف باللغتين
+      this.isLoadingTranslations.set(true);
+      this.workspaceService
+        .getWorkspaceTranslations(edit.id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (t) => {
+            this.form.patchValue(t);
+            this.isLoadingTranslations.set(false);
+          },
+          error: () => this.isLoadingTranslations.set(false)
+        });
     }
 
-    // Toggle the "new type name" validators only when that option is selected
+    // Toggle the "new type" validators only when that option is selected
     this.form.controls.workspaceTypeId.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((value) => {
         const isNew = value === this.NEW_TYPE_VALUE;
-        const ctrl = this.form.controls.newTypeName;
+        const ar = this.form.controls.newTypeNameAr;
+        const en = this.form.controls.newTypeNameEn;
         this.addingNewType.set(isNew);
+
         if (isNew) {
-          ctrl.setValidators([
-            Validators.required,
-            notBlank,
-            Validators.minLength(2),
-            Validators.maxLength(50),
-            this.uniqueTypeName()
-          ]);
+          const base = [Validators.required, notBlank, Validators.minLength(2), Validators.maxLength(50)];
+          ar.setValidators([...base, this.uniqueTypeName()]);
+          en.setValidators([...base, this.uniqueTypeName()]);
         } else {
-          ctrl.clearValidators();
-          ctrl.reset('');
+          ar.clearValidators();
+          en.clearValidators();
+          ar.reset('');
+          en.reset('');
         }
-        ctrl.updateValueAndValidity();
+        ar.updateValueAndValidity();
+        en.updateValueAndValidity();
       });
   }
 
+  /** بيقارن بكل الأسماء المتاحة للأنواع الموجودة (المترجم والعربي والإنجليزي) */
   private uniqueTypeName(): ValidatorFn {
     return (c) => {
       const v = String(c.value ?? '').trim().toLowerCase();
       if (!v) return null;
-      return this.workspaceTypes().some((t) => t.name.trim().toLowerCase() === v) ? { duplicate: true } : null;
+      const exists = this.workspaceTypes().some((t) =>
+        [t.name, t.nameAr, t.nameEn].some((n) => (n ?? '').trim().toLowerCase() === v)
+      );
+      return exists ? { duplicate: true } : null;
     };
   }
 
@@ -167,7 +197,7 @@ export class CreateWorkspaceModalComponent implements OnInit {
 
   // ---------- Submit ----------
   onSubmit(): void {
-    if (this.isSubmitting()) return;
+    if (this.isSubmitting() || this.isLoadingTranslations()) return;
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -179,16 +209,23 @@ export class CreateWorkspaceModalComponent implements OnInit {
 
     const raw = this.form.getRawValue();
     const editData = this.workspaceToEdit();
-    const newTypeName = (raw.newTypeName ?? '').trim();
+    const newTypeAr = (raw.newTypeNameAr ?? '').trim();
+    const newTypeEn = (raw.newTypeNameEn ?? '').trim();
+    const newTypeKey = `${newTypeAr}|${newTypeEn}`;
 
     let typeId$: Observable<number>;
     if (this.addingNewType()) {
       typeId$ =
-        this.createdType?.name === newTypeName
+        this.createdType?.key === newTypeKey
           ? of(this.createdType.id)
           : this.workspaceService
-              .createWorkspaceType({ name: newTypeName })
-              .pipe(tap((id) => (this.createdType = { name: newTypeName, id })));
+              .createWorkspaceType({
+                nameAr: newTypeAr,
+                nameEn: newTypeEn,
+                descriptionAr: null,
+                descriptionEn: null
+              })
+              .pipe(tap((id) => (this.createdType = { key: newTypeKey, id })));
     } else {
       typeId$ = of(Number(raw.workspaceTypeId));
     }
@@ -198,12 +235,14 @@ export class CreateWorkspaceModalComponent implements OnInit {
         switchMap((workspaceTypeId) => {
           const command: CreateWorkspaceCommand = {
             workspaceTypeId,
-            name: (raw.name ?? '').trim(),
+            nameAr: (raw.nameAr ?? '').trim(),
+            nameEn: (raw.nameEn ?? '').trim(),
             code: (raw.code ?? '').trim().toUpperCase(),
             floor: (raw.floor ?? '').trim(),
             location: (raw.location ?? '').trim(),
             capacity: Number(raw.capacity),
-            description: (raw.description ?? '').trim()
+            descriptionAr: (raw.descriptionAr ?? '').trim() || null,
+            descriptionEn: (raw.descriptionEn ?? '').trim() || null
           };
 
           const request$: Observable<Workspace | void> = editData
