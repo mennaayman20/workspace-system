@@ -10,7 +10,7 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { LucideAngularModule, Percent, X, Save, FileText, CalendarDays, Banknote } from 'lucide-angular';
 
 import { DiscountService } from '../discount.service';
-import { CreateDiscountCommand, Discount, DiscountType, DISCOUNT_TYPE_LABELS } from '../Idiscount';
+import { CreateDiscountCommand, Discount, DiscountType, DISCOUNT_TYPE_LABELS , toDiscountType } from '../Idiscount';
 
 @Component({
   selector: 'app-discount-form-modal',

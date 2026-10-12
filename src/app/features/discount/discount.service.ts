@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, forkJoin, map, switchMap, tap } from 'rxjs';
 import {
-  Discount, CreateDiscountCommand, UpdateDiscountCommand, DiscountTranslations,
+  Discount, CreateDiscountCommand, UpdateDiscountCommand, DiscountTranslations,toDiscountType
 } from './Idiscount';
 import { environment } from '../../core/environments/environment';
 
@@ -20,10 +20,11 @@ export class DiscountService {
     const params = new HttpParams().set('pageNumber', 1).set('pageSize', 100);
 
     return this.http.get<any>(this.baseUrl, { params }).pipe(
-      map((res) => {
-        const raw = Array.isArray(res) ? res : (res?.data?.items ?? res?.data ?? res?.items ?? []);
-        return (Array.isArray(raw) ? raw : []) as Discount[];
-      }),
+     map((res) => {
+  const raw = Array.isArray(res) ? res : (res?.data?.items ?? res?.data ?? res?.items ?? []);
+  const list = (Array.isArray(raw) ? raw : []) as Discount[];
+  return list.map((d) => ({ ...d, type: toDiscountType(d.type) }));
+}),
       tap({
         next: (items) => {
           this.discounts.set(items);
