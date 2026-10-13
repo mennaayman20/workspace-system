@@ -6,8 +6,10 @@ import { TextareaModule } from 'primeng/textarea';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { ToastrService } from 'ngx-toastr';
+import { TranslatePipe } from '@ngx-translate/core';
 import { CompanyService } from '../company.service';
 import { Company, CreateCompanyDto, UpdateCompanyDto } from '../Icompany';
+import { LanguageService } from '../../../core/services/lang.service'; // عدّل المسار لو مختلف
 import {
   LucideAngularModule, X, Building2, Save, Phone, Mail, UserRound,
   Wallet, FileText, ScrollText, Hash, Languages,
@@ -19,14 +21,19 @@ import {
   imports: [
     CommonModule, ReactiveFormsModule, LucideAngularModule,
     InputTextModule, TextareaModule, InputNumberModule, SelectModule,
+    TranslatePipe,
   ],
   templateUrl: './add-company-modal.component.html',
+  host: {
+    '[attr.dir]': 'langService.isRtl() ? "rtl" : "ltr"'
+  }
 })
 export class AddCompanyModalComponent implements OnInit {
   private fb = inject(FormBuilder);
   private companyService = inject(CompanyService);
   private toastr = inject(ToastrService);
-
+  private lang = inject(LanguageService);
+readonly langService = inject(LanguageService);
   companyToEdit = input<Company | null>(null);
   closeModal = output<void>();
   companySaved = output<any | void>();
@@ -147,11 +154,11 @@ export class AddCompanyModalComponent implements OnInit {
       this.companyService.updateCompany(editData.id, updateDto).subscribe({
         next: () => {
           this.isSubmitting.set(false);
-          this.toastr.success('تم تعديل بيانات الشركة بنجاح');
+          this.toastr.success(this.lang.t('COMPANIES.MODAL.EDITED'));
           this.companySaved.emit(updateDto);
         },
         error: (err) => {
-          const msg = this.extractError(err, 'حدث خطأ أثناء تعديل بيانات الشركة.');
+          const msg = this.extractError(err, this.lang.t('COMPANIES.MODAL.ERR_EDIT'));
           this.errorMessage.set(msg);
           this.toastr.error(msg);
           this.isSubmitting.set(false);
@@ -161,11 +168,11 @@ export class AddCompanyModalComponent implements OnInit {
       this.companyService.createCompany(dto).subscribe({
         next: (res: any) => {
           this.isSubmitting.set(false);
-          this.toastr.success('تمت إضافة الشركة بنجاح');
+          this.toastr.success(this.lang.t('COMPANIES.MODAL.ADDED'));
           this.companySaved.emit(res);
         },
         error: (err) => {
-          const msg = this.extractError(err, 'حدث خطأ أثناء إضافة الشركة الجديدة.');
+          const msg = this.extractError(err, this.lang.t('COMPANIES.MODAL.ERR_ADD'));
           this.errorMessage.set(msg);
           this.toastr.error(msg);
           this.isSubmitting.set(false);

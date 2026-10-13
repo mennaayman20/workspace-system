@@ -1,34 +1,55 @@
+
 <style>
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
+    to { opacity: 1; transform: translateY(0); }
   }
-  .fade-up { animation: fadeUp .35s ease-out both; }
-  @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
+
+  .fade-up {
+    animation: fadeUp .35s ease-out both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fade-up { animation: none; }
+  }
 </style>
 
-<div dir="rtl" class="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
+<div class="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
 
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+
     <div class="flex items-center gap-4">
       <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
         <lucide-icon [img]="BriefcaseIcon" class="w-6 h-6"></lucide-icon>
       </div>
+
       <div>
-        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">إدارة الخدمات</h1>
-        <p class="text-sm text-slate-500 mt-1">إضافة وتعديل الخدمات المقدّمة وأسعارها</p>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+          {{ 'SERVICES.TITLE' | translate }}
+        </h1>
+
+        <p class="text-sm text-slate-500 mt-1">
+          {{ 'SERVICES.SUBTITLE' | translate }}
+        </p>
       </div>
     </div>
 
-    <button type="button" (click)="openAddForm()"
+    <button
+      type="button"
+      (click)="openAddForm()"
       class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
-      <lucide-icon [img]="PlusIcon" class="w-4 h-4 transition-transform duration-200 group-hover:rotate-90"></lucide-icon>
-      <span>إضافة خدمة جديدة</span>
+
+      <lucide-icon
+        [img]="PlusIcon"
+        class="w-4 h-4 transition-transform duration-200 group-hover:rotate-90">
+      </lucide-icon>
+
+      <span>{{ 'SERVICES.ADD' | translate }}</span>
     </button>
   </div>
 
-  <!-- الجدول المشترك (بحث لكل عمود + ترتيب + pagination) -->
+  <!-- Shared Table -->
   <app-data-table
     [value]="serviceCatalog.services()"
     [columns]="columns"
@@ -36,40 +57,63 @@
     [loading]="serviceCatalog.isLoading()"
     [columnFilters]="true"
     [minWidth]="'48rem'"
-    [emptyTitle]="serviceCatalog.services().length === 0 ? 'لا توجد خدمات مضافة حتى الآن' : 'لا توجد نتائج مطابقة'"
+    [emptyTitle]="serviceCatalog.services().length === 0
+      ? 'SERVICES.EMPTY'
+      : 'SERVICES.NO_RESULTS'"
     (action)="onAction($event)">
   </app-data-table>
 
   <!-- Form Modal -->
   @if (isFormOpen()) {
-    <div appPortal dir="rtl" 
-    class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+
       <div class="bg-white rounded-3xl w-full max-w-3xl shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col overflow-hidden">
 
-        <!-- Header -->
+        <!-- Modal Header -->
         <div class="px-6 sm:px-8 py-5 border-b border-slate-100 bg-gradient-to-l from-blue-50/70 to-white shrink-0">
+
           <div class="flex items-center justify-between gap-3">
+
             <div class="flex items-center gap-3.5">
               <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
                 <lucide-icon [img]="BriefcaseIcon" class="w-6 h-6"></lucide-icon>
               </div>
+
               <div>
                 <h3 class="text-lg font-extrabold text-slate-900 leading-tight">
-                  {{ selectedService() ? 'تعديل بيانات الخدمة' : 'إضافة خدمة جديدة' }}
+                  {{
+                    (selectedService()
+                      ? 'SERVICES.MODAL.EDIT_TITLE'
+                      : 'SERVICES.MODAL.ADD_TITLE') | translate
+                  }}
                 </h3>
+
                 <p class="text-xs text-slate-500 mt-0.5">
-                  {{ selectedService() ? 'عدّلي البيانات ثم احفظي التغييرات' : 'أدخلي بيانات الخدمة بالعربي والإنجليزي' }}
+                  {{
+                    (selectedService()
+                      ? 'SERVICES.MODAL.EDIT_SUBTITLE'
+                      : 'SERVICES.MODAL.ADD_SUBTITLE') | translate
+                  }}
                 </p>
               </div>
             </div>
-            <button type="button" (click)="resetForm()" aria-label="إغلاق"
+
+            <button
+              type="button"
+              (click)="resetForm()"
+              [attr.aria-label]="'SERVICES.MODAL.CLOSE' | translate"
               class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white transition-colors">
+
               <lucide-icon [img]="XIcon" class="w-5 h-5"></lucide-icon>
             </button>
           </div>
         </div>
 
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col min-h-0 flex-1" novalidate>
+        <form
+          [formGroup]="form"
+          (ngSubmit)="onSubmit()"
+          class="flex flex-col min-h-0 flex-1"
+          novalidate>
 
           <!-- Body -->
           <div class="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-6 bg-slate-50/50">
@@ -77,127 +121,261 @@
             @if (isLoadingTranslations()) {
               <div class="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
                 <span class="inline-block w-3.5 h-3.5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></span>
-                جاري تحميل الترجمات...
+
+                {{ 'SERVICES.MODAL.LOADING_TRANSLATIONS' | translate }}
               </div>
             }
 
-            <!-- ① الاسم والوصف -->
+            <!-- Name and Description -->
             <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+
               <div class="flex items-center gap-2.5 mb-4">
                 <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
                   <lucide-icon [img]="BriefcaseIcon" class="w-4 h-4"></lucide-icon>
                 </span>
-                <h4 class="text-sm font-extrabold text-slate-800">اسم الخدمة ووصفها</h4>
+
+                <h4 class="text-sm font-extrabold text-slate-800">
+                  {{ 'SERVICES.MODAL.NAME_DESCRIPTION_SECTION' | translate }}
+                </h4>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                <!-- Arabic Name -->
                 <div>
                   <label for="nameAr" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                    <span>الاسم بالعربي <span class="text-rose-500">*</span></span>
-                    <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
+                    <span>
+                      {{ 'SERVICES.MODAL.NAME_AR' | translate }}
+                      <span class="text-rose-500">*</span>
+                    </span>
+
+                    <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">
+                      AR
+                    </span>
                   </label>
-                  <input pInputText id="nameAr" formControlName="nameAr" dir="rtl"
-                         class="w-full !h-10 !rounded-xl" placeholder="مثال: طباعة"
-                         [class.ng-invalid]="isFieldInvalid('nameAr')" [class.ng-dirty]="isFieldInvalid('nameAr')" />
+
+                  <input
+                    pInputText
+                    id="nameAr"
+                    formControlName="nameAr"
+                    class="w-full !h-10 !rounded-xl"
+                    [placeholder]="'SERVICES.MODAL.NAME_AR_PLACEHOLDER' | translate"
+                    [class.ng-invalid]="isFieldInvalid('nameAr')"
+                    [class.ng-dirty]="isFieldInvalid('nameAr')" />
+
                   @if (isFieldInvalid('nameAr')) {
-                    <span class="text-xs text-rose-600 mt-1 block">الاسم بالعربي مطلوب</span>
+                    <span class="text-xs text-rose-600 mt-1 block">
+                      {{ 'SERVICES.MODAL.ERR_NAME_AR' | translate }}
+                    </span>
                   }
                 </div>
 
+                <!-- English Name -->
                 <div>
                   <label for="nameEn" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                    <span>Service Name <span class="text-rose-500">*</span></span>
-                    <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
+                    <span>
+                      {{ 'SERVICES.MODAL.NAME_EN' | translate }}
+                      <span class="text-rose-500">*</span>
+                    </span>
+
+                    <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">
+                      EN
+                    </span>
                   </label>
-                  <input pInputText id="nameEn" formControlName="nameEn" dir="ltr"
-                         class="w-full !h-10 !rounded-xl" placeholder="e.g. Printing"
-                         [class.ng-invalid]="isFieldInvalid('nameEn')" [class.ng-dirty]="isFieldInvalid('nameEn')" />
+
+                  <input
+                    pInputText
+                    id="nameEn"
+                    formControlName="nameEn"
+                    class="w-full !h-10 !rounded-xl"
+                    [placeholder]="'SERVICES.MODAL.NAME_EN_PLACEHOLDER' | translate"
+                    [class.ng-invalid]="isFieldInvalid('nameEn')"
+                    [class.ng-dirty]="isFieldInvalid('nameEn')" />
+
                   @if (isFieldInvalid('nameEn')) {
-                    <span class="text-xs text-rose-600 mt-1 block">English name is required</span>
+                    <span class="text-xs text-rose-600 mt-1 block">
+                      {{ 'SERVICES.MODAL.ERR_NAME_EN' | translate }}
+                    </span>
                   }
                 </div>
 
+                <!-- Arabic Description -->
                 <div>
                   <label for="descriptionAr" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                    <span>الوصف (اختياري)</span>
-                    <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
+                    <span>{{ 'SERVICES.MODAL.DESCRIPTION_AR' | translate }}</span>
+
+                    <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">
+                      AR
+                    </span>
                   </label>
-                  <textarea pTextarea id="descriptionAr" formControlName="descriptionAr" rows="3" dir="rtl"
-                            class="w-full !rounded-xl resize-none" placeholder="وصف مختصر للخدمة"></textarea>
+
+                  <textarea
+                    pTextarea
+                    id="descriptionAr"
+                    formControlName="descriptionAr"
+                    rows="3"
+                    class="w-full !rounded-xl resize-none"
+                    [placeholder]="'SERVICES.MODAL.DESCRIPTION_AR_PLACEHOLDER' | translate">
+                  </textarea>
                 </div>
 
+                <!-- English Description -->
                 <div>
                   <label for="descriptionEn" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                    <span>Description (optional)</span>
-                    <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
+                    <span>{{ 'SERVICES.MODAL.DESCRIPTION_EN' | translate }}</span>
+
+                    <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">
+                      EN
+                    </span>
                   </label>
-                  <textarea pTextarea id="descriptionEn" formControlName="descriptionEn" rows="3" dir="ltr"
-                            class="w-full !rounded-xl resize-none" placeholder="Short description"></textarea>
+
+                  <textarea
+                    pTextarea
+                    id="descriptionEn"
+                    formControlName="descriptionEn"
+                    rows="3"
+                    class="w-full !rounded-xl resize-none"
+                    [placeholder]="'SERVICES.MODAL.DESCRIPTION_EN_PLACEHOLDER' | translate">
+                  </textarea>
                 </div>
+
               </div>
             </section>
 
-            <!-- ② السعر والحالة -->
+            <!-- Price and Status -->
             <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-              <div class="flex items-center gap-2.5 mb-4">
-                <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
+
+              <div class="flex items-center gap-2.5 mb-5">
+                <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
                   <lucide-icon [img]="SaveIcon" class="w-4 h-4"></lucide-icon>
                 </span>
-                <h4 class="text-sm font-extrabold text-slate-800">السعر والحالة</h4>
+
+                <h4 class="text-sm font-extrabold text-slate-800">
+                  {{ 'SERVICES.MODAL.PRICE_STATUS_SECTION' | translate }}
+                </h4>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
-<div>
-  <label class="block text-xs font-bold text-slate-700 mb-1.5">
-    السعر <span class="text-rose-500">*</span>
-  </label>
-  <p-inputNumber formControlName="price" mode="currency" currency="EGP" locale="en-EG"
-                 [min]="0" [fluid]="true" placeholder="0.00"
-                 inputStyleClass="!h-11 !rounded-xl"
-                 (onBlur)="form.controls.price.markAsTouched()"
-                 [class.ng-invalid]="isFieldInvalid('price')"
-                 [class.ng-dirty]="isFieldInvalid('price')">
-  </p-inputNumber>
-  @if (isFieldInvalid('price')) {
-    <span class="text-xs text-rose-600 mt-1 block">السعر مطلوب (0 أو أكثر)</span>
-  }
-</div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 items-start">
 
-                <div class="flex items-center h-11">
-                  <label class="relative inline-flex items-center cursor-pointer gap-3 select-none">
-                    <input type="checkbox" formControlName="isActive" class="sr-only peer" />
-                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    <span class="text-xs font-bold text-slate-700">تفعيل الخدمة</span>
+                <!-- Price -->
+                <div class="min-w-0">
+                  <label for="servicePrice" class="block text-xs font-bold text-slate-700 mb-2">
+                    {{ 'SERVICES.MODAL.PRICE' | translate }}
+                    <span class="text-rose-500">*</span>
+                  </label>
+
+                  <p-inputNumber
+                    inputId="servicePrice"
+                    formControlName="price"
+                    mode="currency"
+                    currency="EGP"
+                    locale="en-EG"
+                    [min]="0"
+                    [fluid]="true"
+                    [placeholder]="'SERVICES.MODAL.PRICE_PLACEHOLDER' | translate"
+                    inputStyleClass="!h-11 !rounded-xl"
+                    (onBlur)="form.controls.price.markAsTouched()"
+                    [class.ng-invalid]="isFieldInvalid('price')"
+                    [class.ng-dirty]="isFieldInvalid('price')">
+                  </p-inputNumber>
+
+                  @if (isFieldInvalid('price')) {
+                    <span class="text-xs text-rose-600 mt-1.5 block">
+                      {{ 'SERVICES.MODAL.ERR_PRICE' | translate }}
+                    </span>
+                  }
+                </div>
+
+                <!-- Active Status -->
+                <div class="min-w-0">
+                  <span class="block text-xs font-bold text-slate-700 mb-2">
+                    {{ 'SERVICES.MODAL.STATUS_LABEL' | translate }}
+                  </span>
+
+                  <label class="flex items-center justify-between gap-4 min-h-11 rounded-xl border border-slate-200 px-4 py-2.5 cursor-pointer hover:border-blue-300 hover:bg-blue-50/40 transition-colors">
+
+                    <div class="flex flex-col gap-1">
+                      <span class="text-sm font-bold text-slate-800">
+                        {{ 'SERVICES.MODAL.ACTIVE' | translate }}
+                      </span>
+
+                      <span class="text-xs text-slate-500">
+                        {{ 'SERVICES.MODAL.ACTIVE_HINT' | translate }}
+                      </span>
+                    </div>
+
+                    <span class="relative inline-flex shrink-0">
+                      <input
+                        type="checkbox"
+                        formControlName="isActive"
+                        class="peer sr-only" />
+
+                      <span class="w-11 h-6 rounded-full bg-slate-300 transition-colors peer-checked:bg-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-400 peer-focus-visible:ring-offset-2"></span>
+
+                      <span class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform peer-checked:-translate-x-5"></span>
+                    </span>
+
                   </label>
                 </div>
+
               </div>
             </section>
+
           </div>
 
           <!-- Footer -->
           <div class="shrink-0 flex items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
-            <p class="hidden sm:block text-[11px] text-slate-400"><span class="text-rose-500">*</span> حقول مطلوبة</p>
+
+            <p class="hidden sm:block text-[11px] text-slate-400">
+              <span class="text-rose-500">*</span>
+              {{ 'SERVICES.MODAL.REQUIRED_NOTE' | translate }}
+            </p>
+
             <div class="flex items-center gap-3 ms-auto">
-              <button type="button" (click)="resetForm()" [disabled]="isSubmitting()"
+
+              <button
+                type="button"
+                (click)="resetForm()"
+                [disabled]="isSubmitting()"
                 class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
-                إلغاء
+
+                {{ 'SERVICES.MODAL.CANCEL' | translate }}
               </button>
-              <button type="submit" [disabled]="isSubmitting() || isLoadingTranslations()"
+
+              <button
+                type="submit"
+                [disabled]="isSubmitting() || isLoadingTranslations()"
                 class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2">
+
                 <lucide-icon [img]="SaveIcon" class="w-4 h-4"></lucide-icon>
-                <span>{{ isSubmitting() ? 'جاري الحفظ...' : (selectedService() ? 'حفظ التعديلات' : 'حفظ الخدمة') }}</span>
+
+                <span>
+                  {{
+                    (isSubmitting()
+                      ? 'SERVICES.MODAL.SAVING'
+                      : (selectedService()
+                        ? 'SERVICES.MODAL.SAVE_EDITS'
+                        : 'SERVICES.MODAL.SAVE')) | translate
+                  }}
+                </span>
+
               </button>
             </div>
           </div>
+
         </form>
       </div>
     </div>
   }
-<app-confirm-dialog
-  [open]="!!serviceToDelete()"
-  title="حذف الخدمه"
-  [itemName]="serviceToDelete() ? displayName(serviceToDelete()!) : ''"
-  [loading]="isDeleting()"
-  (confirmed)="confirmDelete()"
-  (cancelled)="cancelDelete()" />
+
+  <!-- Delete Confirmation -->
+  <app-confirm-dialog
+    [open]="!!serviceToDelete()"
+    [title]="'SERVICES.DELETE_TITLE' | translate"
+    [itemName]="serviceToDelete() ? displayName(serviceToDelete()!) : ''"
+    [loading]="isDeleting()"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()">
+  </app-confirm-dialog>
+
 </div>

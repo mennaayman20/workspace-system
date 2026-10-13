@@ -12,13 +12,14 @@ import { PACKAGE_TYPE_LABELS, PackageItem, PackageType } from './Ipackage';
 import { LanguageService } from '../../core/services/lang.service'; // عدلي المسار حسب مشروعك
 import { PackageFormModalComponent } from './package-form-modal/package-form-modal';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-packages',
   standalone: true,
   imports: [
     CurrencyPipe, RouterLink, RouterLinkActive, LucideAngularModule,
-    PackageFormModalComponent,ConfirmDialogComponent
+    PackageFormModalComponent,ConfirmDialogComponent,TranslatePipe
   ],
   templateUrl: './packages.component.html',
 })

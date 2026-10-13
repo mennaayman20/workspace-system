@@ -10,13 +10,14 @@ import {
 
 import { PackageService } from '../package.service';
 import { PackageItem, PackagePayload, PackageType } from '../Ipackage';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-package-form-modal',
   standalone: true,
   imports: [
     ReactiveFormsModule, LucideAngularModule,
-    InputTextModule, TextareaModule, InputNumberModule,
+    InputTextModule, TextareaModule, InputNumberModule,TranslatePipe
   ],
   templateUrl: './package-form-modal.html',
 })

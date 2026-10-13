@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, input, output, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
+import { TranslatePipe } from '@ngx-translate/core';
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { LucideAngularModule, X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-angular';
@@ -16,6 +17,7 @@ import { SessionProductDto, SessionServiceDto } from '../Isessions';
 import { CheckoutService } from '../checkout.service';
 import { DiscountService } from '../../discount/discount.service'; // عدّلي المسار
 import { Discount } from '../../discount/Idiscount'; // عدّلي المسار
+import { LanguageService } from '../../../core/services/lang.service'; // عدّل المسار لو مختلف
 
 type PosTab = 'products' | 'services';
 type PosMode = 'edit' | 'checkout';
@@ -23,7 +25,7 @@ type PosMode = 'edit' | 'checkout';
 @Component({
   selector: 'app-session-pos-modal',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, TranslatePipe],
   templateUrl: './session-pos-modal.component.html',
 })
 export class SessionPosModalComponent implements OnInit {
@@ -35,6 +37,7 @@ export class SessionPosModalComponent implements OnInit {
   private checkoutService = inject(CheckoutService);
   private discountService = inject(DiscountService);
   private toastr = inject(ToastrService);
+  private lang = inject(LanguageService);
 
   sessionId = input.required<number>();
   customerName = input<string>('');
@@ -171,13 +174,13 @@ export class SessionPosModalComponent implements OnInit {
     forkJoin({
       products: this.sessionProducts.getSessionProducts(sid).pipe(
         catchError(() => {
-          this.toastr.error('تعذر تحميل منتجات الجلسة');
+          this.toastr.error(this.lang.t('SESSIONS.POS.ERR_LOAD_PRODUCTS'));
           return of([] as SessionProductDto[]);
         })
       ),
       services: this.sessionServices.getSessionServices(sid).pipe(
         catchError(() => {
-          this.toastr.error('تعذر تحميل خدمات الجلسة');
+          this.toastr.error(this.lang.t('SESSIONS.POS.ERR_LOAD_SERVICES'));
           return of([] as SessionServiceDto[]);
         })
       ),
@@ -195,19 +198,19 @@ export class SessionPosModalComponent implements OnInit {
     return this.draftItems().find((i) => i.productId === productId)?.quantity ?? 0;
   }
 
-addProduct(p: Product) {
-  const displayName = p.name ?? p.nameEn ?? p.nameAr ?? p.englishName ?? '';
-  this.draftItems.update((list) => {
-    const exists = list.some((i) => i.productId === p.id);
-    if (exists) {
-      return list.map((i) => (i.productId === p.id ? { ...i, quantity: i.quantity + 1 } : i));
-    }
-    return [
-      ...list,
-      { productId: p.id, productName: displayName, unitPrice: p.sellingPrice, quantity: 1 },
-    ];
-  });
-}
+  addProduct(p: Product) {
+    const displayName = p.name ?? p.nameEn ?? p.nameAr ?? p.englishName ?? '';
+    this.draftItems.update((list) => {
+      const exists = list.some((i) => i.productId === p.id);
+      if (exists) {
+        return list.map((i) => (i.productId === p.id ? { ...i, quantity: i.quantity + 1 } : i));
+      }
+      return [
+        ...list,
+        { productId: p.id, productName: displayName, unitPrice: p.sellingPrice, quantity: 1 },
+      ];
+    });
+  }
 
   changeQuantity(item: SessionProductDto, delta: number) {
     const newQty = item.quantity + delta;
@@ -233,16 +236,16 @@ addProduct(p: Product) {
     return this.draftServices().find((i) => i.serviceId === serviceId)?.quantity ?? 0;
   }
 
-addService(s: ServiceItem) {
-  const displayName = s.name ?? s.nameAr ?? s.nameEn ?? '';
-  this.draftServices.update((list) => {
-    const exists = list.some((i) => i.serviceId === s.id);
-    if (exists) {
-      return list.map((i) => (i.serviceId === s.id ? { ...i, quantity: i.quantity + 1 } : i));
-    }
-    return [...list, { serviceId: s.id, serviceName: displayName, unitPrice: s.price, quantity: 1 }];
-  });
-}
+  addService(s: ServiceItem) {
+    const displayName = s.name ?? s.nameAr ?? s.nameEn ?? '';
+    this.draftServices.update((list) => {
+      const exists = list.some((i) => i.serviceId === s.id);
+      if (exists) {
+        return list.map((i) => (i.serviceId === s.id ? { ...i, quantity: i.quantity + 1 } : i));
+      }
+      return [...list, { serviceId: s.id, serviceName: displayName, unitPrice: s.price, quantity: 1 }];
+    });
+  }
 
   changeServiceQuantity(item: SessionServiceDto, delta: number) {
     const newQty = item.quantity + delta;
@@ -284,13 +287,13 @@ addService(s: ServiceItem) {
     forkJoin(calls).subscribe({
       next: () => {
         this.isSaving.set(false);
-        this.toastr.success('تم حفظ منتجات وخدمات الجلسة');
+        this.toastr.success(this.lang.t('SESSIONS.POS.SAVED'));
         this.saved.emit();
         this.closeModal.emit();
       },
       error: (err) => {
         this.isSaving.set(false);
-        this.toastr.error(err?.error?.message || 'فشل حفظ بعض العناصر');
+        this.toastr.error(err?.error?.message || this.lang.t('SESSIONS.POS.ERR_SAVE'));
         // بعض الطلبات ممكن تكون نجحت، فنرجع للحالة الحقيقية من السيرفر
         this.loadSessionItems();
       },
@@ -310,16 +313,16 @@ addService(s: ServiceItem) {
         next: (res: any) => {
           this.isCheckingOut.set(false);
           if (res?.succeeded === false) {
-            this.toastr.error(res?.message || 'فشل إنهاء الجلسة');
+            this.toastr.error(res?.message || this.lang.t('SESSIONS.POS.ERR_CHECKOUT'));
             return;
           }
-          this.toastr.success('تم إنهاء الجلسة وتحصيل الفاتورة بنجاح');
+          this.toastr.success(this.lang.t('SESSIONS.POS.CHECKOUT_SUCCESS'));
           this.checkedOut.emit();
           this.closeModal.emit();
         },
         error: (err) => {
           this.isCheckingOut.set(false);
-          this.toastr.error(err?.error?.message || 'فشل إنهاء الجلسة');
+          this.toastr.error(err?.error?.message || this.lang.t('SESSIONS.POS.ERR_CHECKOUT'));
         },
       });
   }

@@ -1,3 +1,4 @@
+
 <style>
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(8px); }
@@ -7,7 +8,7 @@
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
 </style>
 
-<div dir="rtl" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-up">
+<div  class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-up">
   <div role="dialog" aria-modal="true"
        class="bg-white rounded-3xl w-full max-w-3xl shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col overflow-hidden">
 
@@ -19,16 +20,22 @@
             <lucide-icon [img]="PercentIcon" class="w-6 h-6"></lucide-icon>
           </div>
 
-
           <div>
             <h4 class="text-xl font-extrabold text-slate-900 leading-tight">
-              {{ isEdit ? 'تعديل الخصم' : 'خصم جديد' }}
+              {{ (isEdit ? 'DISCOUNTS.MODAL.EDIT_TITLE' : 'DISCOUNTS.MODAL.ADD_TITLE') | translate }}
             </h4>
-            <p class="text-xs text-slate-500 mt-0.5">الخصم بيظهر عند إنهاء الجلسة لو كان فعّال</p>
+            <p class="text-xs text-slate-500 mt-0.5">
+              {{ 'DISCOUNTS.MODAL.ADD_SUBTITLE' | translate }}
+            </p>
           </div>
         </div>
-        <button type="button" (click)="cancel()" [disabled]="isSaving()" aria-label="إغلاق"
-                class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white disabled:opacity-50 transition-colors">
+
+        <button
+          type="button"
+          (click)="cancel()"
+          [disabled]="isSaving()"
+          [attr.aria-label]="'DISCOUNTS.MODAL.CLOSE' | translate"
+          class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white disabled:opacity-50 transition-colors">
           <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
         </button>
       </div>
@@ -48,7 +55,7 @@
         @if (isLoadingTranslations()) {
           <div class="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
             <span class="inline-block w-3.5 h-3.5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></span>
-            جاري تحميل الترجمات...
+            {{ 'DISCOUNTS.MODAL.LOADING_TRANSLATIONS' | translate }}
           </div>
         }
 
@@ -58,33 +65,63 @@
             <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
               <lucide-icon [img]="PercentIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">اسم الخصم</h4>
+            <h4 class="text-sm font-extrabold text-slate-800">
+              {{ 'DISCOUNTS.MODAL.NAME_SECTION' | translate }}
+            </h4>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label for="d-name-ar" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>الاسم بالعربي <span class="text-rose-500">*</span></span>
+                <span>
+                  {{ 'DISCOUNTS.MODAL.NAME_AR' | translate }}
+                  <span class="text-rose-500">*</span>
+                </span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
               </label>
-              <input pInputText id="d-name-ar" formControlName="nameAr" dir="rtl" maxlength="100"
-                     class="w-full !h-10 !rounded-xl" placeholder="مثال: خصم الطلبة"
-                     [class.ng-invalid]="isInvalid('nameAr')" [class.ng-dirty]="isInvalid('nameAr')" />
+
+              <input
+                pInputText
+                id="d-name-ar"
+                formControlName="nameAr"
+      
+                maxlength="100"
+                class="w-full !h-10 !rounded-xl"
+                [placeholder]="'DISCOUNTS.MODAL.NAME_AR_PLACEHOLDER' | translate"
+                [class.ng-invalid]="isInvalid('nameAr')"
+                [class.ng-dirty]="isInvalid('nameAr')" />
+
               @if (isInvalid('nameAr')) {
-                <p class="text-xs text-rose-600 mt-1">الاسم بالعربي مطلوب</p>
+                <p class="text-xs text-rose-600 mt-1">
+                  {{ 'DISCOUNTS.MODAL.ERR_NAME_AR' | translate }}
+                </p>
               }
             </div>
 
             <div>
               <label for="d-name-en" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>Discount Name <span class="text-rose-500">*</span></span>
+                <span>
+                  {{ 'DISCOUNTS.MODAL.NAME_EN' | translate }}
+                  <span class="text-rose-500">*</span>
+                </span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
               </label>
-              <input pInputText id="d-name-en" formControlName="nameEn" dir="ltr" maxlength="100"
-                     class="w-full !h-10 !rounded-xl" placeholder="e.g. Student Discount"
-                     [class.ng-invalid]="isInvalid('nameEn')" [class.ng-dirty]="isInvalid('nameEn')" />
+
+              <input
+                pInputText
+                id="d-name-en"
+                formControlName="nameEn"
+                dir="ltr"
+                maxlength="100"
+                class="w-full !h-10 !rounded-xl"
+                [placeholder]="'DISCOUNTS.MODAL.NAME_EN_PLACEHOLDER' | translate"
+                [class.ng-invalid]="isInvalid('nameEn')"
+                [class.ng-dirty]="isInvalid('nameEn')" />
+
               @if (isInvalid('nameEn')) {
-                <p class="text-xs text-rose-600 mt-1">English name is required</p>
+                <p class="text-xs text-rose-600 mt-1">
+                  {{ 'DISCOUNTS.MODAL.ERR_NAME_EN' | translate }}
+                </p>
               }
             </div>
           </div>
@@ -96,95 +133,140 @@
             <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
               <lucide-icon [img]="TextIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">الوصف <span class="font-normal text-slate-400">(اختياري)</span></h4>
+
+            <h4 class="text-sm font-extrabold text-slate-800">
+              {{ 'DISCOUNTS.MODAL.DESCRIPTION_SECTION' | translate }}
+              <span class="font-normal text-slate-400">
+                ({{ 'DISCOUNTS.MODAL.OPTIONAL' | translate }})
+              </span>
+            </h4>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>الوصف</span>
+                <span>{{ 'DISCOUNTS.MODAL.DESCRIPTION_AR' | translate }}</span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
               </label>
-              <textarea pTextarea formControlName="descriptionAr" rows="3" dir="rtl" maxlength="500"
-                        class="w-full !rounded-xl resize-none" placeholder="تفاصيل الخصم..."></textarea>
+
+              <textarea
+                pTextarea
+                formControlName="descriptionAr"
+                rows="3"
+                dir="rtl"
+                maxlength="500"
+                class="w-full !rounded-xl resize-none"
+                [placeholder]="'DISCOUNTS.MODAL.DESCRIPTION_AR_PLACEHOLDER' | translate">
+              </textarea>
             </div>
+
             <div>
               <label class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>Description</span>
+                <span>{{ 'DISCOUNTS.MODAL.DESCRIPTION_EN' | translate }}</span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
               </label>
-              <textarea pTextarea formControlName="descriptionEn" rows="3" dir="ltr" maxlength="500"
-                        class="w-full !rounded-xl resize-none" placeholder="Discount details..."></textarea>
+
+              <textarea
+                pTextarea
+                formControlName="descriptionEn"
+                rows="3"
+                dir="ltr"
+                maxlength="500"
+                class="w-full !rounded-xl resize-none"
+                [placeholder]="'DISCOUNTS.MODAL.DESCRIPTION_EN_PLACEHOLDER' | translate">
+              </textarea>
             </div>
           </div>
         </section>
 
         <!-- ③ النوع والقيمة -->
-<!-- ③ النوع والقيمة -->
-<section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-  <div class="flex items-center gap-2.5 mb-4">
-    <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
-      <lucide-icon [img]="PercentIcon" class="w-4 h-4"></lucide-icon>
-    </span>
-    <h4 class="text-sm font-extrabold text-slate-800">نوع الخصم وقيمته</h4>
-  </div>
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+              <lucide-icon [img]="PercentIcon" class="w-4 h-4"></lucide-icon>
+            </span>
 
-  <!-- كروت اختيار النوع -->
-  <div role="radiogroup" aria-label="نوع الخصم" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-    @for (opt of typeCards; track opt.value) {
-      <button type="button" role="radio"
-              [attr.aria-checked]="form.controls.type.value === opt.value"
-              (click)="selectType(opt.value)"
-              [class]="form.controls.type.value === opt.value
-                ? 'border-blue-500 bg-blue-50/70 ring-4 ring-blue-100'
-                : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'"
-              class="relative flex items-center gap-3 p-3.5 rounded-2xl border-2 text-right transition-all duration-200">
+            <h4 class="text-sm font-extrabold text-slate-800">
+              {{ 'DISCOUNTS.MODAL.TYPE_VALUE_SECTION' | translate }}
+            </h4>
+          </div>
 
-        <span class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 {{ opt.tone }}">
-          <lucide-icon [img]="opt.icon" class="w-5 h-5"></lucide-icon>
-        </span>
+          <!-- كروت اختيار النوع -->
+          <div
+            role="radiogroup"
+            [attr.aria-label]="'DISCOUNTS.MODAL.TYPE_VALUE_SECTION' | translate"
+            class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
-        <span class="flex-1 min-w-0">
-          <span class="block text-sm font-extrabold text-slate-800 leading-tight">{{ opt.label }}</span>
-          <span class="block text-[11px] text-slate-400 mt-0.5 truncate">{{ opt.hint }}</span>
-        </span>
+            @for (opt of typeCards; track opt.value) {
+              <button
+                type="button"
+                role="radio"
+                [attr.aria-checked]="form.controls.type.value === opt.value"
+                (click)="selectType(opt.value)"
+                [class]="form.controls.type.value === opt.value
+                  ? 'border-blue-500 bg-blue-50/70 ring-4 ring-blue-100'
+                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'"
+                class="relative flex items-center gap-3 p-3.5 rounded-2xl border-2 text-right transition-all duration-200">
 
-        <!-- مؤشر الاختيار -->
-        <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all"
-              [class]="form.controls.type.value === opt.value
-                ? 'border-blue-600 bg-blue-600'
-                : 'border-slate-300 bg-white'">
-          @if (form.controls.type.value === opt.value) {
-            <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
-          }
-        </span>
-      </button>
-    }
-  </div>
+                <span class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 {{ opt.tone }}">
+                  <lucide-icon [img]="opt.icon" class="w-5 h-5"></lucide-icon>
+                </span>
 
-  <!-- القيمة -->
-  <div class="mt-5">
-    <label class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-      <span>{{ isPercent ? 'نسبة الخصم' : 'مبلغ الخصم' }} <span class="text-rose-500">*</span></span>
-      <span class="text-[11px] font-normal text-slate-400">
-        {{ isPercent ? 'من 1 إلى 100' : 'بالجنيه المصري' }}
-      </span>
-    </label>
+                <span class="flex-1 min-w-0">
+                  <span class="block text-sm font-extrabold text-slate-800 leading-tight">
+                    {{ opt.label | translate }}
+                  </span>
+                  <span class="block text-[11px] text-slate-400 mt-0.5 truncate">
+                    {{ opt.hint | translate }}
+                  </span>
+                </span>
 
-    <p-inputNumber formControlName="value" [min]="0" [max]="isPercent ? 100 : undefined"
-                   [minFractionDigits]="0" [maxFractionDigits]="2"
-                   [suffix]="isPercent ? ' %' : ' ج.م'"
-                   placeholder="0"
-                   styleClass="w-full"
-                   inputStyleClass="w-full !h-12 !rounded-xl !text-lg !font-extrabold !text-center" />
+                <!-- مؤشر الاختيار -->
+                <span
+                  class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all"
+                  [class]="form.controls.type.value === opt.value
+                    ? 'border-blue-600 bg-blue-600'
+                    : 'border-slate-300 bg-white'">
 
-    @if (isInvalid('value')) {
-      <p class="text-xs text-rose-600 mt-1">القيمة لازم تكون أكبر من صفر</p>
-    }
-  </div>
+                  @if (form.controls.type.value === opt.value) {
+                    <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+                  }
+                </span>
+              </button>
+            }
+          </div>
 
+          <!-- القيمة -->
+          <div class="mt-5">
+            <label class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+              <span>
+                {{ (isPercent ? 'DISCOUNTS.MODAL.PERCENTAGE_VALUE' : 'DISCOUNTS.MODAL.FIXED_VALUE') | translate }}
+                <span class="text-rose-500">*</span>
+              </span>
 
-</section>
+              <span class="text-[11px] font-normal text-slate-400">
+                {{ (isPercent ? 'DISCOUNTS.MODAL.PERCENTAGE_RANGE' : 'DISCOUNTS.MODAL.EGP') | translate }}
+              </span>
+            </label>
+
+            <p-inputNumber
+              formControlName="value"
+              [min]="0"
+              [max]="isPercent ? 100 : undefined"
+              [minFractionDigits]="0"
+              [maxFractionDigits]="2"
+              [suffix]="isPercent ? ' %' : ' ج.م'"
+              [placeholder]="'DISCOUNTS.MODAL.VALUE_PLACEHOLDER' | translate"
+              styleClass="w-full"
+              inputStyleClass="w-full !h-12 !rounded-xl !text-lg !font-extrabold !text-center" />
+
+            @if (isInvalid('value')) {
+              <p class="text-xs text-rose-600 mt-1">
+                {{ 'DISCOUNTS.MODAL.ERR_VALUE' | translate }}
+              </p>
+            }
+          </div>
+        </section>
 
         <!-- ④ المدة -->
         <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
@@ -192,22 +274,45 @@
             <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
               <lucide-icon [img]="CalendarIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">مدة الصلاحية <span class="font-normal text-slate-400">(اختياري)</span></h4>
+
+            <h4 class="text-sm font-extrabold text-slate-800">
+              {{ 'DISCOUNTS.MODAL.VALIDITY' | translate }}
+              <span class="font-normal text-slate-400">
+                ({{ 'DISCOUNTS.MODAL.OPTIONAL' | translate }})
+              </span>
+            </h4>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1.5">يبدأ من</label>
-              <p-datepicker formControlName="startDate" dateFormat="yy/mm/dd"
-                            placeholder="yyyy/mm/dd" [showIcon]="true" [showClear]="true"
-                            appendTo="body" [fluid]="true" />
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                {{ 'DISCOUNTS.MODAL.START_DATE' | translate }}
+              </label>
+
+              <p-datepicker
+                formControlName="startDate"
+                dateFormat="yy/mm/dd"
+                placeholder="yyyy/mm/dd"
+                [showIcon]="true"
+                [showClear]="true"
+                appendTo="body"
+                [fluid]="true" />
             </div>
+
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1.5">ينتهي في</label>
-              <p-datepicker formControlName="endDate" dateFormat="yy/mm/dd"
-                            placeholder="yyyy/mm/dd" [showIcon]="true" [showClear]="true"
-                            [minDate]="form.controls.startDate.value ?? undefined"
-                            appendTo="body" [fluid]="true" />
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                {{ 'DISCOUNTS.MODAL.END_DATE' | translate }}
+              </label>
+
+              <p-datepicker
+                formControlName="endDate"
+                dateFormat="yy/mm/dd"
+                placeholder="yyyy/mm/dd"
+                [showIcon]="true"
+                [showClear]="true"
+                [minDate]="form.controls.startDate.value ?? undefined"
+                appendTo="body"
+                [fluid]="true" />
             </div>
           </div>
         </section>
@@ -216,9 +321,14 @@
         <section class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
           <div class="flex items-center justify-between gap-4">
             <div>
-              <p class="text-sm font-extrabold text-slate-800">الخصم فعّال</p>
-              <p class="text-xs text-slate-500 mt-0.5">لو اتقفل مش هيظهر عند إنهاء الجلسة</p>
+              <p class="text-sm font-extrabold text-slate-800">
+                {{ 'DISCOUNTS.MODAL.ACTIVE' | translate }}
+              </p>
+              <p class="text-xs text-slate-500 mt-0.5">
+                {{ 'DISCOUNTS.MODAL.ACTIVE_HINT' | translate }}
+              </p>
             </div>
+
             <p-toggleswitch formControlName="isActive" />
           </div>
         </section>
@@ -226,16 +336,32 @@
 
       <!-- Footer -->
       <div class="shrink-0 flex items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
-        <p class="hidden sm:block text-[11px] text-slate-400"><span class="text-rose-500">*</span> حقول مطلوبة</p>
+        <p class="hidden sm:block text-[11px] text-slate-400">
+          <span class="text-rose-500">*</span>
+          {{ 'DISCOUNTS.MODAL.REQUIRED_NOTE' | translate }}
+        </p>
+
         <div class="flex items-center gap-3 ms-auto">
-          <button type="button" (click)="cancel()" [disabled]="isSaving()"
-                  class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
-            إلغاء
+          <button
+            type="button"
+            (click)="cancel()"
+            [disabled]="isSaving()"
+            class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
+            {{ 'DISCOUNTS.MODAL.CANCEL' | translate }}
           </button>
-          <button type="submit" [disabled]="isSaving() || isLoadingTranslations()"
-                  class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2">
+
+          <button
+            type="submit"
+            [disabled]="isSaving() || isLoadingTranslations()"
+            class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2">
+
             <lucide-icon [img]="SaveIcon" class="w-4 h-4"></lucide-icon>
-            {{ isSaving() ? 'جاري الحفظ...' : isEdit ? 'حفظ التعديلات' : 'إضافة الخصم' }}
+
+            {{ (isSaving()
+              ? 'DISCOUNTS.MODAL.SAVING'
+              : isEdit
+                ? 'DISCOUNTS.MODAL.SAVE_EDITS'
+                : 'DISCOUNTS.MODAL.ADD') | translate }}
           </button>
         </div>
       </div>

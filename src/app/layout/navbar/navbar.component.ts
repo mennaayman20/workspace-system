@@ -1,12 +1,14 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { SessionsService } from '../../features/sessions/sessions.service';
 import { ActiveSessionDto } from '../../features/sessions/Isessions';
+import { LanguageService } from '../../core/services/lang.service';
 
 @Component({
   selector: 'app-navbar',
@@ -17,12 +19,14 @@ import { ActiveSessionDto } from '../../features/sessions/Isessions';
     ButtonComponent,
     InputComponent,
     ModalComponent,
+       TranslatePipe
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
 })
 export class NavbarComponent implements OnInit {
   private sessionsService = inject(SessionsService);
+   lang = inject(LanguageService);
 
   activeSessions = signal<ActiveSessionDto[]>([]);
   isLoading = signal<boolean>(true);

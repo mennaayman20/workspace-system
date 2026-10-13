@@ -11,6 +11,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, switchMap, tap } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
+import { TranslatePipe } from '@ngx-translate/core';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -21,6 +22,7 @@ import {
 
 import { CreateWorkspaceCommand, Workspace, WorkspaceType } from '../../../core/interfaces/Iworkspace';
 import { WorkspaceService } from '../../../core/services/workspace.service';
+import { LanguageService } from '../../../core/services/lang.service'; // عدّل المسار لو مختلف
 
 
 // ---------- Custom validators ----------
@@ -38,6 +40,7 @@ const integer: ValidatorFn = (c: AbstractControl): ValidationErrors | null =>
   imports: [
     ReactiveFormsModule, LucideAngularModule,
     InputTextModule, TextareaModule, InputNumberModule, SelectModule,
+    TranslatePipe,
   ],
   templateUrl: './add-workspace-modal.component.html',
 })
@@ -66,6 +69,7 @@ export class CreateWorkspaceModalComponent implements OnInit {
   private readonly workspaceService = inject(WorkspaceService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toastr = inject(ToastrService);
+  private readonly lang = inject(LanguageService);
 
   isSubmitting = signal(false);
   isLoadingTranslations = signal(false);
@@ -79,7 +83,11 @@ export class CreateWorkspaceModalComponent implements OnInit {
       value: t.id as number | string,
       isNew: false,
     })),
-    { label: '+ إضافة نوع جديد', value: this.NEW_TYPE_VALUE as number | string, isNew: true },
+    {
+      label: this.lang.t('WORKSPACES.MODAL.ADD_NEW_TYPE'),
+      value: this.NEW_TYPE_VALUE as number | string,
+      isNew: true,
+    },
   ]);
 
   /** If the type was created but the workspace call failed, reuse it on retry (no duplicate types). */
@@ -178,21 +186,23 @@ export class CreateWorkspaceModalComponent implements OnInit {
   }
 
   // ---------- Template helpers ----------
-  /** Returns an Arabic error message for a control, only after the user touched it. */
+  /** Returns a translated error message for a control, only after the user touched it. */
   fieldError(name: keyof typeof this.form.controls): string | null {
     const c = this.form.controls[name];
     if (!c || !(c.touched || c.dirty) || !c.errors) return null;
 
     const e = c.errors;
-    if (e['required'] || e['blank']) return 'هذا الحقل مطلوب';
-    if (e['minlength']) return `يجب ألا يقل عن ${e['minlength'].requiredLength} أحرف`;
-    if (e['maxlength']) return `يجب ألا يزيد عن ${e['maxlength'].requiredLength} حرفاً`;
-    if (e['pattern']) return 'استخدم حروفاً إنجليزية وأرقاماً و - أو _ فقط (بدون مسافات)';
-    if (e['min']) return `القيمة يجب ألا تقل عن ${e['min'].min}`;
-    if (e['max']) return `القيمة يجب ألا تزيد عن ${e['max'].max}`;
-    if (e['integer']) return 'يجب إدخال رقم صحيح';
-    if (e['duplicate']) return 'هذا النوع موجود بالفعل، اختره من القائمة';
-    return 'قيمة غير صالحة';
+    const t = (k: string, p?: Record<string, unknown>) => this.lang.t('VALIDATION.' + k, p);
+
+    if (e['required'] || e['blank']) return t('REQUIRED');
+    if (e['minlength']) return t('MIN_LENGTH', { n: e['minlength'].requiredLength });
+    if (e['maxlength']) return t('MAX_LENGTH', { n: e['maxlength'].requiredLength });
+    if (e['pattern']) return t('PATTERN');
+    if (e['min']) return t('MIN', { n: e['min'].min });
+    if (e['max']) return t('MAX', { n: e['max'].max });
+    if (e['integer']) return t('INTEGER');
+    if (e['duplicate']) return t('DUPLICATE');
+    return t('INVALID');
   }
 
   // ---------- Submit ----------
@@ -256,7 +266,7 @@ export class CreateWorkspaceModalComponent implements OnInit {
       .subscribe({
         next: () => {
           this.isSubmitting.set(false);
-          this.toastr.success(editData ? 'تم تعديل المساحة بنجاح' : 'تمت إضافة المساحة بنجاح');
+          this.toastr.success(this.lang.t(editData ? 'WORKSPACES.MODAL.EDITED' : 'WORKSPACES.MODAL.ADDED'));
           this.saved.emit();
           this.closeModal.emit();
         },
@@ -270,13 +280,14 @@ export class CreateWorkspaceModalComponent implements OnInit {
   }
 
   private resolveError(err: unknown, isEdit: boolean): string {
+    const t = (k: string) => this.lang.t('WORKSPACES.MODAL.' + k);
     if (err instanceof HttpErrorResponse) {
-      if (err.status === 0) return 'تعذر الاتصال بالسيرفر، تأكد من الإنترنت وأعد المحاولة';
-      if (err.status === 409) return 'كود المساحة مستخدم بالفعل، اختر كوداً آخر';
+      if (err.status === 0) return t('ERR_OFFLINE');
+      if (err.status === 409) return t('ERR_CODE_EXISTS');
       const serverMsg = err.error?.message ?? err.error?.title;
       if (typeof serverMsg === 'string' && serverMsg.trim()) return serverMsg;
     }
-    return isEdit ? 'حدث خطأ أثناء تعديل المساحة' : 'حدث خطأ أثناء إضافة المساحة';
+    return t(isEdit ? 'ERR_EDIT' : 'ERR_ADD');
   }
 
   // ---------- Close ----------

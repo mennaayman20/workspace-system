@@ -1,3 +1,4 @@
+
 <style>
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(8px); }
@@ -7,7 +8,7 @@
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
 </style>
 
-<div dir="rtl" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-up">
+<div  class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-up">
   <div role="dialog" aria-modal="true"
        class="bg-white rounded-3xl w-full max-w-3xl shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col overflow-hidden">
 
@@ -20,13 +21,20 @@
           </div>
           <div>
             <h3 class="text-lg font-extrabold text-slate-900 leading-tight">
-              {{ isEdit ? 'تعديل الباقة' : 'باقة جديدة' }}
+              {{ (isEdit ? 'PACKAGES.MODAL.EDIT_TITLE' : 'PACKAGES.MODAL.ADD_TITLE') | translate }}
             </h3>
-            <p class="text-xs text-slate-500 mt-0.5">باقة ساعات مسبقة الدفع بتتباع للعملاء</p>
+            <p class="text-xs text-slate-500 mt-0.5">
+              {{ 'PACKAGES.MODAL.SUBTITLE' | translate }}
+            </p>
           </div>
         </div>
-        <button type="button" (click)="cancel()" [disabled]="isSaving()" aria-label="إغلاق"
-                class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white disabled:opacity-50 transition-colors">
+
+        <button
+          type="button"
+          (click)="cancel()"
+          [disabled]="isSaving()"
+          [attr.aria-label]="'PACKAGES.MODAL.CLOSE' | translate"
+          class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white disabled:opacity-50 transition-colors">
           <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
         </button>
       </div>
@@ -46,7 +54,7 @@
         @if (isLoadingTranslations()) {
           <div class="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
             <span class="inline-block w-3.5 h-3.5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></span>
-            جاري تحميل الترجمات...
+            {{ 'PACKAGES.MODAL.LOADING_TRANSLATIONS' | translate }}
           </div>
         }
 
@@ -56,33 +64,63 @@
             <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
               <lucide-icon [img]="PackageIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">اسم الباقة</h4>
+            <h4 class="text-sm font-extrabold text-slate-800">
+              {{ 'PACKAGES.MODAL.NAME_SECTION' | translate }}
+            </h4>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label for="pkg-name-ar" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>الاسم بالعربي <span class="text-rose-500">*</span></span>
+                <span>
+                  {{ 'PACKAGES.MODAL.NAME_AR' | translate }}
+                  <span class="text-rose-500">*</span>
+                </span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
               </label>
-              <input pInputText id="pkg-name-ar" formControlName="nameAr" dir="rtl" maxlength="100"
-                     class="w-full !h-10 !rounded-xl" placeholder="مثال: باقة 50 ساعة"
-                     [class.ng-invalid]="isInvalid('nameAr')" [class.ng-dirty]="isInvalid('nameAr')" />
+
+              <input
+                pInputText
+                id="pkg-name-ar"
+                formControlName="nameAr"
+                dir="rtl"
+                maxlength="100"
+                class="w-full !h-10 !rounded-xl"
+                [placeholder]="'PACKAGES.MODAL.NAME_AR_PLACEHOLDER' | translate"
+                [class.ng-invalid]="isInvalid('nameAr')"
+                [class.ng-dirty]="isInvalid('nameAr')" />
+
               @if (isInvalid('nameAr')) {
-                <p class="text-xs text-rose-600 mt-1">الاسم بالعربي مطلوب</p>
+                <p class="text-xs text-rose-600 mt-1">
+                  {{ 'PACKAGES.MODAL.ERR_NAME_AR' | translate }}
+                </p>
               }
             </div>
 
             <div>
               <label for="pkg-name-en" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>Package Name <span class="text-rose-500">*</span></span>
+                <span>
+                  {{ 'PACKAGES.MODAL.NAME_EN' | translate }}
+                  <span class="text-rose-500">*</span>
+                </span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
               </label>
-              <input pInputText id="pkg-name-en" formControlName="nameEn" dir="ltr" maxlength="100"
-                     class="w-full !h-10 !rounded-xl" placeholder="e.g. 50 Hours Pack"
-                     [class.ng-invalid]="isInvalid('nameEn')" [class.ng-dirty]="isInvalid('nameEn')" />
+
+              <input
+                pInputText
+                id="pkg-name-en"
+                formControlName="nameEn"
+                dir="ltr"
+                maxlength="100"
+                class="w-full !h-10 !rounded-xl"
+                [placeholder]="'PACKAGES.MODAL.NAME_EN_PLACEHOLDER' | translate"
+                [class.ng-invalid]="isInvalid('nameEn')"
+                [class.ng-dirty]="isInvalid('nameEn')" />
+
               @if (isInvalid('nameEn')) {
-                <p class="text-xs text-rose-600 mt-1">English name is required</p>
+                <p class="text-xs text-rose-600 mt-1">
+                  {{ 'PACKAGES.MODAL.ERR_NAME_EN' | translate }}
+                </p>
               }
             </div>
           </div>
@@ -94,25 +132,47 @@
             <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
               <lucide-icon [img]="TextIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">الوصف <span class="font-normal text-slate-400">(اختياري)</span></h4>
+            <h4 class="text-sm font-extrabold text-slate-800">
+              {{ 'PACKAGES.MODAL.DESCRIPTION_SECTION' | translate }}
+              <span class="font-normal text-slate-400">
+                ({{ 'PACKAGES.MODAL.OPTIONAL' | translate }})
+              </span>
+            </h4>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>الوصف</span>
+                <span>{{ 'PACKAGES.MODAL.DESCRIPTION_AR' | translate }}</span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
               </label>
-              <textarea pTextarea formControlName="descriptionAr" rows="3" dir="rtl" maxlength="500"
-                        class="w-full !rounded-xl resize-none" placeholder="تفاصيل الباقة..."></textarea>
+
+              <textarea
+                pTextarea
+                formControlName="descriptionAr"
+                rows="3"
+                dir="rtl"
+                maxlength="500"
+                class="w-full !rounded-xl resize-none"
+                [placeholder]="'PACKAGES.MODAL.DESCRIPTION_AR_PLACEHOLDER' | translate">
+              </textarea>
             </div>
+
             <div>
               <label class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>Description</span>
+                <span>{{ 'PACKAGES.MODAL.DESCRIPTION_EN' | translate }}</span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
               </label>
-              <textarea pTextarea formControlName="descriptionEn" rows="3" dir="ltr" maxlength="500"
-                        class="w-full !rounded-xl resize-none" placeholder="Package details..."></textarea>
+
+              <textarea
+                pTextarea
+                formControlName="descriptionEn"
+                rows="3"
+                dir="ltr"
+                maxlength="500"
+                class="w-full !rounded-xl resize-none"
+                [placeholder]="'PACKAGES.MODAL.DESCRIPTION_EN_PLACEHOLDER' | translate">
+              </textarea>
             </div>
           </div>
         </section>
@@ -123,24 +183,38 @@
             <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
               <lucide-icon [img]="PackageIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">نوع الباقة</h4>
+            <h4 class="text-sm font-extrabold text-slate-800">
+              {{ 'PACKAGES.MODAL.TYPE_SECTION' | translate }}
+            </h4>
           </div>
 
-          <div role="radiogroup" aria-label="نوع الباقة" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div
+            role="radiogroup"
+            [attr.aria-label]="'PACKAGES.MODAL.TYPE_ARIA_LABEL' | translate"
+            class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
             @for (opt of typeCards; track opt.value) {
-              <button type="button" role="radio"
-                      [attr.aria-checked]="form.controls.packageType.value === opt.value"
-                      (click)="selectType(opt.value)"
-                      [class]="form.controls.packageType.value === opt.value
-                        ? 'border-blue-500 bg-blue-50/70 ring-4 ring-blue-100'
-                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'"
-                      class="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 text-center transition-all duration-200">
+              <button
+                type="button"
+                role="radio"
+                [attr.aria-checked]="form.controls.packageType.value === opt.value"
+                (click)="selectType(opt.value)"
+                [class]="form.controls.packageType.value === opt.value
+                  ? 'border-blue-500 bg-blue-50/70 ring-4 ring-blue-100'
+                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'"
+                class="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 text-center transition-all duration-200">
+
                 <span class="w-10 h-10 rounded-xl flex items-center justify-center {{ opt.tone }}">
                   <lucide-icon [img]="opt.icon" class="w-5 h-5"></lucide-icon>
                 </span>
+
                 <span>
-                  <span class="block text-sm font-extrabold text-slate-800 leading-tight">{{ opt.label }}</span>
-                  <span class="block text-[11px] text-slate-400 mt-0.5">{{ opt.hint }}</span>
+                  <span class="block text-sm font-extrabold text-slate-800 leading-tight">
+                    {{ opt.label }}
+                  </span>
+                  <span class="block text-[11px] text-slate-400 mt-0.5">
+                    {{ opt.hint }}
+                  </span>
                 </span>
               </button>
             }
@@ -153,51 +227,91 @@
             <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
               <lucide-icon [img]="WalletIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">الساعات والسعر</h4>
+            <h4 class="text-sm font-extrabold text-slate-800">
+              {{ 'PACKAGES.MODAL.HOURS_PRICE_SECTION' | translate }}
+            </h4>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                إجمالي الساعات <span class="text-rose-500">*</span>
+                {{ 'PACKAGES.MODAL.TOTAL_HOURS' | translate }}
+                <span class="text-rose-500">*</span>
               </label>
-              <p-inputNumber formControlName="totalHours" [min]="0" [minFractionDigits]="0" [maxFractionDigits]="2"
-                             suffix=" ساعة" placeholder="0"
-                             styleClass="w-full" inputStyleClass="w-full !h-11 !rounded-xl" />
+
+              <p-inputNumber
+                formControlName="totalHours"
+                [min]="0"
+                [minFractionDigits]="0"
+                [maxFractionDigits]="2"
+                [suffix]="'PACKAGES.MODAL.HOURS_SUFFIX' | translate"
+                [placeholder]="'PACKAGES.MODAL.HOURS_PLACEHOLDER' | translate"
+                styleClass="w-full"
+                inputStyleClass="w-full !h-11 !rounded-xl" />
+
               @if (isInvalid('totalHours')) {
-                <p class="text-xs text-rose-600 mt-1">لازم تكون أكبر من صفر</p>
+                <p class="text-xs text-rose-600 mt-1">
+                  {{ 'PACKAGES.MODAL.HOURS_REQUIRED' | translate }}
+                </p>
               }
             </div>
 
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                الصلاحية <span class="font-normal text-slate-400">(اختياري)</span>
+                {{ 'PACKAGES.MODAL.DURATION' | translate }}
+                <span class="font-normal text-slate-400">
+                  ({{ 'PACKAGES.MODAL.OPTIONAL' | translate }})
+                </span>
               </label>
-              <p-inputNumber formControlName="durationDays" [min]="1" [useGrouping]="false"
-                             suffix=" يوم" placeholder="بدون مدة"
-                             styleClass="w-full" inputStyleClass="w-full !h-11 !rounded-xl" />
+
+              <p-inputNumber
+                formControlName="durationDays"
+                [min]="1"
+                [useGrouping]="false"
+                [suffix]="'PACKAGES.MODAL.DURATION_SUFFIX' | translate"
+                [placeholder]="'PACKAGES.MODAL.DURATION_PLACEHOLDER' | translate"
+                styleClass="w-full"
+                inputStyleClass="w-full !h-11 !rounded-xl" />
+
               @if (isInvalid('durationDays')) {
-                <p class="text-xs text-rose-600 mt-1">يوم واحد على الأقل</p>
+                <p class="text-xs text-rose-600 mt-1">
+                  {{ 'PACKAGES.MODAL.DURATION_REQUIRED' | translate }}
+                </p>
               }
             </div>
 
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                السعر <span class="text-rose-500">*</span>
+                {{ 'PACKAGES.MODAL.PRICE' | translate }}
+                <span class="text-rose-500">*</span>
               </label>
-              <p-inputNumber formControlName="price" mode="currency" currency="EGP" locale="en-EG"
-                             [min]="0" placeholder="0"
-                             styleClass="w-full" inputStyleClass="w-full !h-11 !rounded-xl" />
+
+              <p-inputNumber
+                formControlName="price"
+                mode="currency"
+                currency="EGP"
+                locale="en-EG"
+                [min]="0"
+                placeholder="0"
+                styleClass="w-full"
+                inputStyleClass="w-full !h-11 !rounded-xl" />
+
               @if (isInvalid('price')) {
-                <p class="text-xs text-rose-600 mt-1">السعر مطلوب</p>
+                <p class="text-xs text-rose-600 mt-1">
+                  {{ 'PACKAGES.MODAL.PRICE_REQUIRED' | translate }}
+                </p>
               }
             </div>
           </div>
 
           @if (pricePerHour; as pph) {
             <div class="mt-4 flex items-center justify-between rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/60 px-4 py-3 fade-up">
-              <span class="text-xs font-bold text-emerald-700">سعر الساعة التقريبي</span>
-              <span class="text-sm font-extrabold text-emerald-700" dir="ltr">{{ pph }} EGP / h</span>
+              <span class="text-xs font-bold text-emerald-700">
+                {{ 'PACKAGES.MODAL.PRICE_PER_HOUR' | translate }}
+              </span>
+              <span class="text-sm font-extrabold text-emerald-700" dir="ltr">
+                {{ pph }} EGP / h
+              </span>
             </div>
           }
         </section>
@@ -205,16 +319,30 @@
 
       <!-- Footer -->
       <div class="shrink-0 flex items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
-        <p class="hidden sm:block text-[11px] text-slate-400"><span class="text-rose-500">*</span> حقول مطلوبة</p>
+        <p class="hidden sm:block text-[11px] text-slate-400">
+          <span class="text-rose-500">*</span>
+          {{ 'PACKAGES.MODAL.REQUIRED_NOTE' | translate }}
+        </p>
+
         <div class="flex items-center gap-3 ms-auto">
-          <button type="button" (click)="cancel()" [disabled]="isSaving()"
-                  class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
-            إلغاء
+          <button
+            type="button"
+            (click)="cancel()"
+            [disabled]="isSaving()"
+            class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
+            {{ 'PACKAGES.MODAL.CANCEL' | translate }}
           </button>
-          <button type="submit" [disabled]="isSaving() || isLoadingTranslations()"
-                  class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2">
+
+          <button
+            type="submit"
+            [disabled]="isSaving() || isLoadingTranslations()"
+            class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2">
             <lucide-icon [img]="SaveIcon" class="w-4 h-4"></lucide-icon>
-            {{ isSaving() ? 'جاري الحفظ...' : isEdit ? 'حفظ التعديلات' : 'إضافة الباقة' }}
+            {{ (isSaving()
+              ? 'PACKAGES.MODAL.SAVING'
+              : isEdit
+                ? 'PACKAGES.MODAL.SAVE_EDITS'
+                : 'PACKAGES.MODAL.ADD') | translate }}
           </button>
         </div>
       </div>

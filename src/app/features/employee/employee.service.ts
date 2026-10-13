@@ -15,24 +15,21 @@ export class EmployeeService {
   private baseUrl = `${environment.apiUrl}/api/Employees`;
   private authUrl = `${environment.apiUrl}/api/Authentication`;
 
-  /** جلب كل الموظفين وتوحيد شكل الداتا */
   getEmployees(): Observable<Employee[]> {
-    return this.http
-      .get<any>(this.baseUrl) // تم إزالة params إذا كان الـ Backend لا يدعم includeDeleted
-      .pipe(
-        map(res => {
-          const list: any[] = Array.isArray(res)
-            ? res
-            : Array.isArray(res?.data)
-              ? res.data
-              : Array.isArray(res?.data?.items)
-                ? res.data.items
-                : Array.isArray(res?.items)
-                  ? res.items
-                  : [];
-          return list.map(r => this.normalize(r));
-        })
-      );
+    return this.http.get<any>(this.baseUrl).pipe(
+      map(res => {
+        const list: any[] = Array.isArray(res)
+          ? res
+          : Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res?.data?.items)
+              ? res.data.items
+              : Array.isArray(res?.items)
+                ? res.items
+                : [];
+        return list.map(r => this.normalize(r));
+      })
+    );
   }
 
   getEmployeeById(id: number): Observable<Employee> {
@@ -45,13 +42,11 @@ export class EmployeeService {
     return this.http.post<unknown>(`${this.authUrl}/register`, data);
   }
 
-updateEmployee(id: number, data: UpdateEmployeeDto): Observable<void> {
-  const { phoneNumber, ...rest } = data as any;
-  return this.http.put<void>(`${this.baseUrl}/${id}`, {
-    ...rest,
-    phone: phoneNumber
-  });
-}
+  updateEmployee(id: number, data: UpdateEmployeeDto): Observable<void> {
+    // ⚠️ لو الـ PUT اتغير عندهم لـ phoneNumber امسح الـ mapping ده
+    const { phoneNumber, ...rest } = data;
+    return this.http.put<void>(`${this.baseUrl}/${id}`, { ...rest, phone: phoneNumber });
+  }
 
   deleteEmployee(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
@@ -65,22 +60,28 @@ updateEmployee(id: number, data: UpdateEmployeeDto): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/${id}/restore`, {});
   }
 
-assignToWorkspace(employeeId: number, workspaceId: number): Observable<void> {
-  return this.http.patch<void>(`${this.baseUrl}/${employeeId}/workspace`, { workspaceId });
-}
+  assignToWorkspace(employeeId: number, workspaceId: number): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${employeeId}/workspace`, { workspaceId });
+  }
 
-private normalize(raw: any): Employee {
-  const fullName =
-    raw?.fullName ?? [raw?.firstName, raw?.lastName].filter(Boolean).join(' ');
-  return {
-    id: raw.id,
-    fullName: fullName || '-',
-    email: raw.email,
-    mobileNumber: raw.mobileNumber ?? raw.phoneNumber ?? raw.phone,
-    assignedWorkspaceId: raw.assignedWorkspaceId ?? raw.workspaceId ?? null,
-    assignedWorkspaceName: raw.workspaceName ?? null,
-    status: raw.status ?? 'Active',
-    isDeleted: raw.isDeleted ?? false
-  };
-}
+  private normalize(raw: any): Employee {
+    const fullName =
+      raw?.fullName ??
+      [raw?.firstName, raw?.lastName].filter(Boolean).join(' ');
+    return {
+      id: raw.id,
+      fullName: fullName || '-',
+      firstNameEn: raw?.firstNameEn ?? null,
+      firstNameAr: raw?.firstNameAr ?? null,
+      lastNameEn: raw?.lastNameEn ?? null,
+      lastNameAr: raw?.lastNameAr ?? null,
+      gender: raw?.gender ?? null,
+      email: raw.email,
+      mobileNumber: raw.mobileNumber ?? raw.phoneNumber ?? raw.phone,
+      assignedWorkspaceId: raw.assignedWorkspaceId ?? raw.workspaceId ?? null,
+      assignedWorkspaceName: raw.workspaceName ?? null,
+      status: raw.status ?? 'Active',
+      isDeleted: raw.isDeleted ?? false
+    };
+  }
 }

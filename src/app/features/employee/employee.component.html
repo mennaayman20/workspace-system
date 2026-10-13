@@ -3,28 +3,28 @@
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .fade-up { animation: fadeUp .35s ease-out both; }
+  .fade-up { animation: fadeUp .35s ease-out backwards; }
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
 </style>
 
-<div dir="rtl" class="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
+<div class="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto fade-up">
 
   <!-- Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-up">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5 fade-up">
     <div class="flex items-center gap-4">
       <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
         <lucide-icon [img]="UsersIcon" class="w-6 h-6"></lucide-icon>
       </div>
       <div>
-        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">إدارة الموظفين</h1>
-        <p class="text-sm text-slate-500 mt-1">عرض وتحديث صلاحيات وحالات الموظفين المسجلين بالنظام</p>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">{{ 'EMPLOYEES.TITLE' | translate }}</h1>
+        <p class="text-sm text-slate-500 mt-1">{{ 'EMPLOYEES.SUBTITLE' | translate }}</p>
       </div>
     </div>
 
     <button type="button" (click)="openCreateModal()"
       class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
       <lucide-icon [img]="PlusIcon" class="w-4 h-4 transition-transform duration-200 group-hover:rotate-90"></lucide-icon>
-      <span>إضافة موظف جديد</span>
+      <span>{{ 'EMPLOYEES.ADD' | translate }}</span>
     </button>
   </div>
 
@@ -34,12 +34,12 @@
       <span class="font-medium">{{ errorMessage() }}</span>
       <button type="button" (click)="loadEmployees()"
         class="px-4 py-2 bg-white border border-rose-200 rounded-xl font-bold hover:bg-rose-100 transition-colors">
-        إعادة المحاولة
+        {{ 'EMPLOYEES.RETRY' | translate }}
       </button>
     </div>
   } @else {
 
-    <!-- Stat cards (بتشتغل كفلاتر سريعة) -->
+    <!-- Stat cards (فلاتر سريعة) -->
     @if (isLoading()) {
       <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4" aria-busy="true">
         @for (i of [1, 2, 3, 4, 5]; track i) {
@@ -55,7 +55,7 @@
             [class]="c.border + ' ' + c.tint + (statusFilter() === c.value ? ' ring-2 ring-offset-1 ' + c.ring : '')"
             class="fade-up flex items-center justify-between gap-3 text-start p-4 sm:p-5 rounded-2xl border border-slate-200 border-s-4 bg-gradient-to-br via-white to-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
             <div class="min-w-0">
-              <div class="text-sm font-semibold text-slate-600 leading-snug">{{ c.label }}</div>
+              <div class="text-sm font-semibold text-slate-600 leading-snug">{{ c.labelKey | translate }}</div>
               <div class="mt-1 text-3xl font-extrabold text-slate-800 tabular-nums">{{ statusCounts()[c.value] }}</div>
             </div>
             <span [class]="c.chip" class="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center">
@@ -66,18 +66,18 @@
       </div>
     }
 
-    <!-- الجدول المشترك (بحث لكل عمود + ترتيب + pagination) -->
+    <!-- الجدول المشترك -->
     <app-data-table
+      class="fade-up block"
       [value]="filteredEmployees()"
-      [columns]="columns"
-      [actions]="actions"
+      [columns]="columns()"
+      [actions]="actions()"
       [loading]="isLoading()"
-            [searchable]="true"
-
+      [searchable]="true"
       [columnFilters]="true"
       [rowClass]="rowClass"
       [minWidth]="'64rem'"
-      [emptyTitle]="employees().length === 0 ? 'لا يوجد موظفين مضافين حتى الآن' : 'لا توجد نتائج مطابقة'"
+      [emptyTitle]="(employees().length === 0 ? 'EMPLOYEES.EMPTY' : 'EMPLOYEES.NO_RESULTS') | translate"
       (action)="onAction($event)">
 
       <!-- عمود الموظف: أفاتار + الاسم -->
@@ -90,30 +90,30 @@
         </div>
       </ng-template>
 
-      <!-- عمود مكان العمل: تغيير مباشر -->
+      <!-- عمود مكان العمل -->
       <ng-template appCell="assignedWorkspaceName" let-emp>
         <select
           [disabled]="isBusy(emp.id)"
           (change)="onWorkspaceChange(emp, $event)"
-          aria-label="تغيير مكان العمل"
+          [attr.aria-label]="'EMPLOYEES.CHANGE_WORKSPACE' | translate"
           class="h-10 w-full max-w-[180px] bg-white border border-slate-200 rounded-xl px-3 text-sm text-slate-700 hover:border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all">
-          <option value="" disabled [selected]="emp.assignedWorkspaceId == null">غير محدد</option>
+          <option value="" disabled [selected]="emp.assignedWorkspaceId == null">{{ 'EMPLOYEES.NOT_ASSIGNED' | translate }}</option>
           @for (w of workspaces(); track w.id) {
             <option [value]="w.id" [selected]="w.id === emp.assignedWorkspaceId">{{ w.name }}</option>
           }
         </select>
       </ng-template>
 
-      <!-- تغيير الحالة: قبل قايمة الإجراءات -->
+      <!-- تغيير الحالة -->
       <ng-template appRowActions let-emp>
         <select
           [disabled]="isBusy(emp.id)"
           (change)="onStatusChange(emp, $event)"
           (click)="$event.stopPropagation()"
-          aria-label="تغيير الحالة"
+          [attr.aria-label]="'EMPLOYEES.CHANGE_STATUS' | translate"
           class="h-9 bg-white border border-slate-200 rounded-xl px-2 text-xs text-slate-700 hover:border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all">
           @for (s of statusOptions; track s.value) {
-            <option [value]="s.value" [selected]="s.value === emp.status">{{ s.label }}</option>
+            <option [value]="s.value" [selected]="s.value === emp.status">{{ s.labelKey | translate }}</option>
           }
         </select>
       </ng-template>
@@ -121,7 +121,7 @@
       @if (employees().length === 0) {
         <button tableEmptyAction type="button" (click)="openCreateModal()"
           class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors">
-          + أضف أول موظف
+          + {{ 'EMPLOYEES.ADD_FIRST' | translate }}
         </button>
       }
     </app-data-table>
@@ -143,14 +143,14 @@
               </div>
               <div>
                 <h3 id="employee-modal-title" class="text-lg font-extrabold text-slate-900 leading-tight">
-                  {{ isEditMode() ? 'تعديل بيانات الموظف' : 'إضافة موظف جديد' }}
+                  {{ (isEditMode() ? 'EMPLOYEES.MODAL.EDIT_TITLE' : 'EMPLOYEES.MODAL.ADD_TITLE') | translate }}
                 </h3>
                 <p class="text-xs text-slate-500 mt-0.5">
-                  {{ isEditMode() ? 'عدّلي البيانات ثم احفظي التغييرات' : 'أدخلي بيانات الموظف وبيانات الدخول للنظام' }}
+                  {{ (isEditMode() ? 'EMPLOYEES.MODAL.EDIT_SUBTITLE' : 'EMPLOYEES.MODAL.ADD_SUBTITLE') | translate }}
                 </p>
               </div>
             </div>
-            <button type="button" (click)="closeModal()" aria-label="إغلاق"
+            <button type="button" (click)="closeModal()" [attr.aria-label]="'EMPLOYEES.MODAL.CLOSE' | translate"
                     class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white transition-colors">
               <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
             </button>
@@ -160,7 +160,8 @@
         <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()" class="flex flex-col min-h-0 flex-1" novalidate>
 
           <!-- Body -->
-          <div class="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-5 bg-slate-50/50">
+          <div class="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-5 bg-slate-50/50"
+               [class.opacity-60]="isFormLoading()" [class.pointer-events-none]="isFormLoading()">
 
             @if (formError()) {
               <div role="alert" class="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-2xl font-medium">
@@ -168,37 +169,82 @@
               </div>
             }
 
-            <!-- ① الاسم -->
+            <!-- ① الاسم + النوع -->
             <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
               <div class="flex items-center gap-2.5 mb-4">
                 <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
                   <lucide-icon [img]="UserIcon" class="w-4 h-4"></lucide-icon>
                 </span>
-                <h4 class="text-sm font-extrabold text-slate-800">اسم الموظف</h4>
+                <h4 class="text-sm font-extrabold text-slate-800">{{ 'EMPLOYEES.SECTIONS.NAME' | translate }}</h4>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- عربي -->
                 <div>
-                  <label for="firstName" class="block text-xs font-bold text-slate-700 mb-1.5">
-                    الاسم الأول <span class="text-rose-500">*</span>
+                  <label for="firstNameAr" class="block text-xs font-bold text-slate-700 mb-1.5">
+                    {{ 'EMPLOYEES.FIELDS.FIRST_NAME_AR' | translate }} <span class="text-rose-500">*</span>
                   </label>
-                  <input pInputText id="firstName" formControlName="firstName"
-                         class="w-full !h-10 !rounded-xl" placeholder="مثال: أحمد"
-                         [class.ng-invalid]="showError('firstName')" [class.ng-dirty]="showError('firstName')" />
-                  @if (showError('firstName')) {
-                    <p class="text-xs text-rose-600 mt-1">{{ errorOf('firstName') }}</p>
+                  <input pInputText id="firstNameAr" formControlName="firstNameAr" dir="rtl"
+                         class="w-full !h-10 !rounded-xl"
+                         [placeholder]="'EMPLOYEES.PLACEHOLDERS.FIRST_NAME_AR' | translate"
+                         [class.ng-invalid]="showError('firstNameAr')" [class.ng-dirty]="showError('firstNameAr')" />
+                  @if (showError('firstNameAr')) {
+                    <p class="text-xs text-rose-600 mt-1">{{ errorOf('firstNameAr') }}</p>
                   }
                 </div>
 
                 <div>
-                  <label for="lastName" class="block text-xs font-bold text-slate-700 mb-1.5">
-                    اسم العائلة <span class="text-rose-500">*</span>
+                  <label for="lastNameAr" class="block text-xs font-bold text-slate-700 mb-1.5">
+                    {{ 'EMPLOYEES.FIELDS.LAST_NAME_AR' | translate }} <span class="text-rose-500">*</span>
                   </label>
-                  <input pInputText id="lastName" formControlName="lastName"
-                         class="w-full !h-10 !rounded-xl" placeholder="مثال: محمود"
-                         [class.ng-invalid]="showError('lastName')" [class.ng-dirty]="showError('lastName')" />
-                  @if (showError('lastName')) {
-                    <p class="text-xs text-rose-600 mt-1">{{ errorOf('lastName') }}</p>
+                  <input pInputText id="lastNameAr" formControlName="lastNameAr" dir="rtl"
+                         class="w-full !h-10 !rounded-xl"
+                         [placeholder]="'EMPLOYEES.PLACEHOLDERS.LAST_NAME_AR' | translate"
+                         [class.ng-invalid]="showError('lastNameAr')" [class.ng-dirty]="showError('lastNameAr')" />
+                  @if (showError('lastNameAr')) {
+                    <p class="text-xs text-rose-600 mt-1">{{ errorOf('lastNameAr') }}</p>
+                  }
+                </div>
+
+                <!-- إنجليزي -->
+                <div>
+                  <label for="firstNameEn" class="block text-xs font-bold text-slate-700 mb-1.5">
+                    {{ 'EMPLOYEES.FIELDS.FIRST_NAME_EN' | translate }} <span class="text-rose-500">*</span>
+                  </label>
+                  <input pInputText id="firstNameEn" formControlName="firstNameEn" dir="ltr"
+                         class="w-full !h-10 !rounded-xl text-left"
+                         [placeholder]="'EMPLOYEES.PLACEHOLDERS.FIRST_NAME_EN' | translate"
+                         [class.ng-invalid]="showError('firstNameEn')" [class.ng-dirty]="showError('firstNameEn')" />
+                  @if (showError('firstNameEn')) {
+                    <p class="text-xs text-rose-600 mt-1">{{ errorOf('firstNameEn') }}</p>
+                  }
+                </div>
+
+                <div>
+                  <label for="lastNameEn" class="block text-xs font-bold text-slate-700 mb-1.5">
+                    {{ 'EMPLOYEES.FIELDS.LAST_NAME_EN' | translate }} <span class="text-rose-500">*</span>
+                  </label>
+                  <input pInputText id="lastNameEn" formControlName="lastNameEn" dir="ltr"
+                         class="w-full !h-10 !rounded-xl text-left"
+                         [placeholder]="'EMPLOYEES.PLACEHOLDERS.LAST_NAME_EN' | translate"
+                         [class.ng-invalid]="showError('lastNameEn')" [class.ng-dirty]="showError('lastNameEn')" />
+                  @if (showError('lastNameEn')) {
+                    <p class="text-xs text-rose-600 mt-1">{{ errorOf('lastNameEn') }}</p>
+                  }
+                </div>
+
+                <!-- النوع -->
+                <div class="sm:col-span-2">
+                  <label for="gender" class="block text-xs font-bold text-slate-700 mb-1.5">
+                    {{ 'EMPLOYEES.GENDER.LABEL' | translate }} <span class="text-rose-500">*</span>
+                  </label>
+                  <p-select inputId="gender" formControlName="gender"
+                            [options]="genderOptions()" optionLabel="label" optionValue="value"
+                            [placeholder]="'EMPLOYEES.GENDER.PLACEHOLDER' | translate"
+                            appendTo="body" styleClass="w-full !h-10 !rounded-xl"
+                            [class.ng-invalid]="showError('gender')" [class.ng-dirty]="showError('gender')" />
+                  @if (showError('gender')) {
+                    <p class="text-xs text-rose-600 mt-1">{{ errorOf('gender') }}</p>
                   }
                 </div>
               </div>
@@ -210,28 +256,28 @@
                 <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
                   <lucide-icon [img]="PhoneIcon" class="w-4 h-4"></lucide-icon>
                 </span>
-                <h4 class="text-sm font-extrabold text-slate-800">بيانات التواصل</h4>
+                <h4 class="text-sm font-extrabold text-slate-800">{{ 'EMPLOYEES.SECTIONS.CONTACT' | translate }}</h4>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label for="mobileNumber" class="block text-xs font-bold text-slate-700 mb-1.5">
-                    رقم الهاتف <span class="text-rose-500">*</span>
+                  <label for="phoneNumber" class="block text-xs font-bold text-slate-700 mb-1.5">
+                    {{ 'EMPLOYEES.FIELDS.PHONE' | translate }} <span class="text-rose-500">*</span>
                   </label>
                   <div class="relative">
                     <lucide-icon [img]="PhoneIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"></lucide-icon>
-                    <input pInputText id="mobileNumber" type="tel" formControlName="mobileNumber" dir="ltr"
+                    <input pInputText id="phoneNumber" type="tel" formControlName="phoneNumber" dir="ltr"
                            class="w-full !h-10 !rounded-xl !ps-10 text-left" placeholder="01012345678"
-                           [class.ng-invalid]="showError('mobileNumber')" [class.ng-dirty]="showError('mobileNumber')" />
+                           [class.ng-invalid]="showError('phoneNumber')" [class.ng-dirty]="showError('phoneNumber')" />
                   </div>
-                  @if (showError('mobileNumber')) {
-                    <p class="text-xs text-rose-600 mt-1">{{ errorOf('mobileNumber') }}</p>
+                  @if (showError('phoneNumber')) {
+                    <p class="text-xs text-rose-600 mt-1">{{ errorOf('phoneNumber') }}</p>
                   }
                 </div>
 
                 <div>
                   <label for="email" class="block text-xs font-bold text-slate-700 mb-1.5">
-                    البريد الإلكتروني <span class="text-rose-500">*</span>
+                    {{ 'EMPLOYEES.FIELDS.EMAIL' | translate }} <span class="text-rose-500">*</span>
                   </label>
                   <div class="relative">
                     <lucide-icon [img]="MailIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"></lucide-icon>
@@ -253,37 +299,60 @@
                   <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
                     <lucide-icon [img]="LockIcon" class="w-4 h-4"></lucide-icon>
                   </span>
-                  <h4 class="text-sm font-extrabold text-slate-800">بيانات الدخول</h4>
+                  <h4 class="text-sm font-extrabold text-slate-800">{{ 'EMPLOYEES.SECTIONS.LOGIN' | translate }}</h4>
                 </div>
 
-                <label for="password" class="block text-xs font-bold text-slate-700 mb-1.5">
-                  كلمة المرور <span class="text-rose-500">*</span>
-                </label>
-                <div class="relative">
-                  <lucide-icon [img]="LockIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"></lucide-icon>
-                  <input pInputText id="password" type="password" formControlName="password" dir="ltr"
-                         class="w-full !h-10 !rounded-xl !ps-10 text-left" placeholder="6 أحرف على الأقل"
-                         [class.ng-invalid]="showError('password')" [class.ng-dirty]="showError('password')" />
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label for="password" class="block text-xs font-bold text-slate-700 mb-1.5">
+                      {{ 'EMPLOYEES.FIELDS.PASSWORD' | translate }} <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                      <lucide-icon [img]="LockIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"></lucide-icon>
+                      <input pInputText id="password" type="password" formControlName="password" dir="ltr"
+                             class="w-full !h-10 !rounded-xl !ps-10 text-left"
+                             [placeholder]="'EMPLOYEES.PLACEHOLDERS.PASSWORD' | translate"
+                             [class.ng-invalid]="showError('password')" [class.ng-dirty]="showError('password')" />
+                    </div>
+                    @if (showError('password')) {
+                      <p class="text-xs text-rose-600 mt-1">{{ errorOf('password') }}</p>
+                    }
+                  </div>
+
+                  <div>
+                    <label for="confirmPassword" class="block text-xs font-bold text-slate-700 mb-1.5">
+                      {{ 'EMPLOYEES.FIELDS.CONFIRM_PASSWORD' | translate }} <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                      <lucide-icon [img]="LockIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"></lucide-icon>
+                      <input pInputText id="confirmPassword" type="password" formControlName="confirmPassword" dir="ltr"
+                             class="w-full !h-10 !rounded-xl !ps-10 text-left"
+                             [placeholder]="'EMPLOYEES.PLACEHOLDERS.CONFIRM_PASSWORD' | translate"
+                             [class.ng-invalid]="showError('confirmPassword')" [class.ng-dirty]="showError('confirmPassword')" />
+                    </div>
+                    @if (showError('confirmPassword')) {
+                      <p class="text-xs text-rose-600 mt-1">{{ errorOf('confirmPassword') }}</p>
+                    }
+                  </div>
                 </div>
-                @if (showError('password')) {
-                  <p class="text-xs text-rose-600 mt-1">{{ errorOf('password') }}</p>
-                }
               </section>
             }
           </div>
 
           <!-- Footer -->
           <div class="shrink-0 flex items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
-            <p class="hidden sm:block text-[11px] text-slate-400"><span class="text-rose-500">*</span> حقول مطلوبة</p>
+            <p class="hidden sm:block text-[11px] text-slate-400">
+              <span class="text-rose-500">*</span> {{ 'EMPLOYEES.MODAL.REQUIRED_FIELDS' | translate }}
+            </p>
             <div class="flex items-center gap-3 ms-auto">
               <button type="button" (click)="closeModal()" [disabled]="isSubmitting()"
                       class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
-                إلغاء
+                {{ 'EMPLOYEES.MODAL.CANCEL' | translate }}
               </button>
-              <button type="submit" [disabled]="isSubmitting()"
+              <button type="submit" [disabled]="isSubmitting() || isFormLoading()"
                       class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2">
                 <lucide-icon [img]="SaveIcon" class="w-4 h-4"></lucide-icon>
-                {{ isSubmitting() ? 'جاري الحفظ...' : (isEditMode() ? 'حفظ التعديلات' : 'حفظ الموظف') }}
+                {{ (isSubmitting() ? 'EMPLOYEES.MODAL.SAVING' : (isEditMode() ? 'EMPLOYEES.MODAL.SAVE_EDIT' : 'EMPLOYEES.MODAL.SAVE_ADD')) | translate }}
               </button>
             </div>
           </div>
@@ -293,48 +362,12 @@
   }
 
   <!-- تأكيد الحذف -->
-  <!-- @if (pendingDelete(); as d) {
-    <div appPortal dir="rtl"
-         class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
-         (click)="cancelDelete()">
-      <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl" dir="rtl"
-           role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
-
-        <div class="flex items-start gap-3">
-          <div class="w-11 h-11 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
-            <lucide-icon [img]="TrashIcon" class="w-5 h-5"></lucide-icon>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-slate-900">حذف الموظف</h3>
-            <p class="text-sm text-slate-500 mt-1.5 leading-relaxed">
-              هل أنت متأكد من حذف
-              <b class="text-slate-800">"{{ d.fullName }}"</b>؟
-            </p>
-          </div>
-        </div>
-
-        <div class="flex gap-3 mt-6">
-          <button type="button" (click)="confirmDelete()" [disabled]="isDeleting()"
-                  class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-colors">
-            {{ isDeleting() ? 'جاري الحذف...' : 'نعم، حذف' }}
-          </button>
-          <button type="button" (click)="cancelDelete()" [disabled]="isDeleting()"
-                  class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-60 rounded-xl text-sm font-bold text-slate-700 transition-colors">
-            إلغاء
-          </button>
-        </div>
-      </div>
-    </div>
-  } -->
-
-
-<app-confirm-dialog
-  [open]="!!pendingDelete()"
-  title="حذف الموظف"
-  [itemName]="pendingDelete()?.fullName ?? ''"
-  [loading]="isDeleting()"
-  (confirmed)="confirmDelete()"
-  (cancelled)="cancelDelete()" />
-
+  <app-confirm-dialog
+    [open]="!!pendingDelete()"
+    [title]="'EMPLOYEES.DELETE_TITLE' | translate"
+    [itemName]="pendingDelete()?.fullName ?? ''"
+    [loading]="isDeleting()"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()" />
 
 </div>

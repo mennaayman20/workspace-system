@@ -12,13 +12,14 @@ import { ProductService } from '../../services/product.service';
 import { ProductCategoryService } from '../../services/product-category.service';
 import { Product, CreateProductCommand } from '../../interfaces/product';
 import { Observable } from 'rxjs';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-product-form-modal',
   standalone: true,
   imports: [
     ReactiveFormsModule, LucideAngularModule,
-    InputTextModule, TextareaModule, InputNumberModule, SelectModule, ToggleSwitchModule,
+    InputTextModule, TextareaModule, InputNumberModule, SelectModule, ToggleSwitchModule,TranslatePipe
   ],
   templateUrl: './product-form-modal.component.html'
 })

@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { TranslatePipe } from '@ngx-translate/core';
 import { LucideAngularModule, Play, Plus, MoveLeft, Square, Clock } from 'lucide-angular';
 import { SessionsService } from '../sessions.service';
 import { ActiveSessionDto } from '../Isessions';
@@ -9,6 +10,7 @@ import { StartSessionModalComponent } from '../start-session-modal/start-session
 import { TransferWorkspaceModalComponent } from '../transfer-session-modal/transfer-session-modal.component';
 import { ToastrService } from 'ngx-toastr';
 import { SessionPosModalComponent } from '../session-pos-modal/session-pos-modal.component';
+import { LanguageService } from '../../../core/services/lang.service'; // عدّل المسار لو مختلف
 
 @Component({
   selector: 'app-live-sessions',
@@ -20,13 +22,15 @@ import { SessionPosModalComponent } from '../session-pos-modal/session-pos-modal
     LucideAngularModule,
     StartSessionModalComponent,
     TransferWorkspaceModalComponent,
-    SessionPosModalComponent
+    SessionPosModalComponent,
+    TranslatePipe,
   ],
   templateUrl: './live-sessions.component.html'
 })
 export class LiveSessionsComponent implements OnInit, OnDestroy {
   private sessionsService = inject(SessionsService);
   private toastr = inject(ToastrService);
+  private lang = inject(LanguageService);
 
   readonly PlayIcon = Play;
   readonly PlusIcon = Plus;
@@ -50,6 +54,14 @@ export class LiveSessionsComponent implements OnInit, OnDestroy {
   isTransferModalOpen = signal<boolean>(false);
   selectedSessionToTransfer = signal<ActiveSessionDto | null>(null);
 
+  constructor() {
+    // أول تحميل + إعادة الجلب كل ما اللغة تتغير (الأسماء راجعة مترجمة من السيرفر)
+    effect(() => {
+      this.lang.currentLang();
+      untracked(() => this.loadActiveSessions());
+    });
+  }
+
   openTransferModal(session: ActiveSessionDto) {
     this.selectedSessionToTransfer.set(session);
     this.isTransferModalOpen.set(true);
@@ -61,7 +73,7 @@ export class LiveSessionsComponent implements OnInit, OnDestroy {
   }
 
   onTransferredSuccessfully() {
-    this.notify('تم نقل الجلسة بنجاح');
+    this.notify(this.lang.t('SESSIONS.LIVE.TRANSFERRED_SUCCESS'));
     this.loadActiveSessions();
   }
 
@@ -74,7 +86,6 @@ export class LiveSessionsComponent implements OnInit, OnDestroy {
   }
 
   // ===== إنهاء الجلسة (Checkout) =====
-  // الزرار بيفتح مودال الفاتورة، والـ POST بيتعمل جوّاه (POST /api/Checkout/sessions/{sessionId})
   openCheckoutModal(session: ActiveSessionDto) {
     this.selectedSessionForCheckout.set(session);
   }
@@ -88,7 +99,6 @@ export class LiveSessionsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.loadActiveSessions();
     this.timerInterval = setInterval(() => this.now.set(Date.now()), 1000);
   }
 
@@ -108,7 +118,7 @@ export class LiveSessionsComponent implements OnInit, OnDestroy {
         console.error('Error loading active sessions:', err);
         this.activeSessions.set([]);
         this.isLoading.set(false);
-        this.notify('تعذر تحميل الجلسات النشطة', true);
+        this.notify(this.lang.t('SESSIONS.LIVE.LOAD_ERROR'), true);
       }
     });
   }

@@ -1,29 +1,44 @@
 @if (open()) {
-  <div appPortal dir="rtl"
-       class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
-       (click)="onCancel()">
-    <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl" dir="rtl"
-         role="alertdialog" aria-modal="true" aria-labelledby="confirm-dialog-title"
-         (click)="$event.stopPropagation()">
+  <div
+    class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
+    (click)="onCancel()">
+
+    <div
+      class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl"
+      [attr.dir]="langService.isRtl() ? 'rtl' : 'ltr'"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="confirm-dialog-title"
+      (click)="$event.stopPropagation()">
 
       <div class="flex items-start gap-3">
-        <div [class]="toneClasses().icon"
-             class="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0">
+        <div
+          [class]="toneClasses().icon"
+          class="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0">
+
           <lucide-icon [img]="icon()" class="w-5 h-5"></lucide-icon>
         </div>
 
-        <div class="min-w-0">
-          <h3 id="confirm-dialog-title" class="text-lg font-bold text-slate-900">{{ title() }}</h3>
+        <div class="min-w-0 flex-1">
+          <h3
+            id="confirm-dialog-title"
+            class="text-lg font-bold text-slate-900">
+
+            {{ title() | translate }}
+          </h3>
 
           <p class="text-sm text-slate-500 mt-1.5 leading-relaxed">
-            {{ message() }}
+            {{ message() | translate }}
+
             @if (itemName()) {
               <b class="text-slate-800">"{{ itemName() }}"</b>؟
             }
           </p>
 
           @if (description()) {
-            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">{{ description() }}</p>
+            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+              {{ description() | translate }}
+            </p>
           }
 
           <ng-content />
@@ -31,14 +46,23 @@
       </div>
 
       <div class="flex gap-3 mt-6">
-        <button type="button" (click)="onConfirm()" [disabled]="loading()"
-                [class]="toneClasses().button"
-                class="flex-1 py-2.5 disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-colors">
-          {{ loading() ? loadingLabel() : confirmLabel() }}
+        <button
+          type="button"
+          (click)="onConfirm()"
+          [disabled]="loading()"
+          [class]="toneClasses().button"
+          class="flex-1 py-2.5 disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-colors">
+
+          {{ (loading() ? loadingLabel() : confirmLabel()) | translate }}
         </button>
-        <button type="button" (click)="onCancel()" [disabled]="loading()"
-                class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-60 rounded-xl text-sm font-bold text-slate-700 transition-colors">
-          {{ cancelLabel() }}
+
+        <button
+          type="button"
+          (click)="onCancel()"
+          [disabled]="loading()"
+          class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-60 rounded-xl text-sm font-bold text-slate-700 transition-colors">
+
+          {{ cancelLabel() | translate }}
         </button>
       </div>
     </div>

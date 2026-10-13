@@ -7,14 +7,14 @@
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
 </style>
 
-<div dir="rtl"
+<div
   class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 fade-up">
 
   <div role="dialog" aria-modal="true" aria-labelledby="workspace-modal-title"
     class="bg-white rounded-3xl border border-slate-100 shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[92vh]">
 
     <!-- Header -->
-    <div class="shrink-0 px-6 sm:px-8 py-5 border-b border-slate-100 bg-gradient-to-l from-blue-50/70 to-white">
+    <div class="shrink-0 px-6 sm:px-8 py-5 border-b border-slate-100 bg-gradient-to-l ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-blue-50/70 to-white">
       <div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-3.5">
           <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
@@ -22,14 +22,15 @@
           </div>
           <div>
             <h3 id="workspace-modal-title" class="text-lg font-extrabold text-slate-900 leading-tight">
-              {{ isEditMode ? 'تعديل مساحة العمل' : 'إضافة مساحة عمل جديدة' }}
+              {{ (isEditMode ? 'WORKSPACES.MODAL.EDIT_TITLE' : 'WORKSPACES.MODAL.ADD_TITLE') | translate }}
             </h3>
             <p class="text-xs text-slate-500 mt-0.5">
-              {{ isEditMode ? 'عدّل بيانات المساحة ثم احفظ' : 'أدخل بيانات المساحة الجديدة' }}
+              {{ (isEditMode ? 'WORKSPACES.MODAL.EDIT_SUBTITLE' : 'WORKSPACES.MODAL.ADD_SUBTITLE') | translate }}
             </p>
           </div>
         </div>
-        <button type="button" (click)="onClose()" [disabled]="isSubmitting()" aria-label="إغلاق"
+        <button type="button" (click)="onClose()" [disabled]="isSubmitting()"
+          [attr.aria-label]="'WORKSPACES.MODAL.CLOSE' | translate"
           class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white disabled:opacity-50 transition-colors">
           <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
         </button>
@@ -50,7 +51,7 @@
         @if (isLoadingTranslations()) {
           <div class="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
             <span class="inline-block w-3.5 h-3.5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></span>
-            جاري تحميل الترجمات...
+            {{ 'WORKSPACES.MODAL.LOADING_TRANSLATIONS' | translate }}
           </div>
         }
 
@@ -60,20 +61,20 @@
             <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
               <lucide-icon [img]="TypeIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">نوع المساحة</h4>
+            <h4 class="text-sm font-extrabold text-slate-800">{{ 'WORKSPACES.MODAL.TYPE_SECTION' | translate }}</h4>
           </div>
 
           <label class="block text-xs font-bold text-slate-700 mb-1.5">
-            النوع <span class="text-rose-500">*</span>
+            {{ 'WORKSPACES.MODAL.TYPE_LABEL' | translate }} <span class="text-rose-500">*</span>
           </label>
           <p-select formControlName="workspaceTypeId"
                     [options]="typeOptions()"
                     optionLabel="label"
                     optionValue="value"
-                    placeholder="اختر نوع المساحة"
+                    [placeholder]="'WORKSPACES.MODAL.TYPE_PLACEHOLDER' | translate"
                     [filter]="true"
                     filterBy="label"
-                    filterPlaceholder="ابحث عن نوع..."
+                    [filterPlaceholder]="'WORKSPACES.MODAL.TYPE_FILTER' | translate"
                     appendTo="body"
                     [fluid]="true"
                     styleClass="!rounded-xl !h-10"
@@ -88,17 +89,17 @@
             </ng-template>
           </p-select>
           @if (fieldError('workspaceTypeId')) {
-            <p class="text-xs text-rose-600 mt-1">يرجى اختيار نوع المساحة</p>
+            <p class="text-xs text-rose-600 mt-1">{{ 'WORKSPACES.MODAL.TYPE_REQUIRED' | translate }}</p>
           }
 
           @if (addingNewType()) {
             <div class="mt-3 p-3.5 rounded-2xl bg-blue-50/60 border border-blue-100 fade-up">
-              <p class="text-[11px] font-bold text-blue-800 mb-2">اسم النوع الجديد (بالعربي والإنجليزي)</p>
+              <p class="text-[11px] font-bold text-blue-800 mb-2">{{ 'WORKSPACES.MODAL.NEW_TYPE_TITLE' | translate }}</p>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label for="ws-new-type-ar" class="flex items-center justify-between text-[11px] font-bold text-slate-700 mb-1.5">
-                    <span>بالعربي <span class="text-rose-500">*</span></span>
+                    <span>{{ 'WORKSPACES.MODAL.IN_ARABIC' | translate }} <span class="text-rose-500">*</span></span>
                     <span class="px-1.5 py-0.5 rounded-md bg-white text-slate-500 text-[10px] font-bold">AR</span>
                   </label>
                   <input pInputText id="ws-new-type-ar" formControlName="newTypeNameAr" dir="rtl" maxlength="50"
@@ -134,13 +135,13 @@
             <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
               <lucide-icon [img]="BuildingIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">البيانات الأساسية</h4>
+            <h4 class="text-sm font-extrabold text-slate-800">{{ 'WORKSPACES.MODAL.BASIC_SECTION' | translate }}</h4>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label for="ws-name-ar" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>اسم المساحة بالعربي <span class="text-rose-500">*</span></span>
+                <span>{{ 'WORKSPACES.MODAL.NAME_AR' | translate }} <span class="text-rose-500">*</span></span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
               </label>
               <input pInputText id="ws-name-ar" formControlName="nameAr" dir="rtl" maxlength="100" placeholder="مثال: قاعة الأمل"
@@ -153,7 +154,7 @@
 
             <div>
               <label for="ws-name-en" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>Workspace Name <span class="text-rose-500">*</span></span>
+                <span>{{ 'WORKSPACES.MODAL.NAME_EN' | translate }} <span class="text-rose-500">*</span></span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
               </label>
               <input pInputText id="ws-name-en" formControlName="nameEn" dir="ltr" maxlength="100" placeholder="e.g. Al Amal Hall"
@@ -166,7 +167,7 @@
 
             <div>
               <label for="ws-code" class="block text-xs font-bold text-slate-700 mb-1.5">
-                كود المساحة <span class="text-rose-500">*</span>
+                {{ 'WORKSPACES.MODAL.CODE' | translate }} <span class="text-rose-500">*</span>
               </label>
               <input pInputText id="ws-code" formControlName="code" maxlength="20" dir="ltr" placeholder="WS-101"
                 class="w-full !h-10 !rounded-xl font-mono uppercase placeholder:normal-case"
@@ -184,15 +185,16 @@
             <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
               <lucide-icon [img]="PinIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">الموقع</h4>
+            <h4 class="text-sm font-extrabold text-slate-800">{{ 'WORKSPACES.MODAL.LOCATION_SECTION' | translate }}</h4>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label for="ws-floor" class="block text-xs font-bold text-slate-700 mb-1.5">
-                الطابق <span class="text-rose-500">*</span>
+                {{ 'WORKSPACES.MODAL.FLOOR' | translate }} <span class="text-rose-500">*</span>
               </label>
-              <input pInputText id="ws-floor" formControlName="floor" maxlength="50" placeholder="الأول"
+              <input pInputText id="ws-floor" formControlName="floor" maxlength="50"
+                [placeholder]="'WORKSPACES.MODAL.FLOOR_PLACEHOLDER' | translate"
                 class="w-full !h-10 !rounded-xl"
                 [class.ng-invalid]="!!fieldError('floor')" [class.ng-dirty]="!!fieldError('floor')" />
               @if (fieldError('floor'); as msg) {
@@ -202,9 +204,10 @@
 
             <div>
               <label for="ws-location" class="block text-xs font-bold text-slate-700 mb-1.5">
-                الموقع <span class="text-rose-500">*</span>
+                {{ 'WORKSPACES.MODAL.LOCATION' | translate }} <span class="text-rose-500">*</span>
               </label>
-              <input pInputText id="ws-location" formControlName="location" maxlength="100" placeholder="المبنى الرئيسي"
+              <input pInputText id="ws-location" formControlName="location" maxlength="100"
+                [placeholder]="'WORKSPACES.MODAL.LOCATION_PLACEHOLDER' | translate"
                 class="w-full !h-10 !rounded-xl"
                 [class.ng-invalid]="!!fieldError('location')" [class.ng-dirty]="!!fieldError('location')" />
               @if (fieldError('location'); as msg) {
@@ -220,13 +223,14 @@
             <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
               <lucide-icon [img]="UsersIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">السعة (عدد الأفراد) <span class="text-rose-500">*</span></h4>
+            <h4 class="text-sm font-extrabold text-slate-800">{{ 'WORKSPACES.MODAL.CAPACITY_SECTION' | translate }} <span class="text-rose-500">*</span></h4>
           </div>
 
           <div class="flex flex-wrap items-center gap-3">
             <div class="inline-flex items-center gap-1 p-1 bg-slate-50 border rounded-xl"
                  [class]="fieldError('capacity') ? 'border-rose-400' : 'border-slate-200'">
-              <button type="button" (click)="changeCapacity(-1)" aria-label="تقليل"
+              <button type="button" (click)="changeCapacity(-1)"
+                [attr.aria-label]="'WORKSPACES.MODAL.DECREASE' | translate"
                 [disabled]="(form.controls.capacity.value ?? 1) <= 1"
                 class="w-9 h-9 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none">
                 <lucide-icon [img]="MinusIcon" class="w-4 h-4"></lucide-icon>
@@ -235,7 +239,8 @@
               <p-inputNumber formControlName="capacity" [min]="1" [max]="1000" [useGrouping]="false"
                              inputStyleClass="!w-16 !h-9 !text-center !font-bold !border-0 !bg-transparent !shadow-none" />
 
-              <button type="button" (click)="changeCapacity(1)" aria-label="زيادة"
+              <button type="button" (click)="changeCapacity(1)"
+                [attr.aria-label]="'WORKSPACES.MODAL.INCREASE' | translate"
                 [disabled]="(form.controls.capacity.value ?? 1) >= 1000"
                 class="w-9 h-9 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none">
                 <lucide-icon [img]="PlusIcon" class="w-4 h-4"></lucide-icon>
@@ -266,20 +271,23 @@
             <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center">
               <lucide-icon [img]="TextIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">الوصف <span class="font-normal text-slate-400">(اختياري)</span></h4>
+            <h4 class="text-sm font-extrabold text-slate-800">
+              {{ 'WORKSPACES.MODAL.DESC_SECTION' | translate }}
+              <span class="font-normal text-slate-400">{{ 'WORKSPACES.MODAL.OPTIONAL' | translate }}</span>
+            </h4>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label for="ws-desc-ar" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>الوصف بالعربي</span>
+                <span>{{ 'WORKSPACES.MODAL.DESC_AR' | translate }}</span>
                 <span class="flex items-center gap-2">
                   <span class="text-[11px] font-normal text-slate-400">{{ (form.controls.descriptionAr.value?.length ?? 0) }}/500</span>
                   <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
                 </span>
               </label>
               <textarea pTextarea id="ws-desc-ar" formControlName="descriptionAr" rows="3" maxlength="500" dir="rtl"
-                placeholder="تفاصيل إضافية عن المساحة..."
+                [placeholder]="'WORKSPACES.MODAL.DESC_PLACEHOLDER' | translate"
                 class="w-full !rounded-xl resize-none"></textarea>
               @if (fieldError('descriptionAr'); as msg) {
                 <p class="text-xs text-rose-600 mt-1">{{ msg }}</p>
@@ -288,14 +296,14 @@
 
             <div>
               <label for="ws-desc-en" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>Description</span>
+                <span>{{ 'WORKSPACES.MODAL.DESC_EN' | translate }}</span>
                 <span class="flex items-center gap-2">
                   <span class="text-[11px] font-normal text-slate-400">{{ (form.controls.descriptionEn.value?.length ?? 0) }}/500</span>
                   <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
                 </span>
               </label>
               <textarea pTextarea id="ws-desc-en" formControlName="descriptionEn" rows="3" maxlength="500" dir="ltr"
-                placeholder="Additional details about the workspace..."
+                [placeholder]="'WORKSPACES.MODAL.DESC_PLACEHOLDER' | translate"
                 class="w-full !rounded-xl resize-none"></textarea>
               @if (fieldError('descriptionEn'); as msg) {
                 <p class="text-xs text-rose-600 mt-1">{{ msg }}</p>
@@ -308,13 +316,13 @@
       <!-- Footer -->
       <div class="shrink-0 flex items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
         <p class="hidden sm:block text-[11px] text-slate-400">
-          <span class="text-rose-500">*</span> الحقول المطلوبة ملزمة
+          <span class="text-rose-500">*</span> {{ 'WORKSPACES.MODAL.REQUIRED_NOTE' | translate }}
         </p>
 
         <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
           <button type="button" (click)="onClose()" [disabled]="isSubmitting()"
             class="px-5 h-11 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 disabled:opacity-50 transition-colors">
-            إلغاء
+            {{ 'WORKSPACES.MODAL.CANCEL' | translate }}
           </button>
 
           <button type="submit" [disabled]="isSubmitting() || isLoadingTranslations()"
@@ -322,7 +330,7 @@
             @if (isSubmitting()) {
               <span class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
             } @else {
-              {{ isEditMode ? 'حفظ التعديلات' : 'حفظ المساحة' }}
+              {{ (isEditMode ? 'WORKSPACES.MODAL.SAVE_EDITS' : 'WORKSPACES.MODAL.SAVE') | translate }}
             }
           </button>
         </div>

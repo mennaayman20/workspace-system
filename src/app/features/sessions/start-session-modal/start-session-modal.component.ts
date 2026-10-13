@@ -1,10 +1,14 @@
 import {
-  Component, OnInit, EventEmitter, Output, HostListener, DestroyRef, inject, signal
+  Component, OnInit, EventEmitter, Output, DestroyRef, inject, signal, computed
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { LucideAngularModule, X, UserPlus, Play, Search, Loader2 } from 'lucide-angular';
+import { TranslatePipe } from '@ngx-translate/core';
+import { SelectModule } from 'primeng/select';
+import { InputTextModule } from 'primeng/inputtext';
+import {
+  LucideAngularModule, X, UserPlus, Play, Search, Loader2, User, Building2, Tag, Phone, Mail, Users,
+} from 'lucide-angular';
 import { Observable, Subject, catchError, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
 
 import { SessionsService } from '../sessions.service';
@@ -12,6 +16,7 @@ import { CustomerService } from '../../customers/customer.service';
 import { WorkspaceService } from '../../../core/services/workspace.service';
 import { PricingPlanService } from '../../pricing/pricing-plan.service';
 import { EmployeeService } from '../../employee/employee.service';
+import { LanguageService } from '../../../core/services/lang.service'; // عدّل المسار لو مختلف
 
 import { StartSessionCommand } from '../Isessions';
 import { Customer, CreateCustomerDto } from '../../customers/Icustomer';
@@ -22,7 +27,9 @@ import { Employee } from '../../employee/Iimployee';
 @Component({
   selector: 'app-start-session-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
+  imports: [
+    ReactiveFormsModule, LucideAngularModule, SelectModule, InputTextModule, TranslatePipe,
+  ],
   templateUrl: './start-session-modal.component.html'
 })
 export class StartSessionModalComponent implements OnInit {
@@ -33,6 +40,7 @@ export class StartSessionModalComponent implements OnInit {
   private workspaceService = inject(WorkspaceService);
   private pricingPlanService = inject(PricingPlanService);
   private employeeService = inject(EmployeeService);
+  private lang = inject(LanguageService);
 
   @Output() closeModal = new EventEmitter<void>();
   @Output() sessionStarted = new EventEmitter<void>();
@@ -42,6 +50,12 @@ export class StartSessionModalComponent implements OnInit {
   readonly PlayIcon = Play;
   readonly SearchIcon = Search;
   readonly LoaderIcon = Loader2;
+  readonly UserIcon = User;
+  readonly WorkspaceIcon = Building2;
+  readonly PlanIcon = Tag;
+  readonly PhoneIcon = Phone;
+  readonly MailIcon = Mail;
+  readonly PeopleIcon = Users;
 
   // حالات التحميل منفصلة
   isSubmitting = signal(false);
@@ -60,6 +74,15 @@ export class StartSessionModalComponent implements OnInit {
   searchTerm = signal('');
   private searchSubject = new Subject<string>();
 
+  /** خيارات العملاء للـ p-select (الاسم المترجم + الموبايل) */
+  readonly customerOptions = computed(() =>
+    this.customersList().map(c => ({
+      id: c.id,
+      name: c.fullName || c.fullNameAr || c.fullNameEn || '',
+      mobile: c.mobileNumber,
+    }))
+  );
+
   sessionForm: FormGroup = this.fb.group({
     customerId: [null, [Validators.required]],
     employeeId: [null, [Validators.required]],
@@ -69,11 +92,12 @@ export class StartSessionModalComponent implements OnInit {
     numberOfPeople: [1, [Validators.required, Validators.min(1)]]
   });
 
+  // الاسكيما الجديدة: اسم عربي + اسم إنجليزي
   quickCustomerForm: FormGroup = this.fb.group({
-    fullName: ['', [Validators.required, Validators.minLength(3)]],
+    fullNameAr: ['', [Validators.required, Validators.minLength(3)]],
+    fullNameEn: ['', [Validators.required, Validators.minLength(3)]],
     mobileNumber: ['', [Validators.required, Validators.pattern(/^\+?\d{10,15}$/)]],
     email: ['', [Validators.email]],
-    customerType: ['Individual', [Validators.required]]
   });
 
   // ===== Getters للتمبلت =====
@@ -91,8 +115,6 @@ export class StartSessionModalComponent implements OnInit {
     return !!c && c.invalid && (c.touched || c.dirty);
   }
 
-
-
   ngOnInit(): void {
     this.loadInitialData();
     this.setupCustomerSearch();
@@ -101,6 +123,14 @@ export class StartSessionModalComponent implements OnInit {
   // يفك الـ wrapper سواء المصفوفة جاية مباشرة أو جوه data/items
   private unwrapList<T>(res: any): T[] {
     return Array.isArray(res) ? res : (res?.data?.items || res?.data || res?.items || []);
+  }
+
+  private extractError(err: any, fallback: string): string {
+    if (typeof err?.error === 'string') return err.error;
+    if (typeof err?.error?.message === 'string') return err.error.message;
+    if (typeof err?.error?.title === 'string') return err.error.title;
+    if (typeof err?.message === 'string') return err.message;
+    return fallback;
   }
 
   private loadInitialData(): void {
@@ -163,7 +193,17 @@ export class StartSessionModalComponent implements OnInit {
     }
     if (this.isSavingCustomer()) return;
 
-    const dto: CreateCustomerDto = this.quickCustomerForm.getRawValue();
+    const v = this.quickCustomerForm.getRawValue();
+    const dto: CreateCustomerDto = {
+      fullNameAr: (v.fullNameAr ?? '').trim(),
+      fullNameEn: (v.fullNameEn ?? '').trim(),
+      mobileNumber: (v.mobileNumber ?? '').trim(),
+      email: v.email?.trim() || null,
+      companyId: null,
+      customerType: 'Individual',
+      notes: null,
+    };
+
     this.isSavingCustomer.set(true);
     this.quickError.set(null);
 
@@ -176,12 +216,17 @@ export class StartSessionModalComponent implements OnInit {
         this.isSavingCustomer.set(false);
 
         if (!newId) {
-          this.quickError.set('تم الحفظ لكن لم نستطع تحديد العميل، ابحث عنه بالاسم.');
+          this.quickError.set(this.lang.t('SESSIONS.START_MODAL.ERR_QUICK_NO_ID'));
           return;
         }
 
-        // نبني العميل محلياً بدل طلب تاني
-        const customer = { ...dto, id: newId } as unknown as Customer;
+        // نبني العميل محلياً بدل طلب تاني، والاسم المعروض حسب اللغة الحالية
+        const isAr = this.lang.currentLang() === 'ar';
+        const customer: Customer = {
+          ...dto,
+          id: newId,
+          fullName: isAr ? dto.fullNameAr : dto.fullNameEn,
+        };
 
         // 1) الأول نضيفه للقايمة  2) بعدين نختاره
         this.customersList.update(list => [customer, ...list.filter(c => Number(c.id) !== newId)]);
@@ -189,12 +234,12 @@ export class StartSessionModalComponent implements OnInit {
         this.sessionForm.get('customerId')?.markAsDirty();
 
         this.searchTerm.set('');
-        this.quickCustomerForm.reset({ fullName: '', mobileNumber: '', email: '', customerType: 'Individual' });
+        this.quickCustomerForm.reset({ fullNameAr: '', fullNameEn: '', mobileNumber: '', email: '' });
         this.isQuickAddCustomerOpen.set(false);
       },
       error: (err) => {
         this.isSavingCustomer.set(false);
-        this.quickError.set(err?.error?.message || 'حدث خطأ أثناء إضافة العميل.');
+        this.quickError.set(this.extractError(err, this.lang.t('SESSIONS.START_MODAL.ERR_QUICK_SAVE')));
       }
     });
   }
@@ -216,7 +261,9 @@ export class StartSessionModalComponent implements OnInit {
 
     const capacity = Number(this.selectedWorkspace?.capacity);
     if (capacity && this.people > capacity) {
-      this.errorMessage.set(`عدد الأشخاص أكبر من سعة المكان (${capacity}).`);
+      this.errorMessage.set(
+        this.lang.t('SESSIONS.START_MODAL.ERR_CAPACITY').replace('{{capacity}}', String(capacity))
+      );
       return;
     }
 
@@ -241,7 +288,7 @@ export class StartSessionModalComponent implements OnInit {
       },
       error: (err) => {
         this.isSubmitting.set(false);
-        this.errorMessage.set(err?.error?.message || 'حدث خطأ أثناء بدء الجلسة.');
+        this.errorMessage.set(this.extractError(err, this.lang.t('SESSIONS.START_MODAL.ERR_START')));
       }
     });
   }

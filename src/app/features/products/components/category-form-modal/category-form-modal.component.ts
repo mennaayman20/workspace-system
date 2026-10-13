@@ -9,11 +9,12 @@ import { LucideAngularModule, FolderTree, X, Save, FileText } from 'lucide-angul
 import { ProductCategoryService } from '../../services/product-category.service';
 import { ProductCategory, CreateProductCategoryCommand } from '../../interfaces/product';
 import { Observable } from 'rxjs';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-category-form-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, LucideAngularModule, InputTextModule, TextareaModule, ToggleSwitchModule],
+  imports: [ReactiveFormsModule, LucideAngularModule, InputTextModule, TextareaModule, ToggleSwitchModule , TranslatePipe],
   templateUrl: './category-form-modal.component.html'
 })
 export class CategoryFormModalComponent implements OnInit {

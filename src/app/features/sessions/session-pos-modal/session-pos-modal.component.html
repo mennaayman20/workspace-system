@@ -1,5 +1,6 @@
-<div dir="rtl" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-  <div class="w-full bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]"
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+  <div role="dialog" aria-modal="true"
+       class="w-full bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]"
        [class.max-w-4xl]="mode() === 'edit'"
        [class.max-w-xl]="mode() === 'checkout'">
 
@@ -11,14 +12,15 @@
         </div>
         <div>
           <h3 class="text-lg font-bold text-slate-900">
-            {{ mode() === 'checkout' ? 'فاتورة الجلسة' : 'إضافة منتجات وخدمات للجلسة' }} #{{ sessionId() }}
+            {{ (mode() === 'checkout' ? 'SESSIONS.POS.TITLE_CHECKOUT' : 'SESSIONS.POS.TITLE_EDIT') | translate }} #{{ sessionId() }}
           </h3>
           @if (customerName()) {
             <p class="text-xs text-slate-500 mt-0.5">{{ customerName() }}</p>
           }
         </div>
       </div>
-      <button (click)="closeModal.emit()" [disabled]="isBusy()"
+      <button type="button" (click)="closeModal.emit()" [disabled]="isBusy()"
+        [attr.aria-label]="'SESSIONS.COMMON.CLOSE' | translate"
         class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 disabled:opacity-50 flex items-center justify-center text-slate-500 transition-colors">
         <lucide-icon [img]="CloseIcon" class="w-4 h-4"></lucide-icon>
       </button>
@@ -27,7 +29,7 @@
     <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 gap-6"
          [class.lg:grid-cols-5]="mode() === 'edit'">
 
-      <!-- يمين: التابات + (التصنيفات والمنتجات) أو (الخدمات) — وضع التعديل فقط -->
+      <!-- التابات + الكتالوج (وضع التعديل فقط) -->
       @if (mode() === 'edit') {
       <div class="lg:col-span-3 space-y-4">
 
@@ -39,7 +41,7 @@
             [class.shadow-sm]="activeTab() === 'products'"
             [class.text-blue-600]="activeTab() === 'products'"
             [class.text-slate-500]="activeTab() !== 'products'">
-            المنتجات
+            {{ 'SESSIONS.POS.TAB_PRODUCTS' | translate }}
             @if (draftItems().length > 0) {
               <span class="min-w-5 h-5 px-1.5 rounded-full bg-blue-600 text-white text-[11px] flex items-center justify-center">
                 {{ draftItems().length }}
@@ -52,7 +54,7 @@
             [class.shadow-sm]="activeTab() === 'services'"
             [class.text-blue-600]="activeTab() === 'services'"
             [class.text-slate-500]="activeTab() !== 'services'">
-            الخدمات
+            {{ 'SESSIONS.POS.TAB_SERVICES' | translate }}
             @if (draftServices().length > 0) {
               <span class="min-w-5 h-5 px-1.5 rounded-full bg-blue-600 text-white text-[11px] flex items-center justify-center">
                 {{ draftServices().length }}
@@ -65,7 +67,7 @@
 
           <!-- Categories -->
           <div>
-            <p class="text-xs font-bold text-slate-500 mb-2">التصنيفات</p>
+            <p class="text-xs font-bold text-slate-500 mb-2">{{ 'SESSIONS.POS.CATEGORIES' | translate }}</p>
             <div class="flex flex-wrap gap-2">
               @for (cat of categories(); track cat.id) {
                 <button type="button" (click)="selectCategory(cat.id)"
@@ -79,18 +81,18 @@
                   {{ cat.name }}
                 </button>
               } @empty {
-                <span class="text-sm text-slate-400">لا توجد تصنيفات</span>
+                <span class="text-sm text-slate-400">{{ 'SESSIONS.POS.NO_CATEGORIES' | translate }}</span>
               }
             </div>
           </div>
 
           <!-- Products -->
           <div>
-            <p class="text-xs font-bold text-slate-500 mb-2">المنتجات</p>
+            <p class="text-xs font-bold text-slate-500 mb-2">{{ 'SESSIONS.POS.PRODUCTS' | translate }}</p>
 
             @if (selectedCategoryId() === null) {
               <div class="py-10 text-center text-sm text-slate-400 border border-dashed border-slate-200 rounded-2xl">
-                اختاري تصنيف لعرض منتجاته
+                {{ 'SESSIONS.POS.PICK_CATEGORY' | translate }}
               </div>
             } @else {
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -98,18 +100,18 @@
                   <button type="button" (click)="addProduct(p)"
                     class="relative text-start p-4 rounded-2xl border border-slate-200 bg-white hover:border-blue-400 hover:bg-blue-50/40 active:scale-[0.98] transition-all">
                     @if (quantityOf(p.id) > 0) {
-                      <span class="absolute top-2 left-2 min-w-6 h-6 px-1.5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">
+                      <span class="absolute top-2 end-2 min-w-6 h-6 px-1.5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">
                         {{ quantityOf(p.id) }}
                       </span>
                     }
-<p class="font-bold text-slate-800 text-sm truncate">{{ p.name ?? p.nameEn ?? p.nameAr ?? p.englishName }}</p>
-                    <p dir="ltr" class="text-xs font-mono font-bold text-emerald-600 mt-1 text-right">
+                    <p class="font-bold text-slate-800 text-sm truncate">{{ p.name ?? p.nameEn ?? p.nameAr ?? p.englishName }}</p>
+                    <p dir="ltr" class="text-xs font-mono font-bold text-emerald-600 mt-1 ltr:text-left rtl:text-right">
                       {{ p.sellingPrice | currency:'EGP' }}
                     </p>
                   </button>
                 } @empty {
                   <div class="col-span-full py-10 text-center text-sm text-slate-400 border border-dashed border-slate-200 rounded-2xl">
-                    لا توجد منتجات في هذا التصنيف
+                    {{ 'SESSIONS.POS.NO_PRODUCTS' | translate }}
                   </div>
                 }
               </div>
@@ -120,13 +122,13 @@
 
           <!-- Services -->
           <div>
-            <p class="text-xs font-bold text-slate-500 mb-2">الخدمات</p>
+            <p class="text-xs font-bold text-slate-500 mb-2">{{ 'SESSIONS.POS.SERVICES' | translate }}</p>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
               @for (s of availableServices(); track s.id) {
                 <button type="button" (click)="addService(s)"
                   class="relative text-start p-4 rounded-2xl border border-slate-200 bg-white hover:border-blue-400 hover:bg-blue-50/40 active:scale-[0.98] transition-all">
                   @if (serviceQuantityOf(s.id) > 0) {
-                    <span class="absolute top-2 left-2 min-w-6 h-6 px-1.5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">
+                    <span class="absolute top-2 end-2 min-w-6 h-6 px-1.5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">
                       {{ serviceQuantityOf(s.id) }}
                     </span>
                   }
@@ -134,13 +136,13 @@
                   @if (s.description) {
                     <p class="text-[11px] text-slate-400 mt-0.5 truncate">{{ s.description }}</p>
                   }
-                  <p dir="ltr" class="text-xs font-mono font-bold text-emerald-600 mt-1 text-right">
+                  <p dir="ltr" class="text-xs font-mono font-bold text-emerald-600 mt-1 ltr:text-left rtl:text-right">
                     {{ s.price | currency:'EGP' }}
                   </p>
                 </button>
               } @empty {
                 <div class="col-span-full py-10 text-center text-sm text-slate-400 border border-dashed border-slate-200 rounded-2xl">
-                  لا توجد خدمات متاحة
+                  {{ 'SESSIONS.POS.NO_SERVICES' | translate }}
                 </div>
               }
             </div>
@@ -150,7 +152,7 @@
       </div>
       }
 
-      <!-- يسار: ملخص الجلسة (منتجات + خدمات) -->
+      <!-- ملخص الجلسة (منتجات + خدمات) -->
       <div class="bg-slate-50 rounded-2xl p-4 flex flex-col"
            [class.lg:col-span-2]="mode() === 'edit'">
 
@@ -159,11 +161,11 @@
           <!-- منتجات الجلسة -->
           <div>
             <div class="flex items-center justify-between mb-2">
-              <p class="text-sm font-bold text-slate-800">منتجات الجلسة</p>
+              <p class="text-sm font-bold text-slate-800">{{ 'SESSIONS.POS.SESSION_PRODUCTS' | translate }}</p>
               @if (mode() === 'edit' && draftItems().length > 0) {
                 <button type="button" (click)="clearAll()"
                   class="text-xs font-bold text-red-600 hover:text-red-700">
-                  مسح الكل
+                  {{ 'SESSIONS.POS.CLEAR_ALL' | translate }}
                 </button>
               }
             </div>
@@ -180,7 +182,9 @@
                       <p class="text-sm font-bold text-slate-800 truncate">{{ item.productName }}</p>
                       @if (mode() === 'edit') {
                         <button type="button" (click)="remove(item.productId)"
-                          class="text-rose-500 hover:text-rose-700" title="حذف">
+                          class="text-rose-500 hover:text-rose-700"
+                          [attr.title]="'SESSIONS.POS.DELETE' | translate"
+                          [attr.aria-label]="'SESSIONS.POS.DELETE' | translate">
                           <lucide-icon [img]="TrashIcon" class="w-4 h-4"></lucide-icon>
                         </button>
                       }
@@ -210,7 +214,7 @@
                   </div>
                 } @empty {
                   <div class="py-4 text-center text-sm text-slate-400">
-                    {{ mode() === 'edit' ? 'لم تتم إضافة منتجات بعد' : 'لا توجد منتجات' }}
+                    {{ (mode() === 'edit' ? 'SESSIONS.POS.NO_PRODUCTS_YET' : 'SESSIONS.POS.NO_PRODUCTS_CHECKOUT') | translate }}
                   </div>
                 }
               }
@@ -220,11 +224,11 @@
           <!-- خدمات الجلسة -->
           <div>
             <div class="flex items-center justify-between mb-2">
-              <p class="text-sm font-bold text-slate-800">خدمات الجلسة</p>
+              <p class="text-sm font-bold text-slate-800">{{ 'SESSIONS.POS.SESSION_SERVICES' | translate }}</p>
               @if (mode() === 'edit' && draftServices().length > 0) {
                 <button type="button" (click)="clearAllServices()"
                   class="text-xs font-bold text-red-600 hover:text-red-700">
-                  مسح الكل
+                  {{ 'SESSIONS.POS.CLEAR_ALL' | translate }}
                 </button>
               }
             </div>
@@ -241,7 +245,9 @@
                       <p class="text-sm font-bold text-slate-800 truncate">{{ item.serviceName }}</p>
                       @if (mode() === 'edit') {
                         <button type="button" (click)="removeService(item.serviceId)"
-                          class="text-rose-500 hover:text-rose-700" title="حذف">
+                          class="text-rose-500 hover:text-rose-700"
+                          [attr.title]="'SESSIONS.POS.DELETE' | translate"
+                          [attr.aria-label]="'SESSIONS.POS.DELETE' | translate">
                           <lucide-icon [img]="TrashIcon" class="w-4 h-4"></lucide-icon>
                         </button>
                       }
@@ -271,7 +277,7 @@
                   </div>
                 } @empty {
                   <div class="py-4 text-center text-sm text-slate-400">
-                    {{ mode() === 'edit' ? 'لم تتم إضافة خدمات بعد' : 'لا توجد خدمات' }}
+                    {{ (mode() === 'edit' ? 'SESSIONS.POS.NO_SERVICES_YET' : 'SESSIONS.POS.NO_SERVICES_CHECKOUT') | translate }}
                   </div>
                 }
               }
@@ -282,21 +288,23 @@
         <!-- Totals -->
         <div class="pt-3 mt-3 border-t border-slate-200 space-y-1.5">
           <div class="flex items-center justify-between text-xs text-slate-500">
-            <span>إجمالي المنتجات</span>
+            <span>{{ 'SESSIONS.POS.PRODUCTS_TOTAL' | translate }}</span>
             <span dir="ltr" class="font-mono font-bold">{{ productsTotal() | currency:'EGP' }}</span>
           </div>
           <div class="flex items-center justify-between text-xs text-slate-500">
-            <span>إجمالي الخدمات</span>
+            <span>{{ 'SESSIONS.POS.SERVICES_TOTAL' | translate }}</span>
             <span dir="ltr" class="font-mono font-bold">{{ servicesTotal() | currency:'EGP' }}</span>
           </div>
 
           @if (mode() === 'checkout') {
             <!-- اختيار الخصم -->
             <div class="pt-2">
-              <label class="block text-xs font-bold text-slate-600 mb-1.5">الخصم</label>
-              <select (change)="onDiscountChange($any($event.target).value)" [disabled]="isCheckingOut()"
+              <label for="discountSelect" class="block text-xs font-bold text-slate-600 mb-1.5">
+                {{ 'SESSIONS.POS.DISCOUNT' | translate }}
+              </label>
+              <select id="discountSelect" (change)="onDiscountChange($any($event.target).value)" [disabled]="isCheckingOut()"
                 class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:border-blue-400 disabled:opacity-60">
-                <option value="">بدون خصم</option>
+                <option value="">{{ 'SESSIONS.POS.NO_DISCOUNT' | translate }}</option>
                 @for (d of availableDiscounts(); track d.id) {
                   <option [value]="d.id" [selected]="d.id === selectedDiscountId()">
                     {{ d.name }} — {{ d.type === 'Percentage' ? d.value + '%' : (d.value | currency:'EGP') }}
@@ -307,23 +315,21 @@
 
             @if (discountAmount() > 0) {
               <div class="flex items-center justify-between text-xs text-emerald-600 pt-1">
-                <span>قيمة الخصم</span>
+                <span>{{ 'SESSIONS.POS.DISCOUNT_AMOUNT' | translate }}</span>
                 <span dir="ltr" class="font-mono font-bold">- {{ discountAmount() | currency:'EGP' }}</span>
               </div>
             }
           }
 
           <div class="flex items-center justify-between pt-1.5">
-            <span class="text-sm text-slate-500">الإجمالي</span>
+            <span class="text-sm text-slate-500">{{ 'SESSIONS.POS.TOTAL' | translate }}</span>
             <span dir="ltr" class="text-lg font-extrabold font-mono text-slate-900">
               {{ (mode() === 'checkout' ? netTotal() : grandTotal()) | currency:'EGP' }}
             </span>
           </div>
 
           @if (mode() === 'checkout') {
-            <p class="text-[11px] text-slate-400 pt-1">
-              الإجمالي هنا للمنتجات والخدمات فقط، وحساب وقت المكان بيتضاف تلقائياً من النظام عند الإنهاء.
-            </p>
+            <p class="text-[11px] text-slate-400 pt-1">{{ 'SESSIONS.POS.CHECKOUT_NOTE' | translate }}</p>
           }
         </div>
       </div>
@@ -332,26 +338,26 @@
     <!-- Footer -->
     <div class="p-4 border-t border-slate-100 flex items-center justify-between gap-3">
       @if (mode() === 'edit' && hasChanges()) {
-        <span class="text-xs font-bold text-amber-600">يوجد تعديلات لم يتم حفظها</span>
+        <span class="text-xs font-bold text-amber-600">{{ 'SESSIONS.POS.UNSAVED' | translate }}</span>
       } @else {
         <span></span>
       }
 
       <div class="flex gap-3">
-        <button (click)="closeModal.emit()" [disabled]="isBusy()"
+        <button type="button" (click)="closeModal.emit()" [disabled]="isBusy()"
           class="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 rounded-xl text-sm font-bold text-slate-700">
-          إلغاء
+          {{ 'SESSIONS.COMMON.CANCEL' | translate }}
         </button>
 
         @if (mode() === 'edit') {
-          <button (click)="save()" [disabled]="isBusy() || isLoadingItems()"
+          <button type="button" (click)="save()" [disabled]="isBusy() || isLoadingItems()"
             class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-bold">
-            {{ isSaving() ? 'جاري الحفظ...' : 'حفظ' }}
+            {{ (isSaving() ? 'SESSIONS.POS.SAVING' : 'SESSIONS.POS.SAVE') | translate }}
           </button>
         } @else {
-          <button (click)="confirmCheckout()" [disabled]="isBusy() || isLoadingItems()"
+          <button type="button" (click)="confirmCheckout()" [disabled]="isBusy() || isLoadingItems()"
             class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-bold">
-            {{ isCheckingOut() ? 'جاري الإنهاء...' : 'إنهاء وتحصيل الفاتورة' }}
+            {{ (isCheckingOut() ? 'SESSIONS.POS.CHECKING_OUT' : 'SESSIONS.POS.CHECKOUT_BUTTON') | translate }}
           </button>
         }
       </div>

@@ -14,6 +14,7 @@ import {
   ActionTone, BadgeStyle, ColumnFilters, ColumnFilterType, ColumnFilterValue, FilterOption,
   TableAction, TableActionEvent, TableColumn,
 } from './table.types';
+import { TranslatePipe } from '@ngx-translate/core';
 
 const NEUTRAL_BADGE = 'bg-slate-100 text-slate-600';
 
@@ -42,7 +43,7 @@ const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDat
   standalone: true,
   imports: [
     TableModule, PopoverModule, DatePickerModule, FormsModule,
-    NgTemplateOutlet, CurrencyPipe, LucideAngularModule,
+    NgTemplateOutlet, CurrencyPipe, LucideAngularModule,TranslatePipe
   ],
   templateUrl: './data-table.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

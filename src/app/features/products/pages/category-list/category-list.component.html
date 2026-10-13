@@ -1,7 +1,8 @@
+
 <style>
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
+    to { opacity: 1; transform: translateY(0); }
   }
   .fade-up { animation: fadeUp .35s ease-out both; }
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
@@ -16,21 +17,21 @@
          [routerLinkActiveOptions]="{ exact: true }"
          class="group inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 border border-transparent transition-all duration-200 shrink-0 cursor-pointer select-none">
         <lucide-icon [img]="PackageIcon" class="w-4 h-4 text-slate-400 group-[.font-bold]:text-blue-600 transition-colors"></lucide-icon>
-        <span>قائمة المنتجات</span>
+        <span>{{ 'CATEGORIES.TABS.PRODUCTS' | translate }}</span>
       </a>
 
       <a [routerLink]="['/products/categories']"
          routerLinkActive="bg-white text-blue-600 shadow-sm border-slate-200/80 font-bold"
          class="group inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 border border-transparent transition-all duration-200 shrink-0 cursor-pointer select-none">
         <lucide-icon [img]="FolderTreeIcon" class="w-4 h-4 text-slate-400 group-[.font-bold]:text-blue-600 transition-colors"></lucide-icon>
-        <span>تصنيفات المنتجات</span>
+        <span>{{ 'CATEGORIES.TABS.CATEGORIES' | translate }}</span>
       </a>
 
     </nav>
   </div>
 </div>
 
-<div dir="rtl" class="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
+<div  class="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
 
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-up">
@@ -39,37 +40,41 @@
         <lucide-icon [img]="FolderTreeIcon" class="w-6 h-6"></lucide-icon>
       </div>
       <div>
-        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">إدارة التصنيفات</h1>
-        <p class="text-sm text-slate-500 mt-1">إضافة، تعديل وإدارة تصنيفات المنتجات بالنظام</p>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+          {{ 'CATEGORIES.TITLE' | translate }}
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">
+          {{ 'CATEGORIES.SUBTITLE' | translate }}
+        </p>
       </div>
     </div>
 
     <button type="button" (click)="openAddForm()"
       class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 shrink-0">
       <lucide-icon [img]="PlusIcon" class="w-4 h-4"></lucide-icon>
-      <span>إضافة تصنيف جديد</span>
+      <span>{{ 'CATEGORIES.NEW' | translate }}</span>
     </button>
   </div>
 
-  <!-- الجدول المشترك (بحث لكل عمود + ترتيب + pagination) -->
+  <!-- Table -->
   <app-data-table
     [value]="categoryService.categories()"
     [columns]="columns"
     [actions]="actions"
     [columnFilters]="true"
     [minWidth]="'48rem'"
-    [emptyTitle]="categoryService.categories().length === 0 ? 'لا توجد تصنيفات مضافة حتى الآن' : 'لا توجد نتائج مطابقة'"
+    [emptyTitle]="(categoryService.categories().length === 0 ? 'CATEGORIES.EMPTY' : 'CATEGORIES.NO_RESULTS') | translate"
     (action)="onAction($event)">
 
     @if (categoryService.categories().length === 0) {
       <button tableEmptyAction type="button" (click)="openAddForm()"
         class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors">
-        + أضف أول تصنيف
+        + {{ 'CATEGORIES.ADD_FIRST' | translate }}
       </button>
     }
   </app-data-table>
 
-  <!-- مودال الإضافة والتعديل -->
+  <!-- Add/Edit Modal -->
   @if (isFormOpen()) {
     <app-category-form-modal
       [category]="editing()"
@@ -78,12 +83,12 @@
     </app-category-form-modal>
   }
 
-<app-confirm-dialog
-  [open]="!!pendingDelete()"
-  title="حذف التصنيف"
-  [itemName]="pendingDelete() ? displayName(pendingDelete()!) : ''"
-   [loading]="isDeleting()"
+  <app-confirm-dialog
+    [open]="!!pendingDelete()"
+    [title]="'CATEGORIES.CONFIRM_DELETE_TITLE' | translate"
+    [itemName]="pendingDelete() ? displayName(pendingDelete()!) : ''"
+    [loading]="isDeleting()"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()" />
 
-  (confirmed)="confirmDelete()"
-  (cancelled)="cancelDelete()" />
 </div>

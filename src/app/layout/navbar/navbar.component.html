@@ -5,14 +5,24 @@
     <div class="flex items-center gap-6">
       <!-- Logo -->
       <div class="flex items-center gap-3 cursor-pointer group">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-all duration-300">
-          <span class="font-black text-lg tracking-wider">W</span>
-        </div>
+        <!-- <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-all duration-300">
+<span class="text-[10px] font-semibold text-slate-400 tracking-widest uppercase mt-1">{{ 'HEADER.PLATFORM' | translate }}</span>
+        </div> -->
         <div class="flex flex-col">
           <span class="font-bold text-lg text-slate-900 tracking-tight leading-none group-hover:text-blue-600 transition-colors">WorkSpace</span>
           <span class="text-[10px] font-semibold text-slate-400 tracking-widest uppercase mt-1">Platform</span>
         </div>
       </div>
+
+
+      <!-- Language Switch -->
+<button
+  type="button"
+  (click)="lang.toggleLanguage()"
+  class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 border border-slate-200/80 transition-all duration-200 active:scale-95 cursor-pointer"
+>
+  {{ 'HEADER.SWITCH_LANG' | translate }}
+</button>
 
       <!-- Quick Action Button -->
       <!-- <app-button
@@ -28,12 +38,12 @@
     <!-- Center Section: Global Search -->
     <div class="hidden md:block flex-1 max-w-md">
       <div class="relative group">
-        <app-input
-          placeholder="بحث سريع عن المقاعد، الغرف، أو الأعضاء..."
-          [ngModel]="searchQuery()"
-          (ngModelChange)="onSearch($event)"
-          class="w-full bg-slate-50/80 hover:bg-slate-100/80 focus-within:bg-white border-slate-200/80 rounded-xl text-xs transition-all duration-200"
-        ></app-input>
+<app-input
+  [placeholder]="'HEADER.SEARCH_PLACEHOLDER' | translate"
+  [ngModel]="searchQuery()"
+  (ngModelChange)="onSearch($event)"
+  class="w-full bg-slate-50/80 hover:bg-slate-100/80 focus-within:bg-white border-slate-200/80 rounded-xl text-xs transition-all duration-200"
+></app-input>
       </div>
     </div>
 
@@ -45,7 +55,7 @@
       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
       <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
     </span>
-    <span class="font-medium text-[11px] text-slate-600">الجلسات النشطة:</span>
+<span class="font-medium text-[11px] text-slate-600">{{ 'HEADER.ACTIVE_SESSIONS' | translate }}</span>
     <span class="font-bold text-xs px-2 py-0.5 bg-emerald-600 text-white rounded-md">
       @if (isLoading()) {
         ...
@@ -75,32 +85,31 @@
   </div>
 </header>
 
-<!-- Quick Check-in Modal -->
 <app-modal
   [isOpen]="isCheckInModalOpen()"
-  title="تسجيل دخول سريع"
+  [title]="'CHECKIN.TITLE' | translate"
   (onClose)="closeCheckInModal()"
   class="backdrop-blur-md"
 >
   <div class="p-2 space-y-4">
     <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5">
       <p class="text-xs text-slate-600 leading-relaxed font-medium">
-        قم بتسجيل الدخول السريع عن طريق أدخال رقم الهاتف وتحديد الغرفة أو المساحة المطلوبة.
+        {{ 'CHECKIN.DESCRIPTION' | translate }}
       </p>
     </div>
 
     <div class="space-y-3">
       <app-input
-        label="رقم الهاتف"
-        placeholder="مثال: 05X XXX XXXX"
+        [label]="'CHECKIN.PHONE_LABEL' | translate"
+        [placeholder]="'CHECKIN.PHONE_PLACEHOLDER' | translate"
         [ngModel]="checkInPhone()"
         (ngModelChange)="checkInPhone.set($event)"
         class="focus-within:ring-2 focus-within:ring-blue-500/20 rounded-xl"
       ></app-input>
 
       <app-input
-        label="المساحة / الغرفة"
-        placeholder="اختر أو اكتب اسم المساحة..."
+        [label]="'CHECKIN.SPACE_LABEL' | translate"
+        [placeholder]="'CHECKIN.SPACE_PLACEHOLDER' | translate"
         [ngModel]="checkInSpace()"
         (ngModelChange)="checkInSpace.set($event)"
         class="focus-within:ring-2 focus-within:ring-blue-500/20 rounded-xl"
@@ -109,19 +118,11 @@
   </div>
 
   <div modal-footer class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
-    <app-button 
-      variant="outline" 
-      (onClick)="closeCheckInModal()"
-      class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs transition-all cursor-pointer"
-    >
-      إلغاء
+    <app-button variant="outline" (onClick)="closeCheckInModal()" class="...">
+      {{ 'CHECKIN.CANCEL' | translate }}
     </app-button>
-    <app-button 
-      variant="primary" 
-      (onClick)="confirmCheckIn()"
-      class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-sm active:scale-95 transition-all cursor-pointer"
-    >
-      تأكيد الدخول
+    <app-button variant="primary" (onClick)="confirmCheckIn()" class="...">
+      {{ 'CHECKIN.CONFIRM' | translate }}
     </app-button>
   </div>
 </app-modal>

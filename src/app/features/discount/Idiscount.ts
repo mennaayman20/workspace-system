@@ -41,8 +41,8 @@ export interface DiscountTranslations {
 
 // راجعي النصوص دي مع اللي كانت عندك قبل كده
 export const DISCOUNT_TYPE_LABELS: Record<DiscountType, string> = {
-  Percentage: 'نسبة مئوية',
-  FixedAmount: 'مبلغ ثابت',
+  Percentage: 'DISCOUNTS.MODAL.PERCENTAGE',
+  FixedAmount: 'DISCOUNTS.MODAL.FIXED',
 };
 
 

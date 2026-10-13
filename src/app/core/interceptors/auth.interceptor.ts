@@ -4,6 +4,9 @@ import { AuthService } from '../services/auth.service';
 import { LanguageService } from '../services/lang.service'; // عدّلي المسار حسب مكان الخدمة عندك
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
+    if (req.url.includes('/i18n/')) {
+    return next(req);
+  }
   const authService = inject(AuthService);
   const langService = inject(LanguageService);
 

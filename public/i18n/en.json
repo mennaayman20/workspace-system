@@ -1,0 +1,868 @@
+{
+
+
+  "DATA_TABLE": {
+    "SEARCH_PLACEHOLDER": "Search...",
+    "SEARCH_COLUMN": "Search",
+    "APPLY": "Apply",
+    "CLEAR": "Clear",
+    "ALL": "All",
+    "DATE_RANGE": "Select date range",
+    "ACTIONS": "Actions",
+    "EMPTY_TITLE": "No data available",
+    "EMPTY_SEARCH": "No matching search results",
+    "PAGINATION": "{first} - {last} of {totalRecords}",
+    "STATUS": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive"
+    }
+  }
+,
+
+
+
+
+
+  
+  "HEADER": {
+    "PLATFORM": "Platform",
+    "SEARCH_PLACEHOLDER": "Quick search for seats, rooms, or members...",
+    "ACTIVE_SESSIONS": "Active sessions:",
+    "QUICK_CHECKIN": "Quick check-in",
+    "SWITCH_LANG": "العربية"
+  },
+  "CHECKIN": {
+    "TITLE": "Quick check-in",
+    "DESCRIPTION": "Check in quickly by entering your phone number and selecting the room or space you need.",
+    "PHONE_LABEL": "Phone number",
+    "PHONE_PLACEHOLDER": "e.g. 05X XXX XXXX",
+    "SPACE_LABEL": "Space / Room",
+    "SPACE_PLACEHOLDER": "Choose or type the space name...",
+    "CANCEL": "Cancel",
+    "CONFIRM": "Confirm check-in"
+  },
+  "VALIDATION": {
+    "REQUIRED": "This field is required",
+    "MIN_LENGTH": "Must be at least {{n}} characters",
+    "MAX_LENGTH": "Must not exceed {{n}} characters",
+    "PATTERN": "Use English letters, numbers, - or _ only (no spaces)",
+    "MIN": "Value must be at least {{n}}",
+    "MAX": "Value must not exceed {{n}}",
+    "INTEGER": "Please enter a whole number",
+    "DUPLICATE": "This type already exists, select it from the list",
+    "INVALID": "Invalid value"
+  },
+  "WORKSPACES": {
+    "TITLE": "Workspace Management",
+    "SUBTITLE": "View and update the status of rooms and offices registered in the system",
+    "ADD_BUTTON": "Add new workspace",
+    "ADD_FIRST": "+ Add your first workspace",
+    "RETRY": "Retry",
+    "LOAD_ERROR": "Failed to load data. Check your connection and try again.",
+    "EMPTY_NONE": "No workspaces added yet",
+    "EMPTY_NO_MATCH": "No matching results",
+    "CHANGE_STATUS_OF": "Change status of {{name}}",
+    "CAPACITY_VALUE": "{{count}} people",
+    "STATUS": {
+      "ALL": "Total workspaces",
+      "AVAILABLE": "Available",
+      "OCCUPIED": "Occupied",
+      "RESERVED": "Reserved",
+      "MAINTENANCE": "Maintenance"
+    },
+    "COLUMNS": {
+      "WORKSPACE": "Workspace",
+      "CODE": "Code",
+      "FLOOR_LOCATION": "Floor / Location",
+      "CAPACITY": "Capacity",
+      "STATUS": "Status"
+    },
+    "ACTIONS": { "EDIT": "Edit", "DELETE": "Delete" },
+    "DELETE": {
+      "TITLE": "Delete workspace",
+      "SUCCESS": "Workspace deleted successfully",
+      "ERROR": "Failed to delete, please try again later"
+    },
+    "MSG": {
+      "STATUS_CHANGED": "Workspace status changed successfully",
+      "STATUS_ERROR": "Failed to change status, changes reverted",
+      "REFRESH_FAILED": "Saved, but the list could not be refreshed. Reload the page",
+      "LOAD_ONE_ERROR": "Failed to load workspace data, please try again"
+    },
+    "MODAL": {
+      "ADD_TITLE": "Add new workspace",
+      "EDIT_TITLE": "Edit workspace",
+      "ADD_SUBTITLE": "Enter the new workspace details",
+      "EDIT_SUBTITLE": "Edit the workspace details then save",
+      "CLOSE": "Close",
+      "LOADING_TRANSLATIONS": "Loading translations...",
+      "TYPE_SECTION": "Workspace type",
+      "TYPE_LABEL": "Type",
+      "TYPE_PLACEHOLDER": "Select workspace type",
+      "TYPE_FILTER": "Search for a type...",
+      "TYPE_REQUIRED": "Please select a workspace type",
+      "ADD_NEW_TYPE": "+ Add new type",
+      "NEW_TYPE_TITLE": "New type name (Arabic and English)",
+      "IN_ARABIC": "Arabic",
+      "BASIC_SECTION": "Basic information",
+      "NAME_AR": "Workspace name (Arabic)",
+      "NAME_EN": "Workspace name (English)",
+      "CODE": "Workspace code",
+      "LOCATION_SECTION": "Location",
+      "FLOOR": "Floor",
+      "FLOOR_PLACEHOLDER": "First",
+      "LOCATION": "Location",
+      "LOCATION_PLACEHOLDER": "Main building",
+      "CAPACITY_SECTION": "Capacity (number of people)",
+      "DECREASE": "Decrease",
+      "INCREASE": "Increase",
+      "DESC_SECTION": "Description",
+      "OPTIONAL": "(optional)",
+      "DESC_AR": "Description (Arabic)",
+      "DESC_EN": "Description (English)",
+      "DESC_PLACEHOLDER": "Additional details about the workspace...",
+      "REQUIRED_NOTE": "Required fields",
+      "CANCEL": "Cancel",
+      "SAVE": "Save workspace",
+      "SAVE_EDITS": "Save changes",
+      "ADDED": "Workspace added successfully",
+      "EDITED": "Workspace updated successfully",
+      "ERR_OFFLINE": "Cannot reach the server, check your internet and try again",
+      "ERR_CODE_EXISTS": "Workspace code is already in use, choose another",
+      "ERR_ADD": "An error occurred while adding the workspace",
+      "ERR_EDIT": "An error occurred while updating the workspace"
+    }
+  },
+  "CUSTOMERS": {
+    "TITLE": "Customer Management",
+    "SUBTITLE": "View, add and edit customers and their linked companies",
+    "MANAGE_COMPANIES": "Manage companies",
+    "ADD_BUTTON": "Add new customer",
+    "ADD_FIRST": "+ Add new customer",
+    "EMPTY_NONE": "No customers yet",
+    "EMPTY_SEARCH": "No customers match your search",
+    "LOAD_ERROR": "An error occurred while loading customers.",
+    "TYPES": {
+      "INDIVIDUAL": "Individual",
+      "CORPORATE": "Corporate",
+      "MEMBER": "Member",
+      "WALKIN": "Walk-in"
+    },
+    "TYPE_HINTS": {
+      "INDIVIDUAL": "فردي",
+      "CORPORATE": "شركات",
+      "MEMBER": "عضو",
+      "WALKIN": "عميل عابر"
+    },
+    "COLUMNS": {
+      "NAME": "Name",
+      "MOBILE": "Mobile number",
+      "TYPE": "Type",
+      "COMPANY": "Company",
+      "EMAIL": "Email"
+    },
+    "ACTIONS": { "EDIT": "Edit", "DELETE": "Delete" },
+    "DELETE": {
+      "TITLE": "Delete customer",
+      "CONFIRM_PREFIX": "Are you sure you want to delete",
+      "CONFIRM_SUFFIX": "? You can restore it later.",
+      "CONFIRM_BUTTON": "Yes, delete",
+      "DELETING": "Deleting...",
+      "CANCEL": "Cancel",
+      "SUCCESS": "Customer deleted successfully",
+      "ERROR": "Could not delete the customer, it may be linked to other data."
+    },
+    "MODAL": {
+      "ADD_TITLE": "Add new customer",
+      "EDIT_TITLE": "Edit customer details",
+      "ADD_SUBTITLE": "Enter the customer details and choose the account type",
+      "EDIT_SUBTITLE": "Edit the details then save your changes",
+      "CLOSE": "Close",
+      "LOADING_NAMES": "Loading names...",
+      "NAME_SECTION": "Customer name",
+      "NAME_AR": "Name (Arabic)",
+      "NAME_EN": "Name (English)",
+      "ERR_NAME_AR": "Arabic name is required",
+      "ERR_NAME_EN": "English name is required",
+      "CONTACT_SECTION": "Contact details",
+      "MOBILE": "Mobile number",
+      "ERR_MOBILE": "Mobile number is required",
+      "EMAIL": "Email",
+      "OPTIONAL": "(optional)",
+      "ERR_EMAIL": "Invalid email format",
+      "TYPE_SECTION": "Account type",
+      "TYPE_LABEL": "Customer type",
+      "COMPANY_LABEL": "Linked company",
+      "COMPANY_PLACEHOLDER": "-- Select a company --",
+      "COMPANY_FILTER": "Search for a company...",
+      "ERR_COMPANY": "Please select a company",
+      "NO_COMPANY": "Company not registered in the system?",
+      "ADD_COMPANY": "Add a new company now",
+      "REQUIRED_NOTE": "Required fields",
+      "CANCEL": "Cancel",
+      "SAVING": "Saving...",
+      "SAVE": "Save customer",
+      "SAVE_EDITS": "Save changes",
+      "ADDED": "Customer added successfully",
+      "EDITED": "Customer updated successfully",
+      "ERR_ADD": "An error occurred while adding the customer.",
+      "ERR_EDIT": "An error occurred while updating the customer.",
+      "ERR_COMPANIES": "An error occurred while loading the companies list."
+    }
+  }
+
+,
+
+"COMPANIES": {
+  "TITLE": "Companies Management",
+  "SUBTITLE": "View, add, and edit company information linked to the system",
+  "ADD_BUTTON": "Add New Company",
+  "ADD_FIRST": "+ Add Your First Company",
+  "EMPTY": "No companies have been added yet",
+  "SEARCH_PLACEHOLDER": "Search by company name or phone number...",
+  "LOADING": "Loading data...",
+  "LOAD_ERROR": "An error occurred while loading company data.",
+  "COLUMNS": {
+    "NAME": "Company Name",
+    "CONTACT": "Contact Person",
+    "PHONE": "Phone Number",
+    "TAX_NUMBER": "Tax Number",
+    "CREDIT_LIMIT": "Credit Limit",
+    "STATUS": "Status"
+  },
+  "ACTIONS": {
+    "EDIT": "Edit",
+    "DELETE": "Delete"
+  },
+  "DELETE": {
+    "TITLE": "Delete Company",
+    "CONFIRM_PREFIX": "Are you sure you want to delete",
+    "CONFIRM_SUFFIX": "?",
+    "CONFIRM_BUTTON": "Yes, Delete",
+    "DELETING": "Deleting...",
+    "CANCEL": "Cancel",
+    "SUCCESS": "Company deleted successfully",
+    "ERROR": "Unable to delete the company. It may be linked to other data in the system."
+  },
+  "MSG": {
+    "ACTIVATED": "Company activated successfully",
+    "DEACTIVATED": "Company deactivated successfully",
+    "STATUS_ERROR": "Unable to change company status"
+  },
+  "MODAL": {
+    "ADD_TITLE": "Add New Company",
+    "EDIT_TITLE": "Edit Company Information",
+    "ADD_SUBTITLE": "Enter the company information in Arabic and English",
+    "EDIT_SUBTITLE": "Update the information and save your changes",
+    "CLOSE": "Close",
+    "LOADING_TRANSLATIONS": "Loading translations...",
+    "NAME_SECTION": "Company Name",
+    "NAME_AR": "Name in Arabic",
+    "NAME_EN": "Name in English",
+    "ERR_NAME_AR": "Arabic name is required (at least 2 characters)",
+    "ERR_NAME_EN": "English name is required (at least 2 characters)",
+    "CONTACT_SECTION": "Contact Information",
+    "CONTACT_PERSON": "Contact Person",
+    "CONTACT_PLACEHOLDER": "Contact person's name",
+    "PHONE": "Phone Number",
+    "ERR_PHONE": "Please enter a valid phone number",
+    "EMAIL": "Email Address",
+    "ERR_EMAIL": "Please enter a valid email address",
+    "FINANCE_SECTION": "Financial and Tax Information",
+    "TAX_NUMBER": "Tax Number",
+    "CREDIT_LIMIT": "Credit Limit",
+    "ERR_CREDIT": "The value must be 0 or greater",
+    "TAX_INFO_AR": "Tax Information (Arabic)",
+    "TAX_INFO_EN": "Tax Information (English)",
+    "CONTRACT_SECTION": "Contract Details and Terms",
+    "CONTRACT_AR": "Contract Details (Arabic)",
+    "CONTRACT_EN": "Contract Details (English)",
+    "REQUIRED_NOTE": "Required fields",
+    "CANCEL": "Cancel",
+    "SAVING": "Saving...",
+    "SAVE": "Save Company",
+    "SAVE_EDITS": "Save Changes",
+    "ADDED": "Company added successfully",
+    "EDITED": "Company information updated successfully",
+    "ERR_ADD": "An error occurred while adding the new company.",
+    "ERR_EDIT": "An error occurred while updating the company information."
+  }
+},
+
+"DISCOUNTS": {
+  "TITLE": "Discount Management",
+  "SUBTITLE": "Create and manage discounts displayed when a session is completed",
+  "NEW": "New Discount",
+  "TAB_DISCOUNTS": "Discounts",
+  "TAB_PACKAGES": "Packages",
+  "EMPTY": "No discounts yet. Click New Discount to get started.",
+  "STATUS": {
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive",
+    "DELETED": "Deleted",
+    "EXPIRED": "Expired",
+    "NOT_STARTED": "Not Started Yet"
+  },
+  "DATE": {
+    "FROM": "From",
+    "TO": "To",
+    "UNSPECIFIED": "No specific dates"
+  },
+  "ACTIONS": {
+    "EDIT": "Edit",
+    "DELETE": "Delete",
+    "RESTORE": "Restore"
+  },
+  "DELETE": {
+    "TITLE": "Delete Discount",
+    "CONFIRM_PREFIX": "Are you sure you want to delete",
+    "CONFIRM_SUFFIX": "?"
+  },
+  "MODAL": {
+    "ADD_TITLE": "New Discount",
+    "EDIT_TITLE": "Edit Discount",
+    "ADD_SUBTITLE": "The discount is applied when a session is completed if it is active",
+    "CLOSE": "Close",
+    "LOADING_TRANSLATIONS": "Loading translations...",
+    "NAME_SECTION": "Discount Name",
+    "NAME_AR": "Name in Arabic",
+    "NAME_EN": "Name in English",
+    "NAME_AR_PLACEHOLDER": "e.g. Student Discount",
+    "NAME_EN_PLACEHOLDER": "e.g. Student Discount",
+    "ERR_NAME_AR": "Arabic name is required",
+    "ERR_NAME_EN": "English name is required",
+    "DESCRIPTION_SECTION": "Description",
+    "OPTIONAL": "Optional",
+    "DESCRIPTION_AR": "Description",
+    "DESCRIPTION_EN": "Description in English",
+    "DESCRIPTION_AR_PLACEHOLDER": "Discount details...",
+    "DESCRIPTION_EN_PLACEHOLDER": "Discount details...",
+    "TYPE_VALUE_SECTION": "Discount Type and Value",
+    "PERCENTAGE": "Percentage Discount",
+    "PERCENTAGE_HINT": "A percentage deducted from the price",
+    "FIXED": "Fixed Amount Discount",
+    "FIXED_HINT": "A fixed discount amount in Egyptian pounds",
+    "PERCENTAGE_VALUE": "Discount Percentage",
+    "FIXED_VALUE": "Discount Amount",
+    "PERCENTAGE_RANGE": "From 1 to 100",
+    "EGP": "In Egyptian pounds",
+    "VALUE_PLACEHOLDER": "0",
+    "ERR_VALUE": "The value must be greater than zero",
+    "VALIDITY": "Validity Period",
+    "START_DATE": "Starts On",
+    "END_DATE": "Ends On",
+    "ACTIVE": "Discount Is Active",
+    "ACTIVE_HINT": "When disabled, the discount will not appear when a session is completed",
+    "REQUIRED_NOTE": "Required fields",
+    "CANCEL": "Cancel",
+    "SAVING": "Saving...",
+    "SAVE_EDITS": "Save Changes",
+    "ADD": "Add Discount"
+  }
+}
+
+,
+"CONFIRM_DIALOG": {
+  "DEFAULT_TITLE": "Confirm Deletion",
+  "DEFAULT_MESSAGE": "Are you sure you want to delete",
+  "CONFIRM_DELETE": "Yes, Delete",
+  "DELETING": "Deleting...",
+  "CANCEL": "Cancel"
+},
+"TABS": {
+  "DISCOUNTS": "Discounts",
+  "PACKAGES": "Packages"
+}
+
+
+
+,
+
+  "PACKAGES": {
+    "TITLE": "Package Management",
+    "SUBTITLE": "Prepaid hour packages sold to customers",
+    "NEW": "New Package",
+    "STATUS": {
+      "DELETED": "Deleted",
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive"
+    },
+    "HOURS": "hours",
+    "VALID_FOR": "Valid for",
+    "DAYS": "days",
+    "NO_EXPIRY": "No expiry",
+    "ACTIONS": {
+      "RESTORE": "Restore",
+      "EDIT": "Edit",
+      "DEACTIVATE": "Deactivate",
+      "ACTIVATE": "Activate",
+      "DELETE": "Delete"
+    },
+    "EMPTY": "No packages yet. Click \"New Package\" to start.",
+    "CONFIRM_DELETE_TITLE": "Delete Package",
+    "MODAL": {
+      "ADD_TITLE": "New Package",
+      "EDIT_TITLE": "Edit Package",
+      "SUBTITLE": "Prepaid hour packages sold to customers",
+      "CLOSE": "Close",
+      "LOADING_TRANSLATIONS": "Loading translations...",
+      "NAME_SECTION": "Package Name",
+      "NAME_AR": "Arabic Name",
+      "NAME_EN": "Package Name",
+      "NAME_AR_PLACEHOLDER": "e.g. 50 Hours Pack",
+      "NAME_EN_PLACEHOLDER": "e.g. 50 Hours Pack",
+      "ERR_NAME_AR": "Arabic name is required",
+      "ERR_NAME_EN": "English name is required",
+      "DESCRIPTION_SECTION": "Description",
+      "OPTIONAL": "Optional",
+      "DESCRIPTION_AR": "Description",
+      "DESCRIPTION_EN": "Description",
+      "DESCRIPTION_AR_PLACEHOLDER": "Package details...",
+      "DESCRIPTION_EN_PLACEHOLDER": "Package details...",
+      "TYPE_SECTION": "Package Type",
+      "TYPE_ARIA_LABEL": "Package Type",
+      "HOURS_PACKAGE": "Hours Package",
+      "HOURS_PACKAGE_HINT": "A package based on a number of hours",
+      "OTHER_TYPE": "Other Type",
+      "OTHER_TYPE_HINT": "Choose the appropriate package type",
+      "HOURS_PRICE_SECTION": "Hours and Price",
+      "TOTAL_HOURS": "Total Hours",
+      "HOURS_SUFFIX": " hours",
+      "HOURS_PLACEHOLDER": "0",
+      "HOURS_REQUIRED": "Must be greater than zero",
+      "DURATION": "Validity",
+      "DURATION_SUFFIX": " days",
+      "DURATION_PLACEHOLDER": "No expiry",
+      "DURATION_REQUIRED": "At least one day is required",
+      "PRICE": "Price",
+      "PRICE_REQUIRED": "Price is required",
+      "PRICE_PER_HOUR": "Approximate hourly price",
+      "REQUIRED_NOTE": "Required fields",
+      "CANCEL": "Cancel",
+      "SAVING": "Saving...",
+      "SAVE_EDITS": "Save Changes",
+      "ADD": "Add Package"
+    }
+  }
+
+,
+  "CATEGORIES": {
+    "TITLE": "Category Management",
+    "SUBTITLE": "Add, edit, and manage product categories in the system",
+    "NEW": "Add New Category",
+    "EMPTY": "No categories have been added yet",
+    "NO_RESULTS": "No matching results",
+    "ADD_FIRST": "Add the First Category",
+    "CONFIRM_DELETE_TITLE": "Delete Category",
+    "TABS": {
+      "PRODUCTS": "Product List",
+      "CATEGORIES": "Product Categories"
+    },
+    "MODAL": {
+      "ADD_TITLE": "Add New Category",
+      "EDIT_TITLE": "Edit Category",
+      "SUBTITLE": "Categories group similar products together",
+      "CLOSE": "Close",
+      "LOADING_TRANSLATIONS": "Loading translations...",
+      "NAME_SECTION": "Category Name",
+      "NAME_AR": "Arabic Name",
+      "NAME_EN": "Category Name",
+      "NAME_AR_PLACEHOLDER": "e.g. Hot Drinks",
+      "NAME_EN_PLACEHOLDER": "e.g. Hot Drinks",
+      "ERR_NAME_AR": "Arabic name is required",
+      "ERR_NAME_EN": "English name is required",
+      "DESCRIPTION_SECTION": "Description",
+      "OPTIONAL": "Optional",
+      "DESCRIPTION_AR": "Description",
+      "DESCRIPTION_EN": "Description",
+      "DESCRIPTION_AR_PLACEHOLDER": "Short category description...",
+      "DESCRIPTION_EN_PLACEHOLDER": "Short category description...",
+      "ACTIVE": "Active Category",
+      "ACTIVE_HINT": "Shown when selecting a category for a new product",
+      "REQUIRED_NOTE": "Required fields",
+      "CANCEL": "Cancel",
+      "SAVING": "Saving...",
+      "SAVE_EDITS": "Save Changes",
+      "SAVE": "Save Category"
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+  }
+
+
+  ,
+   "PRODUCTS": {
+    "TITLE": "Product Management",
+    "SUBTITLE": "Add, edit, and manage products and prices in the system",
+    "NEW": "Add New Product",
+    "EMPTY": "No products have been added yet",
+    "NO_RESULTS": "No matching results",
+    "ADD_FIRST": "Add the First Product",
+    "CONFIRM_DELETE_TITLE": "Delete Product",
+    "TABS": {
+      "LIST": "Product List",
+      "CATEGORIES": "Product Categories"
+    },
+    "MODAL": {
+      "ADD_TITLE": "Add New Product",
+      "EDIT_TITLE": "Edit Product",
+      "SUBTITLE": "Products sold to customers during sessions",
+      "CLOSE": "Close",
+      "LOADING_TRANSLATIONS": "Loading translations...",
+      "DETAILS_SECTION": "Product Details",
+      "NAME_AR": "Arabic Name",
+      "NAME_EN": "Product Name",
+      "NAME_AR_PLACEHOLDER": "e.g. Turkish Coffee",
+      "NAME_EN_PLACEHOLDER": "e.g. Turkish Coffee",
+      "ERR_NAME_AR": "Arabic name is required",
+      "ERR_NAME_EN": "English name is required",
+      "CATEGORY": "Category",
+      "CATEGORY_PLACEHOLDER": "Select a category",
+      "CATEGORY_FILTER_PLACEHOLDER": "Search categories...",
+      "CATEGORY_REQUIRED": "Please select a category",
+      "SKU": "Product SKU",
+      "SKU_PLACEHOLDER": "SKU-1001",
+      "SKU_REQUIRED": "Product SKU is required",
+      "DESCRIPTION_SECTION": "Description",
+      "OPTIONAL": "Optional",
+      "DESCRIPTION_AR": "Description",
+      "DESCRIPTION_EN": "Description",
+      "DESCRIPTION_AR_PLACEHOLDER": "Product description...",
+      "DESCRIPTION_EN_PLACEHOLDER": "Product description...",
+      "PRICES_SECTION": "Prices",
+      "SELLING_PRICE": "Selling Price",
+      "SELLING_PRICE_REQUIRED": "Selling price is required",
+      "COST_PRICE": "Cost Price",
+      "COST_PRICE_REQUIRED": "Cost price must be zero or greater",
+      "LOSS_WARNING": "Warning: Selling price is below cost",
+      "PROFIT_MARGIN": "Approximate Profit Margin",
+      "ACTIVE": "Active Product",
+      "ACTIVE_HINT": "When disabled, the product will not appear when adding products to a session",
+      "REQUIRED_NOTE": "Required fields",
+      "CANCEL": "Cancel",
+      "SAVING": "Saving...",
+      "SAVE_EDITS": "Save Changes",
+      "SAVE": "Save Product"
+    } 
+
+  }
+,
+"SERVICES": {
+    "TITLE": "Services Management",
+    "SUBTITLE": "Add and edit the services offered and their prices",
+    "ADD": "Add New Service",
+    "EMPTY": "No services have been added yet",
+    "NO_RESULTS": "No matching results",
+    "DELETE_TITLE": "Delete Service",
+    "MODAL": {
+      "ADD_TITLE": "Add New Service",
+      "EDIT_TITLE": "Edit Service Details",
+      "ADD_SUBTITLE": "Enter the service details in Arabic and English",
+      "EDIT_SUBTITLE": "Edit the details and save your changes",
+      "CLOSE": "Close",
+      "LOADING_TRANSLATIONS": "Loading translations...",
+      "NAME_DESCRIPTION_SECTION": "Service Name and Description",
+      "NAME_AR": "Arabic Name",
+      "NAME_EN": "Service Name",
+      "NAME_AR_PLACEHOLDER": "e.g. Printing",
+      "NAME_EN_PLACEHOLDER": "e.g. Printing",
+      "ERR_NAME_AR": "Arabic name is required",
+      "ERR_NAME_EN": "English name is required",
+      "DESCRIPTION_AR": "Description (optional)",
+      "DESCRIPTION_EN": "Description (optional)",
+      "DESCRIPTION_AR_PLACEHOLDER": "Short service description",
+      "DESCRIPTION_EN_PLACEHOLDER": "Short description",
+      "PRICE_STATUS_SECTION": "Price and Status",
+      "PRICE": "Price",
+      "PRICE_PLACEHOLDER": "0.00",
+      "ERR_PRICE": "Price is required (0 or greater)",
+      "ACTIVE": "Active Service",
+      "REQUIRED_NOTE": "Required fields",
+      "CANCEL": "Cancel",
+      "SAVING": "Saving...",
+      "SAVE_EDITS": "Save Changes",
+      "SAVE": "Save Service",
+        "STATUS_LABEL": "Service Status",
+"ACTIVE_HINT": "Service is available for use"
+    },
+    "TABLE": {
+      "NAME": "Service Name",
+      "DESCRIPTION": "Description",
+      "PRICE": "Price",
+      "STATUS": "Status",
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "EDIT": "Edit",
+      "DELETE": "Delete"
+    },
+    "MESSAGES": {
+      "LOAD_ERROR": "An error occurred while loading services",
+      "TRANSLATIONS_ERROR": "An error occurred while loading service translations",
+      "UPDATE_SUCCESS": "Service updated successfully",
+      "CREATE_SUCCESS": "Service created successfully",
+      "SAVE_ERROR": "An error occurred while saving the service",
+      "DELETE_SUCCESS": "Service deleted successfully",
+      "DELETE_ERROR": "An error occurred while deleting the service"
+    }
+  
+  }
+
+
+,
+  "VALIDATIONEMPLOYEE": {
+    "REQUIRED": "This field is required",
+    "EMAIL": "Invalid email format",
+    "MIN_LENGTH": "Minimum {{count}} characters",
+    "PHONE": "Invalid phone number",
+    "ARABIC_ONLY": "Arabic letters only",
+    "ENGLISH_ONLY": "English letters only",
+    "PASSWORD_MISMATCH": "Passwords do not match",
+    "INVALID": "Invalid value"
+  },
+  "EMPLOYEES": {
+    "TITLE": "Employee Management",
+    "SUBTITLE": "View and update the roles and statuses of registered employees",
+    "ADD": "Add New Employee",
+    "ADD_FIRST": "Add the first employee",
+    "EMPTY": "No employees have been added yet",
+    "NO_RESULTS": "No matching results",
+    "RETRY": "Retry",
+    "NOT_ASSIGNED": "Not assigned",
+    "CHANGE_WORKSPACE": "Change workspace",
+    "CHANGE_STATUS": "Change status",
+    "DELETE_TITLE": "Delete Employee",
+    "STATS": { "ALL": "Total Employees" },
+    "STATUS": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "SUSPENDED": "Suspended",
+      "TERMINATED": "Terminated"
+    },
+    "COLUMNS": {
+      "EMPLOYEE": "Employee",
+      "EMAIL": "Email",
+      "PHONE": "Phone",
+      "WORKSPACE": "Workspace",
+      "STATUS": "Status"
+    },
+    "ACTIONS": { "EDIT": "Edit", "DELETE": "Delete", "RESTORE": "Restore" },
+    "MODAL": {
+      "ADD_TITLE": "Add New Employee",
+      "EDIT_TITLE": "Edit Employee",
+      "ADD_SUBTITLE": "Enter the employee's details and login credentials",
+      "EDIT_SUBTITLE": "Edit the details then save your changes",
+      "CLOSE": "Close",
+      "CANCEL": "Cancel",
+      "REQUIRED_FIELDS": "Required fields",
+      "SAVING": "Saving...",
+      "SAVE_ADD": "Save Employee",
+      "SAVE_EDIT": "Save Changes"
+    },
+    "SECTIONS": {
+      "NAME": "Employee Name",
+      "CONTACT": "Contact Information",
+      "LOGIN": "Login Credentials"
+    },
+    "FIELDS": {
+      "FIRST_NAME_AR": "First Name (Arabic)",
+      "LAST_NAME_AR": "Last Name (Arabic)",
+      "FIRST_NAME_EN": "First Name (English)",
+      "LAST_NAME_EN": "Last Name (English)",
+      "PHONE": "Phone Number",
+      "EMAIL": "Email",
+      "PASSWORD": "Password",
+      "CONFIRM_PASSWORD": "Confirm Password"
+    },
+    "PLACEHOLDERS": {
+      "FIRST_NAME_AR": "مثال: أحمد",
+      "LAST_NAME_AR": "مثال: محمود",
+      "FIRST_NAME_EN": "e.g. Ahmed",
+      "LAST_NAME_EN": "e.g. Mahmoud",
+      "PASSWORD": "At least 6 characters",
+      "CONFIRM_PASSWORD": "Re-enter the password"
+    },
+    "GENDER": {
+      "LABEL": "Gender",
+      "PLACEHOLDER": "Select gender",
+      "MALE": "Male",
+      "FEMALE": "Female"
+    },
+    "TOAST": {
+      "CREATED": "Employee added successfully",
+      "UPDATED": "Employee updated",
+      "DELETED": "Employee deleted",
+      "RESTORED": "Employee restored",
+      "STATUS_CHANGED": "Status changed",
+      "WORKSPACE_CHANGED": "Workspace changed"
+    },
+    "ERRORS": {
+      "LOAD": "Failed to load employees. Check your connection and try again.",
+      "LOAD_DETAILS": "Failed to load the employee's full name details.",
+      "SAVE": "Failed to save, please try again.",
+      "STATUS": "Failed to change status.",
+      "WORKSPACE": "Failed to change workspace.",
+      "DELETE": "Failed to delete employee.",
+      "RESTORE": "Failed to restore employee."
+    }
+  
+}
+
+
+,
+  "SESSIONS": {
+    "START_MODAL": {
+      "TITLE": "Start New Session",
+      "SUBTITLE": "Check-in",
+      "CLOSE": "Close",
+      "CUSTOMER_SECTION": "Customer",
+      "SEARCH_PLACEHOLDER": "Search by customer name or mobile...",
+      "SELECT_CUSTOMER": "Select a customer...",
+      "NO_RESULTS": "No matching results",
+      "FILTER": "Search...",
+      "ERR_CUSTOMER": "Please select a customer",
+      "QUICK_SHOW": "Add new customer",
+      "QUICK_HIDE": "Hide quick add",
+      "QUICK_TITLE": "Add new customer",
+      "QUICK_CANCEL": "Cancel",
+      "QUICK_SAVE": "Save & select",
+      "QUICK_SAVING": "Saving...",
+      "ERR_QUICK_NO_ID": "Saved, but we couldn't select the customer. Please search by name.",
+      "ERR_QUICK_SAVE": "An error occurred while adding the customer.",
+      "DETAILS_SECTION": "Employee & Workspace",
+      "EMPLOYEE": "Responsible employee",
+      "SELECT_EMPLOYEE": "Select employee...",
+      "ERR_EMPLOYEE": "Select the responsible employee",
+      "WORKSPACE": "Workspace",
+      "SELECT_WORKSPACE": "Select workspace...",
+      "ERR_WORKSPACE": "Select a workspace",
+      "CAPACITY": "Capacity",
+      "PRICING_SECTION": "Pricing & Guests",
+      "PRICING_PLAN": "Pricing plan",
+      "SELECT_PLAN": "Select plan...",
+      "ERR_PLAN": "Select a pricing plan",
+      "PEOPLE": "Number of people",
+      "MAX_CAPACITY": "Workspace max capacity",
+      "ERR_CAPACITY": "Number of people exceeds the workspace capacity ({{capacity}}).",
+      "ERR_START": "An error occurred while starting the session.",
+      "REQUIRED_NOTE": "Required fields",
+      "CANCEL": "Cancel",
+      "START": "Start session now",
+      "STARTING": "Starting session..."
+    },
+     "COMMON": {
+      "CLOSE": "Close",
+      "CANCEL": "Cancel"
+    },
+    "LIVE": {
+      "TITLE": "Active Sessions",
+      "SUBTITLE": "View and manage live check-ins with real-time time tracking",
+      "START_BUTTON": "Start new session",
+      "ACTIVE_BADGE": "Active session",
+      "ELAPSED": "Elapsed time",
+      "TRANSFER": "Transfer",
+      "POS": "POS item",
+      "END": "End",
+      "EMPTY": "No active sessions right now.",
+      "TRANSFERRED_SUCCESS": "Session transferred successfully",
+      "LOAD_ERROR": "Failed to load active sessions"
+    },
+    "TRANSFER": {
+      "TITLE": "Transfer session #{{id}}",
+      "CURRENT_WORKSPACE": "Current workspace",
+      "PICK_NEW": "Select the new workspace:",
+      "EMPTY": "No workspaces are available for transfer right now.",
+      "CONFIRM": "Confirm transfer",
+      "TRANSFERRING": "Transferring...",
+      "ERR_LOAD": "Failed to load available workspaces",
+      "ERR_TRANSFER": "Failed to transfer the session, please try again"
+    },
+    "POS": {
+      "TITLE_EDIT": "Add products & services to session",
+      "TITLE_CHECKOUT": "Session invoice",
+      "TAB_PRODUCTS": "Products",
+      "TAB_SERVICES": "Services",
+      "CATEGORIES": "Categories",
+      "NO_CATEGORIES": "No categories",
+      "PRODUCTS": "Products",
+      "PICK_CATEGORY": "Select a category to view its products",
+      "NO_PRODUCTS": "No products in this category",
+      "SERVICES": "Services",
+      "NO_SERVICES": "No services available",
+      "SESSION_PRODUCTS": "Session products",
+      "SESSION_SERVICES": "Session services",
+      "CLEAR_ALL": "Clear all",
+      "DELETE": "Delete",
+      "NO_PRODUCTS_YET": "No products added yet",
+      "NO_PRODUCTS_CHECKOUT": "No products",
+      "NO_SERVICES_YET": "No services added yet",
+      "NO_SERVICES_CHECKOUT": "No services",
+      "PRODUCTS_TOTAL": "Products total",
+      "SERVICES_TOTAL": "Services total",
+      "DISCOUNT": "Discount",
+      "NO_DISCOUNT": "No discount",
+      "DISCOUNT_AMOUNT": "Discount amount",
+      "TOTAL": "Total",
+      "CHECKOUT_NOTE": "This total covers products and services only; workspace time is added automatically by the system on checkout.",
+      "UNSAVED": "You have unsaved changes",
+      "SAVE": "Save",
+      "SAVING": "Saving...",
+      "CHECKOUT_BUTTON": "End & collect invoice",
+      "CHECKING_OUT": "Ending session...",
+      "SAVED": "Session products and services saved",
+      "ERR_SAVE": "Failed to save some items",
+      "ERR_LOAD_PRODUCTS": "Failed to load session products",
+      "ERR_LOAD_SERVICES": "Failed to load session services",
+      "ERR_CHECKOUT": "Failed to end the session",
+      "CHECKOUT_SUCCESS": "Session ended and invoice collected successfully"
+    }
+  }
+    
+
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

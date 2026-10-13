@@ -8,7 +8,7 @@
 </style>
 
 
-<div class="p-4 sm:p-8 space-y-6 sm:space-y-8 dir-rtl max-w-7xl mx-auto fade-up">
+<div class="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto fade-up">
 
   <!-- Header Section -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5 fade-up">
@@ -17,8 +17,8 @@
         <lucide-icon [img]="UsersIcon" class="w-6 h-6"></lucide-icon>
       </div>
       <div>
-        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">إدارة العملاء</h1>
-        <p class="text-sm text-slate-500 mt-1">عرض وإضافة وتعديل بيانات العملاء والشركات المربوطة بهم</p>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">{{ 'CUSTOMERS.TITLE' | translate }}</h1>
+        <p class="text-sm text-slate-500 mt-1">{{ 'CUSTOMERS.SUBTITLE' | translate }}</p>
       </div>
     </div>
 
@@ -28,26 +28,16 @@
               (click)="goToCompanies()"
               class="fade-up group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
         <lucide-icon [img]="BuildingIcon" class="w-4 h-4 transition-transform duration-200 group-hover:scale-110"></lucide-icon>
-        <span>إدارة الشركات</span>
+        <span>{{ 'CUSTOMERS.MANAGE_COMPANIES' | translate }}</span>
       </button>
 
       <button type="button" (click)="openAddModal()"
         class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
         <lucide-icon [img]="PlusIcon" class="w-4 h-4 transition-transform duration-200 group-hover:rotate-90"></lucide-icon>
-        <span>إضافة عميل جديد</span>
+        <span>{{ 'CUSTOMERS.ADD_BUTTON' | translate }}</span>
       </button>
     </div>
   </div>
-
-  <!-- Search & Filter Bar -->
-  <!-- <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-    <div class="w-full sm:w-80">
-      <input #searchInput type="text"
-             (input)="onSearch(searchInput.value)"
-             placeholder="ابحث باسم العميل أو رقم الموبايل..."
-             class="w-full px-4 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
-    </div>
-  </div> -->
 
   <!-- Error -->
   @if (errorMessage()) {
@@ -61,18 +51,17 @@
     <app-data-table
       class="fade-up block"
       [value]="customers()"
-      [columns]="columns"
-      [actions]="actions"
+      [columns]="columns()"
+      [actions]="actions()"
       [loading]="isLoading()"
       [searchable]="true"
-          [columnFilters]="true"
-
-      [emptyTitle]="searchTerm() ? 'لا يوجد عملاء مطابقين للبحث' : 'لا يوجد عملاء حتى الآن'"
+      [columnFilters]="true"
+      [emptyTitle]="(searchTerm() ? 'CUSTOMERS.EMPTY_SEARCH' : 'CUSTOMERS.EMPTY_NONE') | translate"
       (action)="onAction($event)">
 
       <button tableEmptyAction type="button" (click)="openAddModal()"
         class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors">
-        + أضف عميل جديد
+        {{ 'CUSTOMERS.ADD_FIRST' | translate }}
       </button>
     </app-data-table>
   }
@@ -88,10 +77,10 @@
 
   <!-- Delete confirmation -->
   @if (pendingDelete(); as d) {
-    <div appPortal dir="rtl"
+    <div appPortal
          class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
          (click)="cancelDelete()">
-      <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl" dir="rtl"
+      <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl"
            role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
 
         <div class="flex items-start gap-3">
@@ -99,11 +88,10 @@
             <lucide-icon [img]="TrashIcon" class="w-5 h-5"></lucide-icon>
           </div>
           <div>
-            <h3 class="text-lg font-bold text-slate-900">حذف العميل</h3>
+            <h3 class="text-lg font-bold text-slate-900">{{ 'CUSTOMERS.DELETE.TITLE' | translate }}</h3>
             <p class="text-sm text-slate-500 mt-1.5 leading-relaxed">
-              هل أنت متأكد من حذف
-              <b class="text-slate-800">"{{ d.fullName || d.mobileNumber }}"</b>؟
-              يمكنك استعادته لاحقاً.
+              {{ 'CUSTOMERS.DELETE.CONFIRM_PREFIX' | translate }}
+              <b class="text-slate-800">"{{ d.fullName || d.mobileNumber }}"</b>{{ 'CUSTOMERS.DELETE.CONFIRM_SUFFIX' | translate }}
             </p>
           </div>
         </div>
@@ -111,11 +99,11 @@
         <div class="flex gap-3 mt-6">
           <button type="button" (click)="confirmDelete()" [disabled]="isDeleting()"
                   class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-colors">
-            {{ isDeleting() ? 'جاري الحذف...' : 'نعم، حذف' }}
+            {{ (isDeleting() ? 'CUSTOMERS.DELETE.DELETING' : 'CUSTOMERS.DELETE.CONFIRM_BUTTON') | translate }}
           </button>
           <button type="button" (click)="cancelDelete()" [disabled]="isDeleting()"
                   class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-60 rounded-xl text-sm font-bold text-slate-700 transition-colors">
-            إلغاء
+            {{ 'CUSTOMERS.DELETE.CANCEL' | translate }}
           </button>
         </div>
       </div>

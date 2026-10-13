@@ -1,20 +1,23 @@
 import { Component, OnInit, inject, input, output, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 import { LucideAngularModule, X, Check, MapPin, Users } from 'lucide-angular';
 
 import { SessionsService } from '../sessions.service';
-import { WorkspaceService } from '../../../core/services/workspace.service'; // عدّلي المسار لو مختلف
+import { WorkspaceService } from '../../../core/services/workspace.service'; // عدّل المسار لو مختلف
 import { Workspace } from '../../../core/interfaces/Iworkspace';
+import { LanguageService } from '../../../core/services/lang.service'; // عدّل المسار لو مختلف
 
 @Component({
   selector: 'app-transfer-workspace-modal',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, TranslatePipe],
   templateUrl: './transfer-session-modal.component.html',
 })
 export class TransferWorkspaceModalComponent implements OnInit {
   private sessionsService = inject(SessionsService);
   private workspaceService = inject(WorkspaceService);
+  private lang = inject(LanguageService);
 
   // Inputs
   sessionId = input.required<number>();
@@ -50,7 +53,7 @@ export class TransferWorkspaceModalComponent implements OnInit {
         this.isLoading.set(false);
       },
       error: () => {
-        this.errorMessage.set('تعذر تحميل المساحات المتاحة');
+        this.errorMessage.set(this.lang.t('SESSIONS.TRANSFER.ERR_LOAD'));
         this.isLoading.set(false);
       },
     });
@@ -78,7 +81,7 @@ export class TransferWorkspaceModalComponent implements OnInit {
         },
         error: (err) => {
           this.isSubmitting.set(false);
-          this.errorMessage.set(err?.error?.message || 'فشل نقل الجلسة، حاول مرة أخرى');
+          this.errorMessage.set(err?.error?.message || this.lang.t('SESSIONS.TRANSFER.ERR_TRANSFER'));
         },
       });
   }

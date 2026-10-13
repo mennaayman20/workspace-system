@@ -11,6 +11,7 @@ import { LucideAngularModule, Percent, X, Save, FileText, CalendarDays, Banknote
 
 import { DiscountService } from '../discount.service';
 import { CreateDiscountCommand, Discount, DiscountType, DISCOUNT_TYPE_LABELS , toDiscountType } from '../Idiscount';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-discount-form-modal',
@@ -19,6 +20,7 @@ import { CreateDiscountCommand, Discount, DiscountType, DISCOUNT_TYPE_LABELS , t
     ReactiveFormsModule, LucideAngularModule,
     InputTextModule, TextareaModule, InputNumberModule,
     DatePickerModule, SelectButtonModule, ToggleSwitchModule,
+    TranslatePipe
   ],
   templateUrl: './discount-form-modal.html',
 })

@@ -1,0 +1,845 @@
+{
+
+  
+  
+  "DATA_TABLE": {
+    "SEARCH_PLACEHOLDER": "بحث...",
+    "SEARCH_COLUMN": "بحث",
+    "APPLY": "تطبيق",
+    "CLEAR": "مسح",
+    "ALL": "الكل",
+    "DATE_RANGE": "اختر نطاقاً",
+    "ACTIONS": "الإجراءات",
+    "EMPTY_TITLE": "لا توجد بيانات",
+    "EMPTY_SEARCH": "لا توجد نتائج مطابقة للبحث",
+    "PAGINATION": "{first} - {last} من {totalRecords}",
+    "STATUS": {
+      "ACTIVE": "نشط",
+      "INACTIVE": "غير نشط"
+    }
+  }
+
+,
+
+
+
+
+
+
+
+
+  "HEADER": {
+    "PLATFORM": "Platform",
+    "SEARCH_PLACEHOLDER": "بحث سريع عن المقاعد، الغرف، أو الأعضاء...",
+    "ACTIVE_SESSIONS": "الجلسات النشطة:",
+    "QUICK_CHECKIN": "تسجيل دخول سريع",
+    "SWITCH_LANG": "English"
+  },
+  "CHECKIN": {
+    "TITLE": "تسجيل دخول سريع",
+    "DESCRIPTION": "قم بتسجيل الدخول السريع عن طريق إدخال رقم الهاتف وتحديد الغرفة أو المساحة المطلوبة.",
+    "PHONE_LABEL": "رقم الهاتف",
+    "PHONE_PLACEHOLDER": "مثال: 05X XXX XXXX",
+    "SPACE_LABEL": "المساحة / الغرفة",
+    "SPACE_PLACEHOLDER": "اختر أو اكتب اسم المساحة...",
+    "CANCEL": "إلغاء",
+    "CONFIRM": "تأكيد الدخول"
+  },
+  "VALIDATION": {
+    "REQUIRED": "هذا الحقل مطلوب",
+    "MIN_LENGTH": "يجب ألا يقل عن {{n}} أحرف",
+    "MAX_LENGTH": "يجب ألا يزيد عن {{n}} حرفاً",
+    "PATTERN": "استخدم حروفاً إنجليزية وأرقاماً و - أو _ فقط (بدون مسافات)",
+    "MIN": "القيمة يجب ألا تقل عن {{n}}",
+    "MAX": "القيمة يجب ألا تزيد عن {{n}}",
+    "INTEGER": "يجب إدخال رقم صحيح",
+    "DUPLICATE": "هذا النوع موجود بالفعل، اختره من القائمة",
+    "INVALID": "قيمة غير صالحة"
+  },
+  "WORKSPACES": {
+    "TITLE": "إدارة المساحات",
+    "SUBTITLE": "عرض وتحديث حالات القاعات والمكاتب المسجلة في النظام",
+    "ADD_BUTTON": "إضافة مساحة جديدة",
+    "ADD_FIRST": "+ أضف أول مساحة",
+    "RETRY": "إعادة المحاولة",
+    "LOAD_ERROR": "تعذر تحميل البيانات، تأكد من الاتصال ثم أعد المحاولة.",
+    "EMPTY_NONE": "لا توجد مساحات مضافة حتى الآن",
+    "EMPTY_NO_MATCH": "لا توجد نتائج مطابقة",
+    "CHANGE_STATUS_OF": "تغيير حالة {{name}}",
+    "CAPACITY_VALUE": "{{count}} أفراد",
+    "STATUS": {
+      "ALL": "إجمالي المساحات",
+      "AVAILABLE": "متاحة",
+      "OCCUPIED": "مشغولة",
+      "RESERVED": "محجوزة",
+      "MAINTENANCE": "صيانة"
+    },
+    "COLUMNS": {
+      "WORKSPACE": "المساحة",
+      "CODE": "الكود",
+      "FLOOR_LOCATION": "الطابق / الموقع",
+      "CAPACITY": "السعة",
+      "STATUS": "الحالة"
+    },
+    "ACTIONS": { "EDIT": "تعديل", "DELETE": "حذف" },
+    "DELETE": {
+      "TITLE": "حذف مساحة العمل",
+      "SUCCESS": "تم حذف المساحة بنجاح",
+      "ERROR": "حدث خطأ أثناء الحذف، يرجى المحاولة لاحقاً"
+    },
+    "MSG": {
+      "STATUS_CHANGED": "تم تغيير حالة المساحة بنجاح",
+      "STATUS_ERROR": "حدث خطأ أثناء تغيير الحالة، تم التراجع",
+      "REFRESH_FAILED": "تم الحفظ لكن تعذر تحديث القائمة، حدّث الصفحة",
+      "LOAD_ONE_ERROR": "تعذر تحميل بيانات المساحة، حاول مرة أخرى"
+    },
+    "MODAL": {
+      "ADD_TITLE": "إضافة مساحة عمل جديدة",
+      "EDIT_TITLE": "تعديل مساحة العمل",
+      "ADD_SUBTITLE": "أدخل بيانات المساحة الجديدة",
+      "EDIT_SUBTITLE": "عدّل بيانات المساحة ثم احفظ",
+      "CLOSE": "إغلاق",
+      "LOADING_TRANSLATIONS": "جاري تحميل الترجمات...",
+      "TYPE_SECTION": "نوع المساحة",
+      "TYPE_LABEL": "النوع",
+      "TYPE_PLACEHOLDER": "اختر نوع المساحة",
+      "TYPE_FILTER": "ابحث عن نوع...",
+      "TYPE_REQUIRED": "يرجى اختيار نوع المساحة",
+      "ADD_NEW_TYPE": "+ إضافة نوع جديد",
+      "NEW_TYPE_TITLE": "اسم النوع الجديد (بالعربي والإنجليزي)",
+      "IN_ARABIC": "بالعربي",
+      "BASIC_SECTION": "البيانات الأساسية",
+      "NAME_AR": "اسم المساحة بالعربي",
+      "NAME_EN": "اسم المساحة بالإنجليزي",
+      "CODE": "كود المساحة",
+      "LOCATION_SECTION": "الموقع",
+      "FLOOR": "الطابق",
+      "FLOOR_PLACEHOLDER": "الأول",
+      "LOCATION": "الموقع",
+      "LOCATION_PLACEHOLDER": "المبنى الرئيسي",
+      "CAPACITY_SECTION": "السعة (عدد الأفراد)",
+      "DECREASE": "تقليل",
+      "INCREASE": "زيادة",
+      "DESC_SECTION": "الوصف",
+      "OPTIONAL": "(اختياري)",
+      "DESC_AR": "الوصف بالعربي",
+      "DESC_EN": "الوصف بالإنجليزي",
+      "DESC_PLACEHOLDER": "تفاصيل إضافية عن المساحة...",
+      "REQUIRED_NOTE": "الحقول المطلوبة ملزمة",
+      "CANCEL": "إلغاء",
+      "SAVE": "حفظ المساحة",
+      "SAVE_EDITS": "حفظ التعديلات",
+      "ADDED": "تمت إضافة المساحة بنجاح",
+      "EDITED": "تم تعديل المساحة بنجاح",
+      "ERR_OFFLINE": "تعذر الاتصال بالسيرفر، تأكد من الإنترنت وأعد المحاولة",
+      "ERR_CODE_EXISTS": "كود المساحة مستخدم بالفعل، اختر كوداً آخر",
+      "ERR_ADD": "حدث خطأ أثناء إضافة المساحة",
+      "ERR_EDIT": "حدث خطأ أثناء تعديل المساحة"
+    }
+  },
+  "CUSTOMERS": {
+    "TITLE": "إدارة العملاء",
+    "SUBTITLE": "عرض وإضافة وتعديل بيانات العملاء والشركات المربوطة بهم",
+    "MANAGE_COMPANIES": "إدارة الشركات",
+    "ADD_BUTTON": "إضافة عميل جديد",
+    "ADD_FIRST": "+ أضف عميل جديد",
+    "EMPTY_NONE": "لا يوجد عملاء حتى الآن",
+    "EMPTY_SEARCH": "لا يوجد عملاء مطابقين للبحث",
+    "LOAD_ERROR": "حدث خطأ أثناء تحميل بيانات العملاء.",
+    "TYPES": {
+      "INDIVIDUAL": "فردي",
+      "CORPORATE": "شركات",
+      "MEMBER": "عضو",
+      "WALKIN": "عميل عابر"
+    },
+    "TYPE_HINTS": {
+      "INDIVIDUAL": "Individual",
+      "CORPORATE": "Corporate",
+      "MEMBER": "Member",
+      "WALKIN": "Walk-in"
+    },
+    "COLUMNS": {
+      "NAME": "الاسم",
+      "MOBILE": "رقم الموبايل",
+      "TYPE": "النوع",
+      "COMPANY": "الشركة التابع لها",
+      "EMAIL": "الإيميل"
+    },
+    "ACTIONS": { "EDIT": "تعديل", "DELETE": "حذف" },
+    "DELETE": {
+      "TITLE": "حذف العميل",
+      "CONFIRM_PREFIX": "هل أنت متأكد من حذف",
+      "CONFIRM_SUFFIX": "؟ يمكنك استعادته لاحقاً.",
+      "CONFIRM_BUTTON": "نعم، حذف",
+      "DELETING": "جاري الحذف...",
+      "CANCEL": "إلغاء",
+      "SUCCESS": "تم حذف العميل بنجاح",
+      "ERROR": "تعذر حذف العميل، قد يكون مرتبطاً ببيانات أخرى بالنظام."
+    },
+    "MODAL": {
+      "ADD_TITLE": "إضافة عميل جديد",
+      "EDIT_TITLE": "تعديل بيانات العميل",
+      "ADD_SUBTITLE": "أدخلي بيانات العميل وحددي نوع الحساب",
+      "EDIT_SUBTITLE": "عدّلي البيانات ثم احفظي التغييرات",
+      "CLOSE": "إغلاق",
+      "LOADING_NAMES": "جاري تحميل الأسماء...",
+      "NAME_SECTION": "اسم العميل",
+      "NAME_AR": "الاسم بالعربي",
+      "NAME_EN": "الاسم بالإنجليزي",
+      "ERR_NAME_AR": "الاسم بالعربي مطلوب",
+      "ERR_NAME_EN": "الاسم بالإنجليزي مطلوب",
+      "CONTACT_SECTION": "بيانات التواصل",
+      "MOBILE": "رقم الموبايل",
+      "ERR_MOBILE": "رقم الموبايل مطلوب",
+      "EMAIL": "البريد الإلكتروني",
+      "OPTIONAL": "(اختياري)",
+      "ERR_EMAIL": "صيغة البريد الإلكتروني غير صحيحة",
+      "TYPE_SECTION": "نوع الحساب",
+      "TYPE_LABEL": "نوع العميل",
+      "COMPANY_LABEL": "الشركة المربوط بها العميل",
+      "COMPANY_PLACEHOLDER": "-- حدد شركة من القائمة --",
+      "COMPANY_FILTER": "ابحث عن شركة...",
+      "ERR_COMPANY": "يرجى اختيار الشركة",
+      "NO_COMPANY": "الشركة غير مسجلة بالسيستم؟",
+      "ADD_COMPANY": "إضافة شركة جديدة الآن",
+      "REQUIRED_NOTE": "حقول مطلوبة",
+      "CANCEL": "إلغاء",
+      "SAVING": "جاري الحفظ...",
+      "SAVE": "حفظ العميل",
+      "SAVE_EDITS": "حفظ التعديلات",
+      "ADDED": "تمت إضافة العميل بنجاح",
+      "EDITED": "تم تعديل بيانات العميل بنجاح",
+      "ERR_ADD": "حدث خطأ أثناء إضافة العميل.",
+      "ERR_EDIT": "حدث خطأ أثناء تعديل بيانات العميل.",
+      "ERR_COMPANIES": "حدث خطأ أثناء تحميل قائمة الشركات."
+    }
+  },
+  "COMPANIES": {
+    "TITLE": "إدارة الشركات",
+    "SUBTITLE": "عرض وإضافة وتعديل بيانات الشركات المربوطة بالسستم",
+    "ADD_BUTTON": "إضافة شركة جديدة",
+    "ADD_FIRST": "+ أضف أول شركة",
+    "EMPTY": "لا توجد شركات مضافة حتى الآن",
+    "SEARCH_PLACEHOLDER": "ابحث باسم الشركة أو رقم الهاتف...",
+    "LOADING": "جاري تحميل البيانات...",
+    "LOAD_ERROR": "حدث خطأ أثناء تحميل بيانات الشركات.",
+    "COLUMNS": {
+      "NAME": "اسم الشركة",
+      "CONTACT": "الشخص المسؤول",
+      "PHONE": "رقم الهاتف",
+      "TAX_NUMBER": "الرقم الضريبي",
+      "CREDIT_LIMIT": "الحد الائتماني",
+      "STATUS": "الحالة"
+    },
+    "ACTIONS": { "EDIT": "تعديل", "DELETE": "حذف" },
+    "DELETE": {
+      "TITLE": "حذف الشركة",
+      "CONFIRM_PREFIX": "هل أنت متأكد من حذف",
+      "CONFIRM_SUFFIX": "؟",
+      "CONFIRM_BUTTON": "نعم، حذف",
+      "DELETING": "جاري الحذف...",
+      "CANCEL": "إلغاء",
+      "SUCCESS": "تم حذف الشركة بنجاح",
+      "ERROR": "تعذر حذف الشركة، قد تكون مرتبطة ببيانات أخرى في النظام."
+    },
+    "MSG": {
+      "ACTIVATED": "تم تفعيل الشركة",
+      "DEACTIVATED": "تم إيقاف الشركة",
+      "STATUS_ERROR": "تعذر تغيير حالة الشركة"
+    },
+    "MODAL": {
+      "ADD_TITLE": "إضافة شركة جديدة",
+      "EDIT_TITLE": "تعديل بيانات الشركة",
+      "ADD_SUBTITLE": "أدخل بيانات الشركة بالعربي والإنجليزي",
+      "EDIT_SUBTITLE": "عدّل البيانات ثم احفظ التغييرات",
+      "CLOSE": "إغلاق",
+      "LOADING_TRANSLATIONS": "جاري تحميل الترجمات...",
+      "NAME_SECTION": "اسم الشركة",
+      "NAME_AR": "الاسم بالعربي",
+      "NAME_EN": "الاسم بالإنجليزي",
+      "ERR_NAME_AR": "الاسم بالعربي مطلوب (حرفين على الأقل)",
+      "ERR_NAME_EN": "الاسم بالإنجليزي مطلوب (حرفين على الأقل)",
+      "CONTACT_SECTION": "بيانات التواصل",
+      "CONTACT_PERSON": "الشخص المسؤول",
+      "CONTACT_PLACEHOLDER": "اسم المسؤول",
+      "PHONE": "رقم الهاتف",
+      "ERR_PHONE": "يرجى إدخال رقم هاتف صحيح",
+      "EMAIL": "البريد الإلكتروني",
+      "ERR_EMAIL": "البريد الإلكتروني غير صحيح",
+      "FINANCE_SECTION": "البيانات المالية والضريبية",
+      "TAX_NUMBER": "الرقم الضريبي",
+      "CREDIT_LIMIT": "الحد الائتماني",
+      "ERR_CREDIT": "يجب أن تكون القيمة 0 أو أكثر",
+      "TAX_INFO_AR": "المعلومات الضريبية (بالعربي)",
+      "TAX_INFO_EN": "المعلومات الضريبية (بالإنجليزي)",
+      "CONTRACT_SECTION": "تفاصيل العقد والشروط",
+      "CONTRACT_AR": "تفاصيل العقد (بالعربي)",
+      "CONTRACT_EN": "تفاصيل العقد (بالإنجليزي)",
+      "REQUIRED_NOTE": "حقول مطلوبة",
+      "CANCEL": "إلغاء",
+      "SAVING": "جاري الحفظ...",
+      "SAVE": "حفظ الشركة",
+      "SAVE_EDITS": "حفظ التعديلات",
+      "ADDED": "تمت إضافة الشركة بنجاح",
+      "EDITED": "تم تعديل بيانات الشركة بنجاح",
+      "ERR_ADD": "حدث خطأ أثناء إضافة الشركة الجديدة.",
+      "ERR_EDIT": "حدث خطأ أثناء تعديل بيانات الشركة."
+    }
+  }
+
+
+  ,
+  "DISCOUNTS": {
+  "TITLE": "إدارة الخصومات",
+  "SUBTITLE": "أنشئ وعدّل الخصومات اللي بتظهر عند إنهاء الجلسة",
+  "NEW": "خصم جديد",
+  "TAB_DISCOUNTS": "الخصومات",
+  "TAB_PACKAGES": "الباقات",
+  "EMPTY": "لا توجد خصومات بعد. اضغطي على خصم جديد للبدء.",
+  "STATUS": {
+    "ACTIVE": "فعّال",
+    "INACTIVE": "غير فعّال",
+    "DELETED": "محذوف",
+    "EXPIRED": "منتهي",
+    "NOT_STARTED": "لم يبدأ بعد"
+  },
+  "DATE": {
+    "FROM": "من",
+    "TO": "إلى",
+    "UNSPECIFIED": "بدون تاريخ محدد"
+  },
+  "ACTIONS": {
+    "EDIT": "تعديل",
+    "DELETE": "حذف",
+    "RESTORE": "استعادة"
+  },
+  "DELETE": {
+    "TITLE": "حذف الخصم",
+    "CONFIRM_PREFIX": "هل أنت متأكدة من حذف",
+    "CONFIRM_SUFFIX": "؟"
+  },
+  "MODAL": {
+    "ADD_TITLE": "خصم جديد",
+    "EDIT_TITLE": "تعديل الخصم",
+    "ADD_SUBTITLE": "الخصم بيظهر عند إنهاء الجلسة لو كان فعّال",
+    "CLOSE": "إغلاق",
+    "LOADING_TRANSLATIONS": "جاري تحميل الترجمات...",
+    "NAME_SECTION": "اسم الخصم",
+    "NAME_AR": "الاسم بالعربي",
+    "NAME_EN": "الاسم بالإنجليزي",
+    "NAME_AR_PLACEHOLDER": "مثال: خصم الطلبة",
+    "NAME_EN_PLACEHOLDER": "مثال: Student Discount",
+    "ERR_NAME_AR": "الاسم بالعربي مطلوب",
+    "ERR_NAME_EN": "الاسم بالإنجليزي مطلوب",
+    "DESCRIPTION_SECTION": "الوصف",
+    "OPTIONAL": "اختياري",
+    "DESCRIPTION_AR": "الوصف",
+    "DESCRIPTION_EN": "الوصف بالإنجليزي",
+    "DESCRIPTION_AR_PLACEHOLDER": "تفاصيل الخصم...",
+    "DESCRIPTION_EN_PLACEHOLDER": "Discount details...",
+    "TYPE_VALUE_SECTION": "نوع الخصم وقيمته",
+    "PERCENTAGE": "خصم بالنسبة المئوية",
+    "PERCENTAGE_HINT": "خصم بنسبة مئوية من السعر",
+    "FIXED": "خصم بمبلغ ثابت",
+    "FIXED_HINT": "خصم بقيمة ثابتة بالجنيه المصري",
+    "PERCENTAGE_VALUE": "نسبة الخصم",
+    "FIXED_VALUE": "مبلغ الخصم",
+    "PERCENTAGE_RANGE": "من 1 إلى 100",
+    "EGP": "بالجنيه المصري",
+    "VALUE_PLACEHOLDER": "0",
+    "ERR_VALUE": "القيمة لازم تكون أكبر من صفر",
+    "VALIDITY": "مدة الصلاحية",
+    "START_DATE": "يبدأ من",
+    "END_DATE": "ينتهي في",
+    "ACTIVE": "الخصم فعّال",
+    "ACTIVE_HINT": "لو اتقفل مش هيظهر عند إنهاء الجلسة",
+    "REQUIRED_NOTE": "حقول مطلوبة",
+    "CANCEL": "إلغاء",
+    "SAVING": "جاري الحفظ...",
+    "SAVE_EDITS": "حفظ التعديلات",
+    "ADD": "إضافة الخصم"
+  }
+},
+
+"CONFIRM_DIALOG": {
+  "DEFAULT_TITLE": "تأكيد الحذف",
+  "DEFAULT_MESSAGE": "هل أنت متأكد من حذف",
+  "CONFIRM_DELETE": "نعم، حذف",
+  "DELETING": "جاري الحذف...",
+  "CANCEL": "إلغاء"
+},
+"TABS": {
+  "DISCOUNTS": "الخصومات",
+  "PACKAGES": "الباقات"
+}
+
+
+
+,
+  "PACKAGES": {
+    "TITLE": "إدارة الباقات",
+    "SUBTITLE": "باقات ساعات مسبقة الدفع تتباع للعملاء",
+    "NEW": "باقة جديدة",
+    "TABS": {
+      "DISCOUNTS": "الخصومات",
+      "PACKAGES": "الباقات"
+    },
+    "STATUS": {
+      "DELETED": "محذوفة",
+      "ACTIVE": "فعّالة",
+      "INACTIVE": "متوقفة"
+    },
+    "HOURS": "ساعة",
+    "VALID_FOR": "صلاحية",
+    "DAYS": "يوم",
+    "NO_EXPIRY": "بدون مدة صلاحية",
+    "ACTIONS": {
+      "RESTORE": "استعادة",
+      "EDIT": "تعديل",
+      "DEACTIVATE": "إيقاف",
+      "ACTIVATE": "تفعيل",
+      "DELETE": "حذف"
+    },
+    "EMPTY": "لا توجد باقات بعد. اضغطي \"باقة جديدة\" للبدء.",
+    "CONFIRM_DELETE_TITLE": "حذف الباقة",
+    "MODAL": {
+      "ADD_TITLE": "باقة جديدة",
+      "EDIT_TITLE": "تعديل الباقة",
+      "SUBTITLE": "باقة ساعات مسبقة الدفع بتتباع للعملاء",
+      "CLOSE": "إغلاق",
+      "LOADING_TRANSLATIONS": "جاري تحميل الترجمات...",
+      "NAME_SECTION": "اسم الباقة",
+      "NAME_AR": "الاسم بالعربي",
+      "NAME_EN": "اسم الباقة",
+      "NAME_AR_PLACEHOLDER": "مثال: باقة 50 ساعة",
+      "NAME_EN_PLACEHOLDER": "مثال: 50 Hours Pack",
+      "ERR_NAME_AR": "الاسم بالعربي مطلوب",
+      "ERR_NAME_EN": "الاسم بالإنجليزي مطلوب",
+      "DESCRIPTION_SECTION": "الوصف",
+      "OPTIONAL": "اختياري",
+      "DESCRIPTION_AR": "الوصف",
+      "DESCRIPTION_EN": "الوصف",
+      "DESCRIPTION_AR_PLACEHOLDER": "تفاصيل الباقة...",
+      "DESCRIPTION_EN_PLACEHOLDER": "Package details...",
+      "TYPE_SECTION": "نوع الباقة",
+      "TYPE_ARIA_LABEL": "نوع الباقة",
+      "HOURS_PACKAGE": "باقة ساعات",
+      "HOURS_PACKAGE_HINT": "باقة تعتمد على عدد الساعات",
+      "OTHER_TYPE": "نوع آخر",
+      "OTHER_TYPE_HINT": "اختاري نوع الباقة المناسب",
+      "HOURS_PRICE_SECTION": "الساعات والسعر",
+      "TOTAL_HOURS": "إجمالي الساعات",
+      "HOURS_SUFFIX": " ساعة",
+      "HOURS_PLACEHOLDER": "0",
+      "HOURS_REQUIRED": "لازم تكون أكبر من صفر",
+      "DURATION": "الصلاحية",
+      "DURATION_SUFFIX": " يوم",
+      "DURATION_PLACEHOLDER": "بدون مدة",
+      "DURATION_REQUIRED": "يوم واحد على الأقل",
+      "PRICE": "السعر",
+      "PRICE_REQUIRED": "السعر مطلوب",
+      "PRICE_PER_HOUR": "سعر الساعة التقريبي",
+      "REQUIRED_NOTE": "حقول مطلوبة",
+      "CANCEL": "إلغاء",
+      "SAVING": "جاري الحفظ...",
+      "SAVE_EDITS": "حفظ التعديلات",
+      "ADD": "إضافة الباقة"
+    }
+  }
+,
+   "CATEGORIES": {
+    "TITLE": "إدارة التصنيفات",
+    "SUBTITLE": "إضافة، تعديل وإدارة تصنيفات المنتجات بالنظام",
+    "NEW": "إضافة تصنيف جديد",
+    "EMPTY": "لا توجد تصنيفات مضافة حتى الآن",
+    "NO_RESULTS": "لا توجد نتائج مطابقة",
+    "ADD_FIRST": "أضف أول تصنيف",
+    "CONFIRM_DELETE_TITLE": "حذف التصنيف",
+    "TABS": {
+      "PRODUCTS": "قائمة المنتجات",
+      "CATEGORIES": "تصنيفات المنتجات"
+    },
+    "MODAL": {
+      "ADD_TITLE": "إضافة تصنيف جديد",
+      "EDIT_TITLE": "تعديل التصنيف",
+      "SUBTITLE": "التصنيف بيجمّع المنتجات المتشابهة",
+      "CLOSE": "إغلاق",
+      "LOADING_TRANSLATIONS": "جاري تحميل الترجمات...",
+      "NAME_SECTION": "اسم التصنيف",
+      "NAME_AR": "الاسم بالعربي",
+      "NAME_EN": "اسم التصنيف",
+      "NAME_AR_PLACEHOLDER": "مثال: مشروبات ساخنة",
+      "NAME_EN_PLACEHOLDER": "مثال: Hot Drinks",
+      "ERR_NAME_AR": "الاسم بالعربي مطلوب",
+      "ERR_NAME_EN": "الاسم بالإنجليزي مطلوب",
+      "DESCRIPTION_SECTION": "الوصف",
+      "OPTIONAL": "اختياري",
+      "DESCRIPTION_AR": "الوصف",
+      "DESCRIPTION_EN": "الوصف",
+      "DESCRIPTION_AR_PLACEHOLDER": "وصف مختصر للتصنيف...",
+      "DESCRIPTION_EN_PLACEHOLDER": "Short category description...",
+      "ACTIVE": "تصنيف نشط",
+      "ACTIVE_HINT": "يظهر عند اختيار تصنيف لمنتج جديد",
+      "REQUIRED_NOTE": "حقول مطلوبة",
+      "CANCEL": "إلغاء",
+      "SAVING": "جاري الحفظ...",
+      "SAVE_EDITS": "حفظ التعديلات",
+      "SAVE": "حفظ التصنيف"
+    }
+
+
+
+
+
+
+
+
+
+}
+,
+
+"PRODUCTS": {
+    "TITLE": "إدارة المنتجات",
+    "SUBTITLE": "إضافة، تعديل ومتابعة المنتجات والأسعار بالنظام",
+    "NEW": "إضافة منتج جديد",
+    "EMPTY": "لا توجد منتجات مضافة حتى الآن",
+    "NO_RESULTS": "لا توجد نتائج مطابقة",
+    "ADD_FIRST": "أضف أول منتج",
+    "CONFIRM_DELETE_TITLE": "حذف المنتج",
+    "TABS": {
+      "LIST": "قائمة المنتجات",
+      "CATEGORIES": "تصنيفات المنتجات"
+    },
+    "MODAL": {
+      "ADD_TITLE": "إضافة منتج جديد",
+      "EDIT_TITLE": "تعديل المنتج",
+      "SUBTITLE": "المنتجات اللي بتتباع للعملاء داخل الجلسات",
+      "CLOSE": "إغلاق",
+      "LOADING_TRANSLATIONS": "جاري تحميل الترجمات...",
+      "DETAILS_SECTION": "بيانات المنتج",
+      "NAME_AR": "الاسم بالعربي",
+      "NAME_EN": "اسم المنتج",
+      "NAME_AR_PLACEHOLDER": "مثال: قهوة تركي",
+      "NAME_EN_PLACEHOLDER": "مثال: Turkish Coffee",
+      "ERR_NAME_AR": "الاسم بالعربي مطلوب",
+      "ERR_NAME_EN": "الاسم بالإنجليزي مطلوب",
+      "CATEGORY": "التصنيف",
+      "CATEGORY_PLACEHOLDER": "اختر التصنيف",
+      "CATEGORY_FILTER_PLACEHOLDER": "ابحث عن تصنيف...",
+      "CATEGORY_REQUIRED": "اختاري التصنيف",
+      "SKU": "رمز المنتج (SKU)",
+      "SKU_PLACEHOLDER": "SKU-1001",
+      "SKU_REQUIRED": "رمز المنتج (SKU) مطلوب",
+      "DESCRIPTION_SECTION": "الوصف",
+      "OPTIONAL": "اختياري",
+      "DESCRIPTION_AR": "الوصف",
+      "DESCRIPTION_EN": "الوصف",
+      "DESCRIPTION_AR_PLACEHOLDER": "وصف المنتج...",
+      "DESCRIPTION_EN_PLACEHOLDER": "Product description...",
+      "PRICES_SECTION": "الأسعار",
+      "SELLING_PRICE": "سعر البيع",
+      "SELLING_PRICE_REQUIRED": "سعر البيع مطلوب",
+      "COST_PRICE": "سعر التكلفة",
+      "COST_PRICE_REQUIRED": "سعر التكلفة لازم يكون 0 أو أكثر",
+      "LOSS_WARNING": "تنبيه: سعر البيع أقل من التكلفة",
+      "PROFIT_MARGIN": "هامش الربح التقريبي",
+      "ACTIVE": "منتج نشط",
+      "ACTIVE_HINT": "لو اتقفل مش هيظهر عند إضافة منتجات للجلسة",
+      "REQUIRED_NOTE": "حقول مطلوبة",
+      "CANCEL": "إلغاء",
+      "SAVING": "جاري الحفظ...",
+      "SAVE_EDITS": "حفظ التعديلات",
+      "SAVE": "حفظ المنتج"
+    }
+
+
+
+}
+,
+"SERVICES": {
+    "TITLE": "إدارة الخدمات",
+    "SUBTITLE": "إضافة وتعديل الخدمات المقدّمة وأسعارها",
+    "ADD": "إضافة خدمة جديدة",
+    "EMPTY": "لا توجد خدمات مضافة حتى الآن",
+    "NO_RESULTS": "لا توجد نتائج مطابقة",
+    "DELETE_TITLE": "حذف الخدمة",
+    "MODAL": {
+      "ADD_TITLE": "إضافة خدمة جديدة",
+      "EDIT_TITLE": "تعديل بيانات الخدمة",
+      "ADD_SUBTITLE": "أدخلي بيانات الخدمة بالعربي والإنجليزي",
+      "EDIT_SUBTITLE": "عدّلي البيانات ثم احفظي التغييرات",
+      "CLOSE": "إغلاق",
+      "LOADING_TRANSLATIONS": "جاري تحميل الترجمات...",
+      "NAME_DESCRIPTION_SECTION": "اسم الخدمة ووصفها",
+      "NAME_AR": "الاسم بالعربي",
+      "NAME_EN": "اسم الخدمة",
+      "NAME_AR_PLACEHOLDER": "مثال: طباعة",
+      "NAME_EN_PLACEHOLDER": "e.g. Printing",
+      "ERR_NAME_AR": "الاسم بالعربي مطلوب",
+      "ERR_NAME_EN": "English name is required",
+      "DESCRIPTION_AR": "الوصف (اختياري)",
+      "DESCRIPTION_EN": "الوصف (اختياري)",
+      "DESCRIPTION_AR_PLACEHOLDER": "وصف مختصر للخدمة",
+      "DESCRIPTION_EN_PLACEHOLDER": "Short description",
+      "PRICE_STATUS_SECTION": "السعر والحالة",
+      "PRICE": "السعر",
+      "PRICE_PLACEHOLDER": "0.00",
+      "ERR_PRICE": "السعر مطلوب (0 أو أكثر)",
+      "ACTIVE": "تفعيل الخدمة",
+      "REQUIRED_NOTE": "حقول مطلوبة",
+      "CANCEL": "إلغاء",
+      "SAVING": "جاري الحفظ...",
+      "SAVE_EDITS": "حفظ التعديلات",
+      "SAVE": "حفظ الخدمة"
+    },
+    "TABLE": {
+      "NAME": "اسم الخدمة",
+      "DESCRIPTION": "الوصف",
+      "PRICE": "السعر",
+      "STATUS": "الحالة",
+      "ACTIVE": "نشط",
+      "INACTIVE": "غير نشط",
+      "EDIT": "تعديل",
+      "DELETE": "حذف"
+    },
+    "MESSAGES": {
+      "LOAD_ERROR": "حدث خطأ أثناء تحميل الخدمات",
+      "TRANSLATIONS_ERROR": "حدث خطأ أثناء تحميل ترجمات الخدمة",
+      "UPDATE_SUCCESS": "تم تحديث الخدمة بنجاح",
+      "CREATE_SUCCESS": "تمت إضافة الخدمة بنجاح",
+      "SAVE_ERROR": "حدث خطأ أثناء حفظ الخدمة",
+      "DELETE_SUCCESS": "تم حذف الخدمة بنجاح",
+      "DELETE_ERROR": "حدث خطأ أثناء حذف الخدمة"
+    }
+
+
+  }
+,
+"STATUS_LABEL": "حالة الخدمة",
+"ACTIVE_HINT": "الخدمة متاحة للاستخدام"
+
+
+
+,
+  "VALIDATIONEMPLOYEE": {
+    "REQUIRED": "هذا الحقل مطلوب",
+    "EMAIL": "صيغة البريد الإلكتروني غير صحيحة",
+    "MIN_LENGTH": "الحد الأدنى {{count}} أحرف",
+    "PHONE": "رقم الهاتف غير صحيح",
+    "ARABIC_ONLY": "يجب إدخال حروف عربية فقط",
+    "ENGLISH_ONLY": "يجب إدخال حروف إنجليزية فقط",
+    "PASSWORD_MISMATCH": "كلمتا المرور غير متطابقتين",
+    "INVALID": "قيمة غير صالحة"
+  },
+  "EMPLOYEES": {
+    "TITLE": "إدارة الموظفين",
+    "SUBTITLE": "عرض وتحديث صلاحيات وحالات الموظفين المسجلين بالنظام",
+    "ADD": "إضافة موظف جديد",
+    "ADD_FIRST": "أضف أول موظف",
+    "EMPTY": "لا يوجد موظفين مضافين حتى الآن",
+    "NO_RESULTS": "لا توجد نتائج مطابقة",
+    "RETRY": "إعادة المحاولة",
+    "NOT_ASSIGNED": "غير محدد",
+    "CHANGE_WORKSPACE": "تغيير مكان العمل",
+    "CHANGE_STATUS": "تغيير الحالة",
+    "DELETE_TITLE": "حذف الموظف",
+    "STATS": { "ALL": "إجمالي الموظفين" },
+    "STATUS": {
+      "ACTIVE": "نشط",
+      "INACTIVE": "غير نشط",
+      "SUSPENDED": "معلق",
+      "TERMINATED": "منتهي"
+    },
+    "COLUMNS": {
+      "EMPLOYEE": "الموظف",
+      "EMAIL": "البريد الإلكتروني",
+      "PHONE": "رقم الهاتف",
+      "WORKSPACE": "مكان العمل",
+      "STATUS": "الحالة"
+    },
+    "ACTIONS": { "EDIT": "تعديل", "DELETE": "حذف", "RESTORE": "استعادة" },
+    "MODAL": {
+      "ADD_TITLE": "إضافة موظف جديد",
+      "EDIT_TITLE": "تعديل بيانات الموظف",
+      "ADD_SUBTITLE": "أدخل بيانات الموظف وبيانات الدخول للنظام",
+      "EDIT_SUBTITLE": "عدّل البيانات ثم احفظ التغييرات",
+      "CLOSE": "إغلاق",
+      "CANCEL": "إلغاء",
+      "REQUIRED_FIELDS": "حقول مطلوبة",
+      "SAVING": "جاري الحفظ...",
+      "SAVE_ADD": "حفظ الموظف",
+      "SAVE_EDIT": "حفظ التعديلات"
+    },
+    "SECTIONS": {
+      "NAME": "اسم الموظف",
+      "CONTACT": "بيانات التواصل",
+      "LOGIN": "بيانات الدخول"
+    },
+    "FIELDS": {
+      "FIRST_NAME_AR": "الاسم الأول (عربي)",
+      "LAST_NAME_AR": "اسم العائلة (عربي)",
+      "FIRST_NAME_EN": "الاسم الأول (إنجليزي)",
+      "LAST_NAME_EN": "اسم العائلة (إنجليزي)",
+      "PHONE": "رقم الهاتف",
+      "EMAIL": "البريد الإلكتروني",
+      "PASSWORD": "كلمة المرور",
+      "CONFIRM_PASSWORD": "تأكيد كلمة المرور"
+    },
+    "PLACEHOLDERS": {
+      "FIRST_NAME_AR": "مثال: أحمد",
+      "LAST_NAME_AR": "مثال: محمود",
+      "FIRST_NAME_EN": "e.g. Ahmed",
+      "LAST_NAME_EN": "e.g. Mahmoud",
+      "PASSWORD": "6 أحرف على الأقل",
+      "CONFIRM_PASSWORD": "أعد كتابة كلمة المرور"
+    },
+    "GENDER": {
+      "LABEL": "النوع",
+      "PLACEHOLDER": "اختر النوع",
+      "MALE": "ذكر",
+      "FEMALE": "أنثى"
+    },
+    "TOAST": {
+      "CREATED": "تمت إضافة الموظف بنجاح",
+      "UPDATED": "تم تعديل بيانات الموظف",
+      "DELETED": "تم حذف الموظف",
+      "RESTORED": "تمت استعادة الموظف",
+      "STATUS_CHANGED": "تم تغيير الحالة",
+      "WORKSPACE_CHANGED": "تم تغيير مكان العمل"
+    },
+    "ERRORS": {
+      "LOAD": "تعذر تحميل قائمة الموظفين. يرجى التأكد من الاتصال وإعادة المحاولة.",
+      "LOAD_DETAILS": "تعذر تحميل بيانات الاسم الكاملة للموظف.",
+      "SAVE": "تعذر حفظ البيانات، حاول مرة أخرى.",
+      "STATUS": "تعذر تغيير الحالة.",
+      "WORKSPACE": "تعذر تغيير مكان العمل.",
+      "DELETE": "تعذر حذف الموظف.",
+      "RESTORE": "تعذر استعادة الموظف."
+    }
+  
+}
+,
+
+  "SESSIONS": {
+    "START_MODAL": {
+      "TITLE": "بدء جلسة جديدة",
+      "SUBTITLE": "تسجيل حضور (Check-in)",
+      "CLOSE": "إغلاق",
+      "CUSTOMER_SECTION": "العميل",
+      "SEARCH_PLACEHOLDER": "ابحث باسم العميل أو الموبايل...",
+      "SELECT_CUSTOMER": "اختر العميل من القائمة...",
+      "NO_RESULTS": "لا توجد نتائج مطابقة",
+      "FILTER": "بحث...",
+      "ERR_CUSTOMER": "من فضلك اختر العميل",
+      "QUICK_SHOW": "إضافة عميل جديد",
+      "QUICK_HIDE": "إخفاء الإضافة السريعة",
+      "QUICK_TITLE": "إضافة عميل جديد",
+      "QUICK_CANCEL": "إلغاء",
+      "QUICK_SAVE": "حفظ واختيار",
+      "QUICK_SAVING": "جاري الحفظ...",
+      "ERR_QUICK_NO_ID": "تم الحفظ لكن لم نستطع تحديد العميل، ابحث عنه بالاسم.",
+      "ERR_QUICK_SAVE": "حدث خطأ أثناء إضافة العميل.",
+      "DETAILS_SECTION": "الموظف والمكان",
+      "EMPLOYEE": "الموظف المسؤول",
+      "SELECT_EMPLOYEE": "اختر الموظف...",
+      "ERR_EMPLOYEE": "اختر الموظف المسؤول",
+      "WORKSPACE": "المكان (Workspace)",
+      "SELECT_WORKSPACE": "اختر المكان...",
+      "ERR_WORKSPACE": "اختر المكان",
+      "CAPACITY": "السعة",
+      "PRICING_SECTION": "التسعير وعدد الأشخاص",
+      "PRICING_PLAN": "خطة التسعير",
+      "SELECT_PLAN": "اختر الخطة...",
+      "ERR_PLAN": "اختر خطة التسعير",
+      "PEOPLE": "عدد الأشخاص",
+      "MAX_CAPACITY": "أقصى سعة للمكان",
+      "ERR_CAPACITY": "عدد الأشخاص أكبر من سعة المكان ({{capacity}}).",
+      "ERR_START": "حدث خطأ أثناء بدء الجلسة.",
+      "REQUIRED_NOTE": "حقول مطلوبة",
+      "CANCEL": "إلغاء",
+      "START": "بدء الجلسة الآن",
+      "STARTING": "جاري بدء الجلسة..."
+    },
+    "COMMON": {
+      "CLOSE": "إغلاق",
+      "CANCEL": "إلغاء"
+    },
+    "LIVE": {
+      "TITLE": "الجلسات النشطة",
+      "SUBTITLE": "عرض وإدارة الحضور المباشر وحساب الوقت في الوقت الفعلي",
+      "START_BUTTON": "بدء جلسة جديدة",
+      "ACTIVE_BADGE": "جلسة نشطة",
+      "ELAPSED": "المدة المنقضية الحالية",
+      "TRANSFER": "نقل المكان",
+      "POS": "منتج POS",
+      "END": "إنهاء",
+      "EMPTY": "لا توجد جلسات نشطة حالياً.",
+      "TRANSFERRED_SUCCESS": "تم نقل الجلسة بنجاح",
+      "LOAD_ERROR": "تعذر تحميل الجلسات النشطة"
+    },
+    "TRANSFER": {
+      "TITLE": "نقل الجلسة #{{id}}",
+      "CURRENT_WORKSPACE": "المكان الحالي",
+      "PICK_NEW": "اختر المساحة الجديدة:",
+      "EMPTY": "لا توجد مساحات متاحة حالياً للنقل.",
+      "CONFIRM": "تأكيد النقل",
+      "TRANSFERRING": "جاري النقل...",
+      "ERR_LOAD": "تعذر تحميل المساحات المتاحة",
+      "ERR_TRANSFER": "فشل نقل الجلسة، حاول مرة أخرى"
+    },
+    "POS": {
+      "TITLE_EDIT": "إضافة منتجات وخدمات للجلسة",
+      "TITLE_CHECKOUT": "فاتورة الجلسة",
+      "TAB_PRODUCTS": "المنتجات",
+      "TAB_SERVICES": "الخدمات",
+      "CATEGORIES": "التصنيفات",
+      "NO_CATEGORIES": "لا توجد تصنيفات",
+      "PRODUCTS": "المنتجات",
+      "PICK_CATEGORY": "اختر تصنيف لعرض منتجاته",
+      "NO_PRODUCTS": "لا توجد منتجات في هذا التصنيف",
+      "SERVICES": "الخدمات",
+      "NO_SERVICES": "لا توجد خدمات متاحة",
+      "SESSION_PRODUCTS": "منتجات الجلسة",
+      "SESSION_SERVICES": "خدمات الجلسة",
+      "CLEAR_ALL": "مسح الكل",
+      "DELETE": "حذف",
+      "NO_PRODUCTS_YET": "لم تتم إضافة منتجات بعد",
+      "NO_PRODUCTS_CHECKOUT": "لا توجد منتجات",
+      "NO_SERVICES_YET": "لم تتم إضافة خدمات بعد",
+      "NO_SERVICES_CHECKOUT": "لا توجد خدمات",
+      "PRODUCTS_TOTAL": "إجمالي المنتجات",
+      "SERVICES_TOTAL": "إجمالي الخدمات",
+      "DISCOUNT": "الخصم",
+      "NO_DISCOUNT": "بدون خصم",
+      "DISCOUNT_AMOUNT": "قيمة الخصم",
+      "TOTAL": "الإجمالي",
+      "CHECKOUT_NOTE": "الإجمالي هنا للمنتجات والخدمات فقط، وحساب وقت المكان بيتضاف تلقائياً من النظام عند الإنهاء.",
+      "UNSAVED": "يوجد تعديلات لم يتم حفظها",
+      "SAVE": "حفظ",
+      "SAVING": "جاري الحفظ...",
+      "CHECKOUT_BUTTON": "إنهاء وتحصيل الفاتورة",
+      "CHECKING_OUT": "جاري الإنهاء...",
+      "SAVED": "تم حفظ منتجات وخدمات الجلسة",
+      "ERR_SAVE": "فشل حفظ بعض العناصر",
+      "ERR_LOAD_PRODUCTS": "تعذر تحميل منتجات الجلسة",
+      "ERR_LOAD_SERVICES": "تعذر تحميل خدمات الجلسة",
+      "ERR_CHECKOUT": "فشل إنهاء الجلسة",
+      "CHECKOUT_SUCCESS": "تم إنهاء الجلسة وتحصيل الفاتورة بنجاح"
+    }
+  }
+  
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+

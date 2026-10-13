@@ -7,7 +7,7 @@
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
 </style>
 
-<div dir="rtl" class="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
+<div class="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
 
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-up">
@@ -16,15 +16,15 @@
         <lucide-icon [img]="BuildingIcon" class="w-6 h-6"></lucide-icon>
       </div>
       <div>
-        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">إدارة المساحات</h1>
-        <p class="text-sm text-slate-500 mt-1">عرض وتحديث حالات القاعات والمكاتب المسجلة في النظام</p>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">{{ 'WORKSPACES.TITLE' | translate }}</h1>
+        <p class="text-sm text-slate-500 mt-1">{{ 'WORKSPACES.SUBTITLE' | translate }}</p>
       </div>
     </div>
 
     <button type="button" (click)="openAddModal()"
       class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
       <lucide-icon [img]="PlusIcon" class="w-4 h-4 transition-transform duration-200 group-hover:rotate-90"></lucide-icon>
-      <span>إضافة مساحة جديدة</span>
+      <span>{{ 'WORKSPACES.ADD_BUTTON' | translate }}</span>
     </button>
   </div>
 
@@ -34,14 +34,14 @@
       <span class="font-medium">{{ errorMessage() }}</span>
       <button type="button" (click)="loadInitialData()"
         class="px-4 py-2 bg-white border border-rose-200 rounded-xl font-bold hover:bg-rose-100 transition-colors">
-        إعادة المحاولة
+        {{ 'WORKSPACES.RETRY' | translate }}
       </button>
     </div>
   } @else {
 
     <!-- Stat cards (بتشتغل كفلاتر سريعة) -->
     @if (isLoading()) {
-      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4" aria-busy="true ">
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4" aria-busy="true">
         @for (i of [1, 2, 3, 4, 5]; track i) {
           <div class="h-24 rounded-2xl bg-slate-100 animate-pulse"></div>
         }
@@ -55,7 +55,7 @@
             [class]="c.border + ' ' + c.tint + (statusFilter() === c.value ? ' ring-2 ring-offset-1 ' + c.ring : '')"
             class="fade-up flex items-center justify-between gap-3 text-start p-4 sm:p-5 rounded-2xl border border-slate-200 border-s-4 bg-gradient-to-br via-white to-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
             <div class="min-w-0">
-              <div class="text-sm font-semibold text-slate-600 leading-snug">{{ c.label }}</div>
+              <div class="text-sm font-semibold text-slate-600 leading-snug">{{ c.labelKey | translate }}</div>
               <div class="mt-1 text-3xl font-extrabold text-slate-800 tabular-nums">{{ statusCounts()[c.value] }}</div>
             </div>
             <span [class]="c.chip" class="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center">
@@ -66,16 +66,16 @@
       </div>
     }
 
-    <!-- الجدول المشترك (بحث لكل عمود + ترتيب + pagination) -->
+    <!-- الجدول المشترك -->
     <app-data-table
       [value]="filteredWorkspaces()"
-      [columns]="columns"
-      [actions]="actions"
+      [columns]="columns()"
+      [actions]="actions()"
       [loading]="isLoading()"
       [columnFilters]="true"
       [rowClass]="rowClass"
       [minWidth]="'56rem'"
-      [emptyTitle]="workspaces().length === 0 ? 'لا توجد مساحات مضافة حتى الآن' : 'لا توجد نتائج مطابقة'"
+      [emptyTitle]="(workspaces().length === 0 ? 'WORKSPACES.EMPTY_NONE' : 'WORKSPACES.EMPTY_NO_MATCH') | translate"
       (action)="onAction($event)">
 
       <!-- عمود المساحة: أفاتار + الاسم -->
@@ -95,7 +95,7 @@
 
       <!-- تغيير الحالة: قبل قايمة الإجراءات -->
       <ng-template appRowActions let-ws>
-        <p-select [options]="statusOptions"
+        <p-select [options]="statusOptions()"
                   optionLabel="label"
                   optionValue="value"
                   appendTo="body"
@@ -103,14 +103,14 @@
                   styleClass="!rounded-xl !h-9 min-w-28 text-xs"
                   [ngModel]="ws.status"
                   (ngModelChange)="onStatusChange(ws, $event)"
-                  [attr.aria-label]="'تغيير حالة ' + ws.name">
+                  [attr.aria-label]="'WORKSPACES.CHANGE_STATUS_OF' | translate: { name: ws.name }">
         </p-select>
       </ng-template>
 
       @if (workspaces().length === 0) {
         <button tableEmptyAction type="button" (click)="openAddModal()"
           class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors">
-          + أضف أول مساحة
+          {{ 'WORKSPACES.ADD_FIRST' | translate }}
         </button>
       }
     </app-data-table>
@@ -126,17 +126,12 @@
     </app-add-workspace-modal>
   }
 
-
-  
-
-
-
-<app-confirm-dialog
-  [open]="!!pendingDelete()"
-  title="حذف مساحة العمل"
-  [itemName]="pendingDelete()?.name ?? ''"
-  [loading]="isDeleting()"
-  (confirmed)="confirmDelete()"
-  (cancelled)="cancelDelete()" />
+  <app-confirm-dialog
+    [open]="!!pendingDelete()"
+    [title]="'WORKSPACES.DELETE.TITLE' | translate"
+    [itemName]="pendingDelete()?.name ?? ''"
+    [loading]="isDeleting()"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()" />
 
 </div>

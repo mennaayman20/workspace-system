@@ -1,212 +1,345 @@
-<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-up"
-    >
+<style>
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp .35s ease-out both; }
+  @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
+</style>
 
-  <div dir="rtl"
-       class="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-100">
+<div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-up">
+  <div role="dialog" aria-modal="true" aria-labelledby="start-session-title"
+       class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col overflow-hidden">
 
     <!-- Header -->
-    <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100 shrink-0">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-          <lucide-icon [img]="PlayIcon" class="w-5 h-5"></lucide-icon>
+    <div class="px-6 sm:px-8 py-5 border-b border-slate-100 ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-blue-50/70 to-white shrink-0">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
+            <lucide-icon [img]="PlayIcon" class="w-6 h-6"></lucide-icon>
+          </div>
+          <div>
+            <h3 id="start-session-title" class="text-lg font-extrabold text-slate-900 leading-tight">
+              {{ 'SESSIONS.START_MODAL.TITLE' | translate }}
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">{{ 'SESSIONS.START_MODAL.SUBTITLE' | translate }}</p>
+          </div>
         </div>
-        <div>
-          <h2 class="text-lg font-extrabold text-slate-800">بدء جلسة جديدة</h2>
-          <p class="text-xs text-slate-400">تسجيل حضور (Check-in)</p>
-        </div>
+        <button type="button" (click)="closeModal.emit()"
+                [attr.aria-label]="'SESSIONS.START_MODAL.CLOSE' | translate"
+                class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white transition-colors">
+          <lucide-icon [img]="XIcon" class="w-5 h-5"></lucide-icon>
+        </button>
       </div>
-      <button type="button" (click)="closeModal.emit()"
-        class="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
-        <lucide-icon [img]="XIcon" class="w-5 h-5"></lucide-icon>
-      </button>
     </div>
 
-    <form [formGroup]="sessionForm" (ngSubmit)="onSubmit()" class="flex flex-col min-h-0 flex-1">
+    <form [formGroup]="sessionForm" (ngSubmit)="onSubmit()" class="flex flex-col min-h-0 flex-1" novalidate>
 
       <!-- Body -->
-      <div class="p-6 space-y-5 overflow-y-auto">
+      <div class="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-5 bg-slate-50/50">
 
         @if (errorMessage()) {
-          <div class="p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-xs font-semibold">
+          <div role="alert" class="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-2xl font-medium">
             {{ errorMessage() }}
           </div>
         }
 
-        <!-- العميل -->
-        <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <label class="text-xs font-bold text-slate-700">العميل <span class="text-red-500">*</span></label>
+        <!-- ① العميل -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center justify-between gap-2.5 mb-4">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                <lucide-icon [img]="UserIcon" class="w-4 h-4"></lucide-icon>
+              </span>
+              <h4 class="text-sm font-extrabold text-slate-800">
+                {{ 'SESSIONS.START_MODAL.CUSTOMER_SECTION' | translate }} <span class="text-rose-500">*</span>
+              </h4>
+            </div>
             <button type="button" (click)="toggleQuickAddCustomer()"
-              class="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-semibold transition-colors">
+                    class="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-bold transition-colors">
               <lucide-icon [img]="UserPlusIcon" class="w-3.5 h-3.5"></lucide-icon>
-              <span>{{ isQuickAddCustomerOpen() ? 'إخفاء الإضافة السريعة' : 'إضافة عميل جديد' }}</span>
+              <span>{{ (isQuickAddCustomerOpen() ? 'SESSIONS.START_MODAL.QUICK_HIDE' : 'SESSIONS.START_MODAL.QUICK_SHOW') | translate }}</span>
             </button>
           </div>
 
-          <div class="space-y-2">
+          <div class="space-y-3">
+            <!-- بحث -->
             <div class="relative">
-              <lucide-icon [img]="SearchIcon" class="w-4 h-4 absolute start-3 top-1/2 -translate-y-1/2 text-slate-400"></lucide-icon>
-              <input type="text" [value]="searchTerm()" (input)="onSearchCustomer($event)"
-                placeholder="ابحث باسم العميل أو الموبايل..."
-                class="w-full ps-9 pe-9 py-2 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all" />
+              <lucide-icon [img]="SearchIcon" class="w-4 h-4 absolute start-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></lucide-icon>
+              <input pInputText type="text" [value]="searchTerm()" (input)="onSearchCustomer($event)"
+                     [placeholder]="'SESSIONS.START_MODAL.SEARCH_PLACEHOLDER' | translate"
+                     class="w-full !h-10 !rounded-xl !ps-10 !pe-10" />
               @if (isSearchingCustomers()) {
                 <lucide-icon [img]="LoaderIcon" class="w-4 h-4 absolute end-3 top-1/2 -translate-y-1/2 text-blue-500 animate-spin"></lucide-icon>
               }
             </div>
 
-            <select formControlName="customerId"
-              [class.border-red-400]="invalid(sessionForm, 'customerId')"
-              class="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all">
-              <option [ngValue]="null" disabled>اختر العميل من القائمة...</option>
-              @for (c of customersList(); track c.id) {
-                <option [ngValue]="c.id">{{ c.fullName }} ({{ c.mobileNumber }})</option>
-              } @empty {
-                <option disabled value="">لا توجد نتائج مطابقة</option>
+            <!-- اختيار العميل -->
+            <div>
+              <p-select formControlName="customerId"
+                        [options]="customerOptions()"
+                        optionLabel="name"
+                        optionValue="id"
+                        [placeholder]="'SESSIONS.START_MODAL.SELECT_CUSTOMER' | translate"
+                        [emptyMessage]="'SESSIONS.START_MODAL.NO_RESULTS' | translate"
+                        appendTo="body"
+                        [fluid]="true"
+                        styleClass="!rounded-xl !h-10"
+                        [class.ng-invalid]="invalid(sessionForm, 'customerId')"
+                        [class.ng-dirty]="invalid(sessionForm, 'customerId')">
+                <ng-template #selectedItem let-c>
+                  <div class="flex items-center gap-2.5">
+                    <span class="font-bold text-slate-800 text-sm">{{ c.name }}</span>
+                    <span dir="ltr" class="text-xs text-slate-400 font-mono">{{ c.mobile }}</span>
+                  </div>
+                </ng-template>
+                <ng-template #item let-c>
+                  <div class="flex items-center justify-between gap-3 w-full">
+                    <span class="font-bold text-slate-800 text-sm">{{ c.name }}</span>
+                    <span dir="ltr" class="text-xs text-slate-400 font-mono">{{ c.mobile }}</span>
+                  </div>
+                </ng-template>
+              </p-select>
+              @if (invalid(sessionForm, 'customerId')) {
+                <p class="text-xs text-rose-600 mt-1">{{ 'SESSIONS.START_MODAL.ERR_CUSTOMER' | translate }}</p>
               }
-            </select>
-            @if (invalid(sessionForm, 'customerId')) {
-              <p class="text-xs text-red-500">من فضلك اختر العميل</p>
-            }
+            </div>
           </div>
-        </div>
 
-        <!-- إضافة عميل سريع -->
-        @if (isQuickAddCustomerOpen()) {
-          <div [formGroup]="quickCustomerForm"
-               (keydown.enter)="$event.preventDefault(); saveQuickCustomer()"
-               class="p-4 bg-blue-50/60 border border-blue-100 rounded-2xl space-y-3">
-            <h4 class="text-xs font-bold text-blue-900">إضافة عميل جديد</h4>
+          <!-- إضافة عميل سريع -->
+          @if (isQuickAddCustomerOpen()) {
+            <div [formGroup]="quickCustomerForm"
+                 (keydown.enter)="$event.preventDefault(); saveQuickCustomer()"
+                 class="mt-4 p-4 bg-blue-50/60 border border-blue-100 rounded-2xl space-y-3 fade-up">
+              <h4 class="text-xs font-extrabold text-blue-900">{{ 'SESSIONS.START_MODAL.QUICK_TITLE' | translate }}</h4>
 
-            @if (quickError()) {
-              <div class="p-2.5 bg-red-50 text-red-600 rounded-lg text-xs font-semibold">{{ quickError() }}</div>
-            }
+              @if (quickError()) {
+                <div role="alert" class="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs font-medium">{{ quickError() }}</div>
+              }
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label for="qFullNameAr" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+                    <span>{{ 'CUSTOMERS.MODAL.NAME_AR' | translate }} <span class="text-rose-500">*</span></span>
+                    <span class="px-1.5 py-0.5 rounded-md bg-white text-slate-500 text-[10px] font-bold">AR</span>
+                  </label>
+                  <input pInputText id="qFullNameAr" formControlName="fullNameAr" dir="rtl"
+                         class="w-full !h-10 !rounded-xl" placeholder="اسم العميل الرباعي"
+                         [class.ng-invalid]="invalid(quickCustomerForm, 'fullNameAr')"
+                         [class.ng-dirty]="invalid(quickCustomerForm, 'fullNameAr')" />
+                  @if (invalid(quickCustomerForm, 'fullNameAr')) {
+                    <p class="text-xs text-rose-600 mt-1">{{ 'CUSTOMERS.MODAL.ERR_NAME_AR' | translate }}</p>
+                  }
+                </div>
+
+                <div>
+                  <label for="qFullNameEn" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+                    <span>{{ 'CUSTOMERS.MODAL.NAME_EN' | translate }} <span class="text-rose-500">*</span></span>
+                    <span class="px-1.5 py-0.5 rounded-md bg-white text-slate-500 text-[10px] font-bold">EN</span>
+                  </label>
+                  <input pInputText id="qFullNameEn" formControlName="fullNameEn" dir="ltr"
+                         class="w-full !h-10 !rounded-xl" placeholder="Customer full name"
+                         [class.ng-invalid]="invalid(quickCustomerForm, 'fullNameEn')"
+                         [class.ng-dirty]="invalid(quickCustomerForm, 'fullNameEn')" />
+                  @if (invalid(quickCustomerForm, 'fullNameEn')) {
+                    <p class="text-xs text-rose-600 mt-1">{{ 'CUSTOMERS.MODAL.ERR_NAME_EN' | translate }}</p>
+                  }
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label for="qMobile" class="block text-xs font-bold text-slate-700 mb-1.5">
+                    {{ 'CUSTOMERS.MODAL.MOBILE' | translate }} <span class="text-rose-500">*</span>
+                  </label>
+                  <div class="relative">
+                    <lucide-icon [img]="PhoneIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
+                    <input pInputText id="qMobile" type="tel" formControlName="mobileNumber" dir="ltr"
+                           class="w-full !h-10 !rounded-xl !ps-10 text-left" placeholder="01012345678"
+                           [class.ng-invalid]="invalid(quickCustomerForm, 'mobileNumber')"
+                           [class.ng-dirty]="invalid(quickCustomerForm, 'mobileNumber')" />
+                  </div>
+                  @if (invalid(quickCustomerForm, 'mobileNumber')) {
+                    <p class="text-xs text-rose-600 mt-1">{{ 'CUSTOMERS.MODAL.ERR_MOBILE' | translate }}</p>
+                  }
+                </div>
+
+                <div>
+                  <label for="qEmail" class="block text-xs font-bold text-slate-700 mb-1.5">
+                    {{ 'CUSTOMERS.MODAL.EMAIL' | translate }}
+                    <span class="font-normal text-slate-400">{{ 'CUSTOMERS.MODAL.OPTIONAL' | translate }}</span>
+                  </label>
+                  <div class="relative">
+                    <lucide-icon [img]="MailIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
+                    <input pInputText id="qEmail" type="email" formControlName="email" dir="ltr"
+                           class="w-full !h-10 !rounded-xl !ps-10 text-left" placeholder="example@domain.com"
+                           [class.ng-invalid]="invalid(quickCustomerForm, 'email')"
+                           [class.ng-dirty]="invalid(quickCustomerForm, 'email')" />
+                  </div>
+                  @if (invalid(quickCustomerForm, 'email')) {
+                    <p class="text-xs text-rose-600 mt-1">{{ 'CUSTOMERS.MODAL.ERR_EMAIL' | translate }}</p>
+                  }
+                </div>
+              </div>
+
+              <div class="flex justify-end gap-2 pt-1">
+                <button type="button" (click)="toggleQuickAddCustomer()" [disabled]="isSavingCustomer()"
+                        class="px-4 py-2 bg-white border border-slate-200 text-slate-600 text-xs rounded-xl font-bold hover:bg-slate-50 transition-colors disabled:opacity-50">
+                  {{ 'SESSIONS.START_MODAL.QUICK_CANCEL' | translate }}
+                </button>
+                <button type="button" (click)="saveQuickCustomer()" [disabled]="isSavingCustomer()"
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-xs rounded-xl font-bold flex items-center gap-1.5 transition-colors">
+                  @if (isSavingCustomer()) {
+                    <lucide-icon [img]="LoaderIcon" class="w-3.5 h-3.5 animate-spin"></lucide-icon>
+                  }
+                  <span>{{ (isSavingCustomer() ? 'SESSIONS.START_MODAL.QUICK_SAVING' : 'SESSIONS.START_MODAL.QUICK_SAVE') | translate }}</span>
+                </button>
+              </div>
+            </div>
+          }
+        </section>
+
+        <!-- ② الموظف + المكان -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+              <lucide-icon [img]="WorkspaceIcon" class="w-4 h-4"></lucide-icon>
+            </span>
+            <h4 class="text-sm font-extrabold text-slate-800">{{ 'SESSIONS.START_MODAL.DETAILS_SECTION' | translate }}</h4>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                {{ 'SESSIONS.START_MODAL.EMPLOYEE' | translate }} <span class="text-rose-500">*</span>
+              </label>
+              <p-select formControlName="employeeId"
+                        [options]="employeesList()"
+                        optionLabel="fullName"
+                        optionValue="id"
+                        [placeholder]="'SESSIONS.START_MODAL.SELECT_EMPLOYEE' | translate"
+                        [filter]="true"
+                        filterBy="fullName"
+                        [filterPlaceholder]="'SESSIONS.START_MODAL.FILTER' | translate"
+                        [emptyMessage]="'SESSIONS.START_MODAL.NO_RESULTS' | translate"
+                        appendTo="body"
+                        [fluid]="true"
+                        styleClass="!rounded-xl !h-10"
+                        [class.ng-invalid]="invalid(sessionForm, 'employeeId')"
+                        [class.ng-dirty]="invalid(sessionForm, 'employeeId')">
+              </p-select>
+              @if (invalid(sessionForm, 'employeeId')) {
+                <p class="text-xs text-rose-600 mt-1">{{ 'SESSIONS.START_MODAL.ERR_EMPLOYEE' | translate }}</p>
+              }
+            </div>
 
             <div>
-              <input type="text" formControlName="fullName" placeholder="الاسم بالكامل *"
-                [class.border-red-400]="invalid(quickCustomerForm, 'fullName')"
-                class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
-              @if (invalid(quickCustomerForm, 'fullName')) {
-                <p class="text-[11px] text-red-500 mt-1">الاسم مطلوب (3 حروف على الأقل)</p>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                {{ 'SESSIONS.START_MODAL.WORKSPACE' | translate }} <span class="text-rose-500">*</span>
+              </label>
+              <p-select formControlName="workspaceId"
+                        [options]="workspacesList()"
+                        optionLabel="name"
+                        optionValue="id"
+                        [placeholder]="'SESSIONS.START_MODAL.SELECT_WORKSPACE' | translate"
+                        [filter]="true"
+                        filterBy="name"
+                        [filterPlaceholder]="'SESSIONS.START_MODAL.FILTER' | translate"
+                        [emptyMessage]="'SESSIONS.START_MODAL.NO_RESULTS' | translate"
+                        appendTo="body"
+                        [fluid]="true"
+                        styleClass="!rounded-xl !h-10"
+                        [class.ng-invalid]="invalid(sessionForm, 'workspaceId')"
+                        [class.ng-dirty]="invalid(sessionForm, 'workspaceId')">
+                <ng-template #item let-w>
+                  <div class="flex items-center justify-between gap-3 w-full">
+                    <span class="font-bold text-slate-800 text-sm">{{ w.name }}</span>
+                    <span class="text-xs text-slate-400">
+                      {{ 'SESSIONS.START_MODAL.CAPACITY' | translate }}: {{ w.capacity }}
+                    </span>
+                  </div>
+                </ng-template>
+              </p-select>
+              @if (invalid(sessionForm, 'workspaceId')) {
+                <p class="text-xs text-rose-600 mt-1">{{ 'SESSIONS.START_MODAL.ERR_WORKSPACE' | translate }}</p>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- ③ التسعير + عدد الأشخاص -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+              <lucide-icon [img]="PlanIcon" class="w-4 h-4"></lucide-icon>
+            </span>
+            <h4 class="text-sm font-extrabold text-slate-800">{{ 'SESSIONS.START_MODAL.PRICING_SECTION' | translate }}</h4>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                {{ 'SESSIONS.START_MODAL.PRICING_PLAN' | translate }} <span class="text-rose-500">*</span>
+              </label>
+              <p-select formControlName="pricingPlanId"
+                        [options]="pricingPlansList()"
+                        optionLabel="name"
+                        optionValue="id"
+                        [placeholder]="'SESSIONS.START_MODAL.SELECT_PLAN' | translate"
+                        [emptyMessage]="'SESSIONS.START_MODAL.NO_RESULTS' | translate"
+                        appendTo="body"
+                        [fluid]="true"
+                        styleClass="!rounded-xl !h-10"
+                        [class.ng-invalid]="invalid(sessionForm, 'pricingPlanId')"
+                        [class.ng-dirty]="invalid(sessionForm, 'pricingPlanId')">
+              </p-select>
+              @if (invalid(sessionForm, 'pricingPlanId')) {
+                <p class="text-xs text-rose-600 mt-1">{{ 'SESSIONS.START_MODAL.ERR_PLAN' | translate }}</p>
               }
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <input type="tel" dir="ltr" formControlName="mobileNumber" placeholder="رقم الموبايل *"
-                  [class.border-red-400]="invalid(quickCustomerForm, 'mobileNumber')"
-                  class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white text-right focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
-                @if (invalid(quickCustomerForm, 'mobileNumber')) {
-                  <p class="text-[11px] text-red-500 mt-1">رقم موبايل غير صحيح</p>
-                }
+            <div>
+              <label for="numberOfPeople" class="block text-xs font-bold text-slate-700 mb-1.5">
+                {{ 'SESSIONS.START_MODAL.PEOPLE' | translate }} <span class="text-rose-500">*</span>
+              </label>
+              <div class="flex items-center gap-2">
+                <button type="button" (click)="changePeople(-1)" [disabled]="people <= 1"
+                        class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-bold text-lg transition-colors">−</button>
+                <input pInputText id="numberOfPeople" type="number" formControlName="numberOfPeople" min="1" dir="ltr"
+                       class="w-full min-w-0 !h-10 !rounded-xl text-center font-bold" />
+                <button type="button" (click)="changePeople(1)"
+                        class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-lg transition-colors">+</button>
               </div>
-              <div>
-                <input type="email" dir="ltr" formControlName="email" placeholder="البريد (اختياري)"
-                  [class.border-red-400]="invalid(quickCustomerForm, 'email')"
-                  class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white text-right focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
-                @if (invalid(quickCustomerForm, 'email')) {
-                  <p class="text-[11px] text-red-500 mt-1">بريد غير صحيح</p>
-                }
-              </div>
-            </div>
-
-            <div class="flex justify-end gap-2 pt-1">
-              <button type="button" (click)="toggleQuickAddCustomer()"
-                class="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 text-xs rounded-lg font-semibold hover:bg-slate-50 transition-colors">
-                إلغاء
-              </button>
-              <button type="button" (click)="saveQuickCustomer()" [disabled]="isSavingCustomer()"
-                class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-xs rounded-lg font-semibold flex items-center gap-1.5 transition-colors">
-                @if (isSavingCustomer()) {
-                  <lucide-icon [img]="LoaderIcon" class="w-3.5 h-3.5 animate-spin"></lucide-icon>
-                }
-                <span>{{ isSavingCustomer() ? 'جاري الحفظ...' : 'حفظ واختيار' }}</span>
-              </button>
+              @if (selectedWorkspace; as ws) {
+                <p class="text-[11px] text-slate-400 mt-1.5">
+                  {{ 'SESSIONS.START_MODAL.MAX_CAPACITY' | translate }}: {{ ws.capacity }}
+                </p>
+              }
             </div>
           </div>
-        }
-
-        <!-- الموظف + المكان -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1.5">الموظف المسؤول <span class="text-red-500">*</span></label>
-            <select formControlName="employeeId"
-              [class.border-red-400]="invalid(sessionForm, 'employeeId')"
-              class="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all">
-              <option [ngValue]="null" disabled>اختر الموظف...</option>
-              @for (emp of employeesList(); track emp.id) {
-                <option [ngValue]="emp.id">{{ emp.fullName }}</option>
-              }
-            </select>
-            @if (invalid(sessionForm, 'employeeId')) {
-              <p class="text-xs text-red-500 mt-1">اختر الموظف المسؤول</p>
-            }
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1.5">المكان (Workspace) <span class="text-red-500">*</span></label>
-            <select formControlName="workspaceId"
-              [class.border-red-400]="invalid(sessionForm, 'workspaceId')"
-              class="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all">
-              <option [ngValue]="null" disabled>اختر المكان...</option>
-              @for (w of workspacesList(); track w.id) {
-                <option [ngValue]="w.id">{{ w.name }} (السعة: {{ w.capacity }})</option>
-              }
-            </select>
-            @if (invalid(sessionForm, 'workspaceId')) {
-              <p class="text-xs text-red-500 mt-1">اختر المكان</p>
-            }
-          </div>
-        </div>
-
-        <!-- خطة التسعير + عدد الأشخاص -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1.5">خطة التسعير <span class="text-red-500">*</span></label>
-            <select formControlName="pricingPlanId"
-              [class.border-red-400]="invalid(sessionForm, 'pricingPlanId')"
-              class="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all">
-              <option [ngValue]="null" disabled>اختر الخطة...</option>
-              @for (p of pricingPlansList(); track p.id) {
-                <option [ngValue]="p.id">{{ p.name }}</option>
-              }
-            </select>
-            @if (invalid(sessionForm, 'pricingPlanId')) {
-              <p class="text-xs text-red-500 mt-1">اختر خطة التسعير</p>
-            }
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1.5">عدد الأشخاص <span class="text-red-500">*</span></label>
-            <div class="flex items-center gap-2">
-              <button type="button" (click)="changePeople(-1)" [disabled]="people <= 1"
-                class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-bold text-lg transition-colors">−</button>
-              <input type="number" formControlName="numberOfPeople" min="1"
-                class="w-full min-w-0 px-2 py-2.5 border border-slate-300 rounded-xl text-sm text-center font-bold bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all" />
-              <button type="button" (click)="changePeople(1)"
-                class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-lg transition-colors">+</button>
-            </div>
-            @if (selectedWorkspace; as ws) {
-              <p class="text-[11px] text-slate-400 mt-1">أقصى سعة للمكان: {{ ws.capacity }}</p>
-            }
-          </div>
-        </div>
+        </section>
       </div>
 
       <!-- Footer -->
-      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/60 shrink-0">
-        <button type="button" (click)="closeModal.emit()"
-          class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-100 transition-colors">
-          إلغاء
-        </button>
-        <button type="submit" [disabled]="isSubmitting()"
-          class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all">
-          @if (isSubmitting()) {
-            <lucide-icon [img]="LoaderIcon" class="w-4 h-4 animate-spin"></lucide-icon>
-          } @else {
-            <lucide-icon [img]="PlayIcon" class="w-4 h-4"></lucide-icon>
-          }
-          <span>{{ isSubmitting() ? 'جاري بدء الجلسة...' : 'بدء الجلسة الآن' }}</span>
-        </button>
+      <div class="shrink-0 flex items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
+        <p class="hidden sm:block text-[11px] text-slate-400">
+          <span class="text-rose-500">*</span> {{ 'SESSIONS.START_MODAL.REQUIRED_NOTE' | translate }}
+        </p>
+        <div class="flex items-center gap-3 ms-auto">
+          <button type="button" (click)="closeModal.emit()" [disabled]="isSubmitting()"
+                  class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
+            {{ 'SESSIONS.START_MODAL.CANCEL' | translate }}
+          </button>
+          <button type="submit" [disabled]="isSubmitting()"
+                  class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2">
+            @if (isSubmitting()) {
+              <lucide-icon [img]="LoaderIcon" class="w-4 h-4 animate-spin"></lucide-icon>
+            } @else {
+              <lucide-icon [img]="PlayIcon" class="w-4 h-4"></lucide-icon>
+            }
+            {{ (isSubmitting() ? 'SESSIONS.START_MODAL.STARTING' : 'SESSIONS.START_MODAL.START') | translate }}
+          </button>
+        </div>
       </div>
     </form>
   </div>

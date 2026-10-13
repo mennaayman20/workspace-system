@@ -1,8 +1,11 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, signal, inject, computed, effect, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { TranslatePipe } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 import { CustomerService } from './customer.service';
-import { Customer, CUSTOMER_TYPE_LABELS } from './Icustomer';
+import { Customer } from './Icustomer';
+import { LanguageService } from '../../core/services/lang.service'; // عدّل المسار لو مختلف
 import { AddCustomerModalComponent } from './add-customer-modal/add-customer-modal.component';
 import { LucideAngularModule, Plus, Users, BuildingIcon, Trash2, Pencil } from 'lucide-angular';
 import { PortalDirective } from '../../shared/directives/portal.directive';
@@ -13,13 +16,19 @@ import {
 @Component({
   selector: 'app-customers',
   standalone: true,
-  imports: [AddCustomerModalComponent, LucideAngularModule, PortalDirective, DataTableComponent],
+  imports: [
+    AddCustomerModalComponent, LucideAngularModule, PortalDirective, DataTableComponent,
+    TranslatePipe,
+  ],
   templateUrl: './customers.component.html'
 })
-export class CustomersComponent implements OnInit {
+export class CustomersComponent {
   private customerService = inject(CustomerService);
   private router = inject(Router);
   private toastr = inject(ToastrService);
+  private lang = inject(LanguageService);
+
+  private loadSub?: Subscription;
 
   BuildingIcon = BuildingIcon;
   readonly UsersIcon = Users;
@@ -39,38 +48,48 @@ export class CustomersComponent implements OnInit {
   pendingDelete = signal<Customer | null>(null);
   isDeleting = signal<boolean>(false);
 
-  // ---------- تعريف الجدول ----------
-  readonly columns: TableColumn<Customer>[] = [
-    { key: 'fullName', header: 'الاسم', sortable: true, cellClass: 'font-bold text-slate-900' },
-    { key: 'mobileNumber', header: 'رقم الموبايل', type: 'mono' },
-    {
-      key: 'customerType', header: 'النوع', type: 'badge', sortable: true,
-      badges: {
-        Individual: { label: CUSTOMER_TYPE_LABELS.Individual.ar, class: BADGE.blue },
-        Corporate:  { label: CUSTOMER_TYPE_LABELS.Corporate.ar,  class: BADGE.purple },
-        Member:     { label: CUSTOMER_TYPE_LABELS.Member.ar,     class: BADGE.green },
-        WalkIn:     { label: CUSTOMER_TYPE_LABELS.WalkIn.ar,     class: BADGE.orange },
-      },
-    },
-    { key: 'companyName', header: 'الشركة التابع لها' },
-    { key: 'email', header: 'الإيميل', type: 'mono', cellClass: 'text-xs text-slate-500' },
-  ];
+  constructor() {
+    // بيشتغل أول مرة، وبعدين كل ما اللغة تتغير: يعيد جلب الداتا بالـ header الجديد
+    effect(() => {
+      this.lang.currentLang();
+      untracked(() => this.loadCustomers(this.searchTerm()));
+    });
+  }
 
-  readonly actions: TableAction<Customer>[] = [
-    { key: 'edit',   label: 'تعديل', icon: Pencil, tone: 'primary' },
-    { key: 'delete', label: 'حذف',   icon: Trash2, tone: 'danger' },
-  ];
+  // ---------- تعريف الجدول (computed عشان يتحدث مع اللغة) ----------
+  readonly columns = computed<TableColumn<Customer>[]>(() => {
+    const t = (k: string) => this.lang.t(k);
+    return [
+      { key: 'fullName', header: t('CUSTOMERS.COLUMNS.NAME'), sortable: true, cellClass: 'font-bold text-slate-900' },
+      { key: 'mobileNumber', header: t('CUSTOMERS.COLUMNS.MOBILE'), type: 'mono' },
+      {
+        key: 'customerType', header: t('CUSTOMERS.COLUMNS.TYPE'), type: 'badge', sortable: true,
+        badges: {
+          Individual: { label: t('CUSTOMERS.TYPES.INDIVIDUAL'), class: BADGE.blue },
+          Corporate:  { label: t('CUSTOMERS.TYPES.CORPORATE'),  class: BADGE.purple },
+          Member:     { label: t('CUSTOMERS.TYPES.MEMBER'),     class: BADGE.green },
+          WalkIn:     { label: t('CUSTOMERS.TYPES.WALKIN'),     class: BADGE.orange },
+        },
+      },
+      { key: 'companyName', header: t('CUSTOMERS.COLUMNS.COMPANY') },
+      { key: 'email', header: t('CUSTOMERS.COLUMNS.EMAIL'), type: 'mono', cellClass: 'text-xs text-slate-500' },
+    ];
+  });
+
+  readonly actions = computed<TableAction<Customer>[]>(() => [
+    { key: 'edit',   label: this.lang.t('CUSTOMERS.ACTIONS.EDIT'),   icon: Pencil, tone: 'primary' },
+    { key: 'delete', label: this.lang.t('CUSTOMERS.ACTIONS.DELETE'), icon: Trash2, tone: 'danger' },
+  ]);
 
   onAction(e: TableActionEvent<Customer>): void {
     if (e.key === 'edit') this.openEditModal(e.row);
     if (e.key === 'delete') this.askDelete(e.row);
   }
 
-  ngOnInit() {
-    this.loadCustomers();
-  }
-
   loadCustomers(searchTerm: string = '') {
+    // بيلغي أي طلب قديم لسه شغال (لو المستخدم بدّل اللغة أو كتب بسرعة)
+    this.loadSub?.unsubscribe();
+
     this.isLoading.set(true);
     this.errorMessage.set('');
 
@@ -78,7 +97,7 @@ export class CustomersComponent implements OnInit {
       ? this.customerService.searchCustomers(searchTerm)
       : this.customerService.getCustomers();
 
-    request$.subscribe({
+    this.loadSub = request$.subscribe({
       next: (res: any) => {
         if (Array.isArray(res)) {
           this.customers.set(res);
@@ -94,7 +113,7 @@ export class CustomersComponent implements OnInit {
         this.isLoading.set(false);
       },
       error: () => {
-        this.errorMessage.set('حدث خطأ أثناء تحميل بيانات العملاء.');
+        this.errorMessage.set(this.lang.t('CUSTOMERS.LOAD_ERROR'));
         this.isLoading.set(false);
       }
     });
@@ -148,14 +167,12 @@ export class CustomersComponent implements OnInit {
       next: () => {
         this.isDeleting.set(false);
         this.pendingDelete.set(null);
-        this.toastr.success('تم حذف العميل بنجاح');
+        this.toastr.success(this.lang.t('CUSTOMERS.DELETE.SUCCESS'));
         this.loadCustomers(this.searchTerm());
       },
       error: (err) => {
         this.isDeleting.set(false);
-        this.toastr.error(
-          err?.error?.message || 'تعذر حذف العميل، قد يكون مرتبطاً ببيانات أخرى بالنظام.'
-        );
+        this.toastr.error(err?.error?.message || this.lang.t('CUSTOMERS.DELETE.ERROR'));
       }
     });
   }

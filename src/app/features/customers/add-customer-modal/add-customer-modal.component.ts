@@ -1,13 +1,15 @@
-import { Component, OnInit, input, output, inject, signal } from '@angular/core';
+import { Component, OnInit, input, output, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { TranslatePipe } from '@ngx-translate/core';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { CustomerService } from '../customer.service';
 import { CompanyService } from '../../company/company.service';
 import { Customer, CustomerType } from '../Icustomer';
 import { Company } from '../../company/Icompany';
+import { LanguageService } from '../../../core/services/lang.service'; // عدّل المسار لو مختلف
 import {
   LucideAngularModule, X, User, Save, Plus, Phone, Mail, Building2, BadgeCheck, DoorOpen,
 } from 'lucide-angular';
@@ -19,6 +21,7 @@ import { AddCompanyModalComponent } from '../../company/add-company-modal/add-co
   imports: [
     CommonModule, ReactiveFormsModule, LucideAngularModule,
     AddCompanyModalComponent, SelectModule, InputTextModule,
+    TranslatePipe,
   ],
   templateUrl: './add-customer-modal.component.html',
 })
@@ -27,6 +30,7 @@ export class AddCustomerModalComponent implements OnInit {
   private customerService = inject(CustomerService);
   private companyService = inject(CompanyService);
   private toastr = inject(ToastrService);
+  private lang = inject(LanguageService);
 
   customerToEdit = input<Customer | null>(null);
   closeModal = output<void>();
@@ -46,14 +50,17 @@ export class AddCustomerModalComponent implements OnInit {
   readonly MailIcon = Mail;
   readonly BuildingIcon = Building2;
 
-  readonly typeOptions: {
+  readonly typeOptions = computed<{
     value: CustomerType; label: string; hint: string; icon: any; tone: string;
-  }[] = [
-    { value: 'Individual', label: 'فردي',      hint: 'Individual', icon: User,       tone: 'bg-blue-100 text-blue-600' },
-    { value: 'Corporate',  label: 'شركات',     hint: 'Corporate',  icon: Building2,  tone: 'bg-purple-100 text-purple-600' },
-    { value: 'Member',     label: 'عضو',       hint: 'Member',     icon: BadgeCheck, tone: 'bg-emerald-100 text-emerald-600' },
-    { value: 'WalkIn',     label: 'عميل عابر', hint: 'Walk-in',    icon: DoorOpen,   tone: 'bg-orange-100 text-orange-600' },
-  ];
+  }[]>(() => {
+    const t = (k: string) => this.lang.t(k);
+    return [
+      { value: 'Individual', label: t('CUSTOMERS.TYPES.INDIVIDUAL'), hint: t('CUSTOMERS.TYPE_HINTS.INDIVIDUAL'), icon: User,       tone: 'bg-blue-100 text-blue-600' },
+      { value: 'Corporate',  label: t('CUSTOMERS.TYPES.CORPORATE'),  hint: t('CUSTOMERS.TYPE_HINTS.CORPORATE'),  icon: Building2,  tone: 'bg-purple-100 text-purple-600' },
+      { value: 'Member',     label: t('CUSTOMERS.TYPES.MEMBER'),     hint: t('CUSTOMERS.TYPE_HINTS.MEMBER'),     icon: BadgeCheck, tone: 'bg-emerald-100 text-emerald-600' },
+      { value: 'WalkIn',     label: t('CUSTOMERS.TYPES.WALKIN'),     hint: t('CUSTOMERS.TYPE_HINTS.WALKIN'),     icon: DoorOpen,   tone: 'bg-orange-100 text-orange-600' },
+    ];
+  });
 
   customerForm!: FormGroup;
 
@@ -129,7 +136,7 @@ export class AddCustomerModalComponent implements OnInit {
       error: (err) => {
         const apiError = err?.error?.message || err?.error;
         this.errorMessage.set(
-          typeof apiError === 'string' ? apiError : 'حدث خطأ أثناء تحميل قائمة الشركات.'
+          typeof apiError === 'string' ? apiError : this.lang.t('CUSTOMERS.MODAL.ERR_COMPANIES')
         );
       },
     });
@@ -169,11 +176,11 @@ export class AddCustomerModalComponent implements OnInit {
       this.customerService.updateCustomer(editData.id, { id: editData.id, ...dto }).subscribe({
         next: () => {
           this.isSubmitting.set(false);
-          this.toastr.success('تم تعديل بيانات العميل بنجاح');
+          this.toastr.success(this.lang.t('CUSTOMERS.MODAL.EDITED'));
           this.customerCreated.emit();
         },
         error: (err) => {
-          const msg = this.extractError(err, 'حدث خطأ أثناء تعديل بيانات العميل.');
+          const msg = this.extractError(err, this.lang.t('CUSTOMERS.MODAL.ERR_EDIT'));
           this.errorMessage.set(msg);
           this.toastr.error(msg);
           this.isSubmitting.set(false);
@@ -183,11 +190,11 @@ export class AddCustomerModalComponent implements OnInit {
       this.customerService.createCustomer(dto).subscribe({
         next: () => {
           this.isSubmitting.set(false);
-          this.toastr.success('تمت إضافة العميل بنجاح');
+          this.toastr.success(this.lang.t('CUSTOMERS.MODAL.ADDED'));
           this.customerCreated.emit();
         },
         error: (err) => {
-          const msg = this.extractError(err, 'حدث خطأ أثناء إضافة العميل.');
+          const msg = this.extractError(err, this.lang.t('CUSTOMERS.MODAL.ERR_ADD'));
           this.errorMessage.set(msg);
           this.toastr.error(msg);
           this.isSubmitting.set(false);

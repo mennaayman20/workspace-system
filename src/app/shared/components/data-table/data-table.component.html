@@ -1,14 +1,20 @@
+
 <div class="bg-white rounded-2xl border border-blue-100 shadow-sm overflow-hidden">
 
   <!-- شريط البحث -->
   @if (searchable()) {
     <div class="p-3 border-b border-blue-100/70">
       <div class="relative max-w-xs">
-        <lucide-icon [img]="SearchIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
-        <input type="search"
-               [placeholder]="searchPlaceholder()"
-               (input)="onSearch($any($event.target).value)"
-               class="w-full ps-9 pe-3 py-2 bg-slate-50 border border-slate-200/90 rounded-lg text-xs placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+        <lucide-icon
+          [img]="SearchIcon"
+          class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none">
+        </lucide-icon>
+
+        <input
+          type="search"
+          [placeholder]="searchPlaceholder() | translate"
+          (input)="onSearch($any($event.target).value)"
+          class="w-full ps-9 pe-3 py-2 bg-slate-50 border border-slate-200/90 rounded-lg text-xs placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
       </div>
     </div>
   }
@@ -24,19 +30,20 @@
 
   } @else {
 
-    <p-table #dt
-             styleClass="app-table"
-             [value]="filteredValue()"
-             [dataKey]="dataKey()"
-             [rowHover]="true"
-             [loading]="loading()"
-             [tableStyle]="{ 'min-width': minWidth() }"
-             [globalFilterFields]="filterFields()"
-             [paginator]="paginator() && filteredValue().length > rows()"
-             [rows]="rows()"
-             [rowsPerPageOptions]="rowsPerPageOptions()"
-             [showCurrentPageReport]="true"
-             currentPageReportTemplate="{first} - {last} من {totalRecords}">
+    <p-table
+      #dt
+      styleClass="app-table"
+      [value]="filteredValue()"
+      [dataKey]="dataKey()"
+      [rowHover]="true"
+      [loading]="loading()"
+      [tableStyle]="{ 'min-width': minWidth() }"
+      [globalFilterFields]="filterFields()"
+      [paginator]="paginator() && filteredValue().length > rows()"
+      [rows]="rows()"
+      [rowsPerPageOptions]="rowsPerPageOptions()"
+      [showCurrentPageReport]="true"
+      [currentPageReportTemplate]="'DATA_TABLE.PAGINATION' | translate">
 
       <!-- الهيدر -->
       <ng-template #header>
@@ -47,26 +54,34 @@
 
           @for (col of columns(); track col.key) {
             @if (col.sortable) {
-              <th [pSortableColumn]="col.key" [style.width]="col.width" [class]="thClass(col) + ' align-top'">
+              <th
+                [pSortableColumn]="col.key"
+                [style.width]="col.width"
+                [class]="thClass(col) + ' align-top'">
+
                 <span class="inline-flex items-center gap-1.5">
-                  {{ col.header }}
+                  {{ col.header | translate }}
                   <p-sortIcon [field]="col.key" />
                 </span>
 
                 @if (filtersOn()) {
-                  <!-- stopPropagation عشان الضغط على الفلتر ما يعملش ترتيب -->
                   <div class="mt-2 font-normal" (click)="$event.stopPropagation()">
-                    <ng-container *ngTemplateOutlet="filterCell; context: { col: col }" />
+                    <ng-container
+                      *ngTemplateOutlet="filterCell; context: { col: col }" />
                   </div>
                 }
               </th>
             } @else {
-              <th [style.width]="col.width" [class]="thClass(col) + ' align-top'">
-                {{ col.header }}
+              <th
+                [style.width]="col.width"
+                [class]="thClass(col) + ' align-top'">
+
+                {{ col.header | translate }}
 
                 @if (filtersOn()) {
                   <div class="mt-2 font-normal">
-                    <ng-container *ngTemplateOutlet="filterCell; context: { col: col }" />
+                    <ng-container
+                      *ngTemplateOutlet="filterCell; context: { col: col }" />
                   </div>
                 }
               </th>
@@ -75,22 +90,28 @@
 
           @if (showActionsCol()) {
             <th class="text-center align-top" style="width: 1%; white-space: nowrap">
-              {{ hasActions() ? actionsHeader() : '' }}
+
+              {{ hasActions() ? (actionsHeader() | translate) : '' }}
 
               @if (filtersOn()) {
                 <div class="mt-2 flex items-center justify-center gap-1.5 font-normal">
-                  <button type="button"
-                          (click)="applyFilters()"
-                          [disabled]="!hasDraft() && !hasApplied()"
-                          class="h-8 px-4 rounded-full bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:pointer-events-none">
-                    {{ applyLabel() }}
+
+                  <button
+                    type="button"
+                    (click)="applyFilters()"
+                    [disabled]="!hasDraft() && !hasApplied()"
+                    class="h-8 px-4 rounded-full bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:pointer-events-none">
+                    {{ applyLabel() | translate }}
                   </button>
-                  <button type="button"
-                          (click)="clearFilters()"
-                          [disabled]="!hasDraft() && !hasApplied()"
-                          class="h-8 px-3 rounded-full border border-blue-200 bg-white text-blue-600 text-xs font-bold hover:bg-blue-50 transition-colors disabled:opacity-40 disabled:pointer-events-none">
-                    {{ clearLabel() }}
+
+                  <button
+                    type="button"
+                    (click)="clearFilters()"
+                    [disabled]="!hasDraft() && !hasApplied()"
+                    class="h-8 px-3 rounded-full border border-blue-200 bg-white text-blue-600 text-xs font-bold hover:bg-blue-50 transition-colors disabled:opacity-40 disabled:pointer-events-none">
+                    {{ clearLabel() | translate }}
                   </button>
+
                 </div>
               }
             </th>
@@ -100,53 +121,93 @@
 
       <!-- الصفوف -->
       <ng-template #body let-row let-i="rowIndex">
-        <tr [class]="rowClass()(row)"
-            [class.cursor-pointer]="clickable()"
-            (click)="onRowClick(row)">
+        <tr
+          [class]="rowClass()(row)"
+          [class.cursor-pointer]="clickable()"
+          (click)="onRowClick(row)">
 
           @if (showIndex()) {
-            <td class="text-center text-slate-500">{{ i + 1 }}</td>
+            <td class="text-center text-slate-500">
+              {{ i + 1 }}
+            </td>
           }
 
           @for (col of columns(); track col.key) {
             <td [class]="tdClass(col)">
 
               @if (cellTemplates().get(col.key); as tpl) {
+
                 <!-- خلية مخصصة من الصفحة -->
-                <ng-container *ngTemplateOutlet="tpl; context: { $implicit: row, row: row, value: resolve(row, col), index: i }" />
+                <ng-container
+                  *ngTemplateOutlet="tpl; context: {
+                    $implicit: row,
+                    row: row,
+                    value: resolve(row, col),
+                    index: i
+                  }" />
+
               } @else {
+
                 @let v = resolve(row, col);
 
                 @if (isEmpty(v) && col.type !== 'status') {
-                  <span class="text-slate-300">{{ col.fallback ?? '-' }}</span>
+                  <span class="text-slate-300">
+                    {{ col.fallback ?? '-' }}
+                  </span>
                 } @else {
+
                   @switch (col.type) {
+
                     @case ('mono') {
-                      <span dir="ltr" class="inline-block tabular-nums">{{ v }}</span>
+                      <span dir="ltr" class="inline-block tabular-nums">
+                        {{ v }}
+                      </span>
                     }
+
                     @case ('currency') {
-                      <span dir="ltr" class="inline-block font-bold tabular-nums">{{ $any(v) | currency: (col.currency ?? 'EGP') }}</span>
+                      <span dir="ltr" class="inline-block font-bold tabular-nums">
+                        {{ $any(v) | currency: (col.currency ?? 'EGP') }}
+                      </span>
                     }
+
                     @case ('date') {
                       <span>{{ formatDate(v, col) }}</span>
                     }
+
                     @case ('datetime') {
                       <span>{{ formatDate(v, col) }}</span>
                     }
+
                     @case ('status') {
                       @let on = !!v;
-                      <span [class]="on ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'"
-                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold">
-                        {{ on ? (col.trueLabel ?? 'نشط') : (col.falseLabel ?? 'غير نشط') }}
+
+                      <span
+                        [class]="on ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'"
+                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold">
+
+                        {{
+                          (
+                            on
+                              ? (col.trueLabel ?? 'DATA_TABLE.STATUS.ACTIVE')
+                              : (col.falseLabel ?? 'DATA_TABLE.STATUS.INACTIVE')
+                          ) | translate
+                        }}
+
                       </span>
                     }
+
                     @case ('badge') {
                       @let b = badgeFor(v, col);
-                      <span [class]="b.class"
-                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold">
-                        {{ b.label }}
+
+                      <span
+                        [class]="b.class"
+                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold">
+
+                        {{ b.label | translate }}
+
                       </span>
                     }
+
                     @default {
                       <span>{{ v }}</span>
                     }
@@ -162,16 +223,24 @@
                 <div class="flex items-center justify-center gap-1.5">
 
                   @if (rowActionsDirective(); as extra) {
-                    <ng-container *ngTemplateOutlet="extra.template; context: { $implicit: row, row: row }" />
+                    <ng-container
+                      *ngTemplateOutlet="extra.template; context: {
+                        $implicit: row,
+                        row: row
+                      }" />
                   }
 
                   @if (actionsMode() === 'menu') {
 
                     <!-- قايمة ⋮ -->
                     @if (visibleActions(row).length > 0) {
-                      <button type="button" aria-label="الإجراءات" aria-haspopup="menu"
-                              (click)="openMenu($event, row)"
-                              class="w-9 h-9 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors">
+                      <button
+                        type="button"
+                        [attr.aria-label]="'DATA_TABLE.ACTIONS' | translate"
+                        aria-haspopup="menu"
+                        (click)="openMenu($event, row)"
+                        class="w-9 h-9 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors">
+
                         <lucide-icon [img]="MoreIcon" class="w-5 h-5"></lucide-icon>
                       </button>
                     }
@@ -181,13 +250,19 @@
                     <!-- أزرار أيقونات -->
                     @for (a of actions(); track a.key) {
                       @if (isVisible(a, row)) {
-                        <button type="button"
-                                [title]="a.label" [attr.aria-label]="a.label"
-                                [disabled]="isDisabled(a, row)"
-                                (click)="onAction($event, a, row)"
-                                [class]="actionClass(a.tone)"
-                                class="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105 disabled:opacity-40 disabled:pointer-events-none">
-                          <lucide-icon [img]="a.icon" class="w-[18px] h-[18px]"></lucide-icon>
+                        <button
+                          type="button"
+                          [title]="a.label | translate"
+                          [attr.aria-label]="a.label | translate"
+                          [disabled]="isDisabled(a, row)"
+                          (click)="onAction($event, a, row)"
+                          [class]="actionClass(a.tone)"
+                          class="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105 disabled:opacity-40 disabled:pointer-events-none">
+
+                          <lucide-icon
+                            [img]="a.icon"
+                            class="w-[18px] h-[18px]">
+                          </lucide-icon>
                         </button>
                       }
                     }
@@ -204,86 +279,135 @@
         <tr>
           <td [attr.colspan]="colspan()">
             <div class="flex flex-col items-center gap-3 py-12 text-center">
+
               <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
-                <lucide-icon [img]="emptyIcon()" class="w-8 h-8"></lucide-icon>
+                <lucide-icon
+                  [img]="emptyIcon()"
+                  class="w-8 h-8">
+                </lucide-icon>
               </div>
+
               <p class="text-base font-bold text-slate-800">
-                {{ (searchTerm() || hasApplied()) ? 'لا توجد نتائج مطابقة للبحث' : emptyTitle() }}
+                {{
+                  (
+                    (searchTerm() || hasApplied())
+                      ? 'DATA_TABLE.EMPTY_SEARCH'
+                      : emptyTitle()
+                  ) | translate
+                }}
               </p>
+
               @if (emptyDescription() && !searchTerm() && !hasApplied()) {
-                <p class="text-sm text-slate-500">{{ emptyDescription() }}</p>
+                <p class="text-sm text-slate-500">
+                  {{ emptyDescription() | translate }}
+                </p>
               }
+
               @if (hasApplied()) {
-                <button type="button" (click)="clearFilters()"
-                        class="h-9 px-5 rounded-full border border-blue-200 text-blue-600 text-xs font-bold hover:bg-blue-50 transition-colors">
-                  {{ clearLabel() }}
+                <button
+                  type="button"
+                  (click)="clearFilters()"
+                  class="h-9 px-5 rounded-full border border-blue-200 text-blue-600 text-xs font-bold hover:bg-blue-50 transition-colors">
+
+                  {{ clearLabel() | translate }}
+
                 </button>
               }
+
               <ng-content select="[tableEmptyAction]" />
+
             </div>
           </td>
         </tr>
       </ng-template>
+
     </p-table>
   }
 </div>
 
 <!-- فلتر العمود (حسب النوع): text | select | date -->
 <ng-template #filterCell let-col="col">
+
   @switch (filterTypeOf(col)) {
+
     @case ('text') {
-      <input type="text"
-             [value]="draftText(col)"
-             [placeholder]="col.filterPlaceholder ?? 'بحث'"
-             [attr.aria-label]="col.header"
-             (input)="setDraft(col.key, $any($event.target).value)"
-             (keydown.enter)="applyFilters()"
-             class="w-full min-w-24 h-9 px-3 bg-white border border-slate-200 rounded-full text-xs text-center text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+      <input
+        type="text"
+        [value]="draftText(col)"
+        [placeholder]="(col.filterPlaceholder ?? 'DATA_TABLE.SEARCH_COLUMN') | translate"
+        [attr.aria-label]="col.header | translate"
+        (input)="setDraft(col.key, $any($event.target).value)"
+        (keydown.enter)="applyFilters()"
+        class="w-full min-w-24 h-9 px-3 bg-white border border-slate-200 rounded-full text-xs text-center text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
     }
+
     @case ('select') {
-      <select [value]="draftText(col)"
-              [attr.aria-label]="col.header"
-              (change)="setDraft(col.key, $any($event.target).value)"
-              class="w-full min-w-24 h-9 ps-3 pe-8 bg-white border border-slate-200 rounded-full text-xs text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer">
-        <option value="">{{ allLabel() }}</option>
+      <select
+        [value]="draftText(col)"
+        [attr.aria-label]="col.header | translate"
+        (change)="setDraft(col.key, $any($event.target).value)"
+        class="w-full min-w-24 h-9 ps-3 pe-8 bg-white border border-slate-200 rounded-full text-xs text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer">
+
+        <option value="">
+          {{ allLabel() | translate }}
+        </option>
+
         @for (o of filterOptionsOf(col); track o.value) {
-          <option [value]="o.value">{{ o.label }}</option>
+          <option [value]="o.value">
+            {{ o.label | translate }}
+          </option>
         }
+
       </select>
     }
+
     @case ('date') {
-      <p-datepicker selectionMode="range"
-                    [ngModel]="draftDates(col)"
-                    (ngModelChange)="setDraft(col.key, $event)"
-                    [showIcon]="true"
-                    iconDisplay="input"
-                    [showButtonBar]="true"
-                    [readonlyInput]="true"
-                    [placeholder]="col.filterPlaceholder ?? dateFilterPlaceholder()"
-                    dateFormat="yy/mm/dd"
-                    appendTo="body"
-                    styleClass="w-full"
-                    inputStyleClass="w-full h-9 text-xs rounded-full" />
+      <p-datepicker
+        selectionMode="range"
+        [ngModel]="draftDates(col)"
+        (ngModelChange)="setDraft(col.key, $event)"
+        [showIcon]="true"
+        iconDisplay="input"
+        [showButtonBar]="true"
+        [readonlyInput]="true"
+        [placeholder]="(col.filterPlaceholder ?? dateFilterPlaceholder()) | translate"
+        dateFormat="yy/mm/dd"
+        appendTo="body"
+        styleClass="w-full"
+        inputStyleClass="w-full h-9 text-xs rounded-full" />
     }
   }
+
 </ng-template>
 
 <!-- القايمة المنبثقة المشتركة لكل الصفوف (⋮) -->
 <p-popover #actionsPop appendTo="body">
+
   @if (activeRow(); as row) {
     <div class="flex flex-col min-w-44 p-1" role="menu">
+
       @for (a of actions(); track a.key) {
         @if (isVisible(a, row)) {
-          <button type="button" role="menuitem"
-                  [disabled]="isDisabled(a, row)"
-                  (click)="onMenuAction(a)"
-                  [class]="menuItemClass(a.tone)"
-                  class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-start transition-colors disabled:opacity-40 disabled:pointer-events-none">
-            <lucide-icon [img]="a.icon" class="w-4 h-4 shrink-0"></lucide-icon>
-            <span>{{ a.label }}</span>
+          <button
+            type="button"
+            role="menuitem"
+            [disabled]="isDisabled(a, row)"
+            (click)="onMenuAction(a)"
+            [class]="menuItemClass(a.tone)"
+            class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-start transition-colors disabled:opacity-40 disabled:pointer-events-none">
+
+            <lucide-icon
+              [img]="a.icon"
+              class="w-4 h-4 shrink-0">
+            </lucide-icon>
+
+            <span>{{ a.label | translate }}</span>
+
           </button>
         }
       }
+
     </div>
   }
+
 </p-popover>

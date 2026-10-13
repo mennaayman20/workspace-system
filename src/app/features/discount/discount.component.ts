@@ -8,12 +8,13 @@ import { DiscountService } from './discount.service';
 import { Discount, DISCOUNT_TYPE_LABELS } from './Idiscount';
 import { DiscountFormModalComponent } from './discount-form-modal/discount-form-modal';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog';
+import { TranslatePipe } from '@ngx-translate/core';
 @Component({
   selector: 'app-discounts',
   standalone: true,
   imports: [
     CommonModule, LucideAngularModule, RouterLink, RouterLinkActive,
-    DiscountFormModalComponent,ConfirmDialogComponent
+    DiscountFormModalComponent,ConfirmDialogComponent,TranslatePipe
   ],
   templateUrl: './discount.component.html',
 })
@@ -120,17 +121,41 @@ export class DiscountsComponent implements OnInit {
 
   // ===== مساعدات للعرض =====
   status(d: Discount): { label: string; cls: string } {
-    const now = Date.now();
-    if (d.isDeleted) return { label: 'محذوف', cls: 'bg-slate-100 text-slate-500' };
-    if (!d.isActive) return { label: 'غير فعّال', cls: 'bg-amber-50 text-amber-600' };
-    if (d.endDate && new Date(d.endDate).getTime() < now) {
-      return { label: 'منتهي', cls: 'bg-rose-50 text-rose-600' };
-    }
-    if (d.startDate && new Date(d.startDate).getTime() > now) {
-      return { label: 'لم يبدأ بعد', cls: 'bg-blue-50 text-blue-600' };
-    }
-    return { label: 'فعّال', cls: 'bg-emerald-50 text-emerald-600' };
+  const now = Date.now();
+
+  if (d.isDeleted) {
+    return {
+      label: 'DISCOUNTS.STATUS.DELETED',
+      cls: 'bg-slate-100 text-slate-500'
+    };
   }
+
+  if (!d.isActive) {
+    return {
+      label: 'DISCOUNTS.STATUS.INACTIVE',
+      cls: 'bg-amber-50 text-amber-600'
+    };
+  }
+
+  if (d.endDate && new Date(d.endDate).getTime() < now) {
+    return {
+      label: 'DISCOUNTS.STATUS.EXPIRED',
+      cls: 'bg-rose-50 text-rose-600'
+    };
+  }
+
+  if (d.startDate && new Date(d.startDate).getTime() > now) {
+    return {
+      label: 'DISCOUNTS.STATUS.NOT_STARTED',
+      cls: 'bg-blue-50 text-blue-600'
+    };
+  }
+
+  return {
+    label: 'DISCOUNTS.STATUS.ACTIVE',
+    cls: 'bg-emerald-50 text-emerald-600'
+  };
+}
 
   private errorMessage(err: any, fallback: string): string {
     if (typeof err?.error?.message === 'string') return err.error.message;

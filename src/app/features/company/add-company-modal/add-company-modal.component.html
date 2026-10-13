@@ -1,8 +1,8 @@
-<div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 dir-rtl">
-  <div class="bg-white rounded-3xl w-full max-w-3xl shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col overflow-hidden">
+<div  [attr.dir]="langService.isRtl() ? 'rtl' : 'ltr'"  class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+  <div  class="bg-white rounded-3xl w-full max-w-3xl shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col overflow-hidden text-start">
 
     <!-- Header -->
-    <div class="relative px-6 sm:px-8 py-5 border-b border-slate-100 bg-gradient-to-l from-blue-50/70 to-white shrink-0">
+    <div class="relative px-6 sm:px-8 py-5 border-b border-slate-100 bg-gradient-to-r from-blue-50/70 via-white to-white shrink-0">
       <div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-3.5">
           <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
@@ -10,15 +10,16 @@
           </div>
           <div>
             <h3 class="text-lg font-extrabold text-slate-900 leading-tight">
-              {{ companyToEdit() ? 'تعديل بيانات الشركة' : 'إضافة شركة جديدة' }}
+              {{ (companyToEdit() ? 'COMPANIES.MODAL.EDIT_TITLE' : 'COMPANIES.MODAL.ADD_TITLE') | translate }}
             </h3>
             <p class="text-xs text-slate-500 mt-0.5">
-              {{ companyToEdit() ? 'عدّل البيانات ثم احفظ التغييرات' : 'أدخل بيانات الشركة بالعربي والإنجليزي' }}
+              {{ (companyToEdit() ? 'COMPANIES.MODAL.EDIT_SUBTITLE' : 'COMPANIES.MODAL.ADD_SUBTITLE') | translate }}
             </p>
           </div>
         </div>
-        <button (click)="onClose()" type="button" aria-label="إغلاق"
-                class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white transition-colors">
+        <button (click)="onClose()" type="button"
+                [attr.aria-label]="'COMPANIES.MODAL.CLOSE' | translate"
+                class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white transition-colors cursor-pointer">
           <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
         </button>
       </div>
@@ -38,7 +39,7 @@
         @if (isLoadingTranslations()) {
           <div class="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
             <span class="inline-block w-3.5 h-3.5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></span>
-            جاري تحميل الترجمات...
+            {{ 'COMPANIES.MODAL.LOADING_TRANSLATIONS' | translate }}
           </div>
         }
 
@@ -48,33 +49,33 @@
             <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
               <lucide-icon [img]="BuildingIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">اسم الشركة</h4>
+            <h4 class="text-sm font-extrabold text-slate-800">{{ 'COMPANIES.MODAL.NAME_SECTION' | translate }}</h4>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label for="nameAr" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>الاسم بالعربي <span class="text-rose-500">*</span></span>
+                <span>{{ 'COMPANIES.MODAL.NAME_AR' | translate }} <span class="text-rose-500">*</span></span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
               </label>
               <input pInputText id="nameAr" formControlName="nameAr" dir="rtl"
                      class="w-full !h-10 !rounded-xl" placeholder="شركة الأمل للحلول الذكية"
                      [class.ng-invalid]="isFieldInvalid('nameAr')" [class.ng-dirty]="isFieldInvalid('nameAr')" />
               @if (isFieldInvalid('nameAr')) {
-                <span class="text-xs text-rose-600 mt-1 block">الاسم بالعربي مطلوب (حرفين على الأقل)</span>
+                <span class="text-xs text-rose-600 mt-1 block">{{ 'COMPANIES.MODAL.ERR_NAME_AR' | translate }}</span>
               }
             </div>
 
             <div>
               <label for="nameEn" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>Company Name <span class="text-rose-500">*</span></span>
+                <span>{{ 'COMPANIES.MODAL.NAME_EN' | translate }} <span class="text-rose-500">*</span></span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
               </label>
               <input pInputText id="nameEn" formControlName="nameEn" dir="ltr"
                      class="w-full !h-10 !rounded-xl" placeholder="Al Amal Smart Solutions"
                      [class.ng-invalid]="isFieldInvalid('nameEn')" [class.ng-dirty]="isFieldInvalid('nameEn')" />
               @if (isFieldInvalid('nameEn')) {
-                <span class="text-xs text-rose-600 mt-1 block">English name is required</span>
+                <span class="text-xs text-rose-600 mt-1 block">{{ 'COMPANIES.MODAL.ERR_NAME_EN' | translate }}</span>
               }
             </div>
           </div>
@@ -86,45 +87,46 @@
             <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
               <lucide-icon [img]="PhoneIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">بيانات التواصل</h4>
+            <h4 class="text-sm font-extrabold text-slate-800">{{ 'COMPANIES.MODAL.CONTACT_SECTION' | translate }}</h4>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <!-- المسؤول -->
             <div>
-              <label for="contactPerson" class="block text-xs font-bold text-slate-700 mb-1.5">الشخص المسؤول</label>
+              <label for="contactPerson" class="block text-xs font-bold text-slate-700 mb-1.5">{{ 'COMPANIES.MODAL.CONTACT_PERSON' | translate }}</label>
               <div class="relative">
                 <lucide-icon [img]="UserIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
                 <input pInputText id="contactPerson" formControlName="contactPerson"
-                       class="w-full !h-10 !rounded-xl !ps-10" placeholder="اسم المسؤول" />
+                       class="w-full !h-10 !rounded-xl !ps-10"
+                       [placeholder]="'COMPANIES.MODAL.CONTACT_PLACEHOLDER' | translate" />
               </div>
             </div>
 
             <!-- الهاتف -->
             <div>
-              <label for="phone" class="block text-xs font-bold text-slate-700 mb-1.5">رقم الهاتف</label>
+              <label for="phone" class="block text-xs font-bold text-slate-700 mb-1.5">{{ 'COMPANIES.MODAL.PHONE' | translate }}</label>
               <div class="relative">
                 <lucide-icon [img]="PhoneIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
                 <input pInputText id="phone" formControlName="phone" dir="ltr"
-                       class="w-full !h-10 !rounded-xl !ps-10 text-right" placeholder="01000000000"
+                       class="w-full !h-10 !rounded-xl !ps-10 text-start" placeholder="01000000000"
                        [class.ng-invalid]="isFieldInvalid('phone')" [class.ng-dirty]="isFieldInvalid('phone')" />
               </div>
               @if (isFieldInvalid('phone')) {
-                <span class="text-xs text-rose-600 mt-1 block">يرجى إدخال رقم هاتف صحيح</span>
+                <span class="text-xs text-rose-600 mt-1 block">{{ 'COMPANIES.MODAL.ERR_PHONE' | translate }}</span>
               }
             </div>
 
             <!-- الإيميل -->
             <div class="sm:col-span-2">
-              <label for="email" class="block text-xs font-bold text-slate-700 mb-1.5">البريد الإلكتروني</label>
+              <label for="email" class="block text-xs font-bold text-slate-700 mb-1.5">{{ 'COMPANIES.MODAL.EMAIL' | translate }}</label>
               <div class="relative">
                 <lucide-icon [img]="MailIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
                 <input pInputText id="email" formControlName="email" type="email" dir="ltr"
-                       class="w-full !h-10 !rounded-xl !ps-10 text-left" placeholder="company@domain.com"
+                       class="w-full !h-10 !rounded-xl !ps-10 text-start" placeholder="company@domain.com"
                        [class.ng-invalid]="isFieldInvalid('email')" [class.ng-dirty]="isFieldInvalid('email')" />
               </div>
               @if (isFieldInvalid('email')) {
-                <span class="text-xs text-rose-600 mt-1 block">البريد الإلكتروني غير صحيح</span>
+                <span class="text-xs text-rose-600 mt-1 block">{{ 'COMPANIES.MODAL.ERR_EMAIL' | translate }}</span>
               }
             </div>
           </div>
@@ -136,32 +138,32 @@
             <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
               <lucide-icon [img]="WalletIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">البيانات المالية والضريبية</h4>
+            <h4 class="text-sm font-extrabold text-slate-800">{{ 'COMPANIES.MODAL.FINANCE_SECTION' | translate }}</h4>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label for="taxNumber" class="block text-xs font-bold text-slate-700 mb-1.5">الرقم الضريبي</label>
+              <label for="taxNumber" class="block text-xs font-bold text-slate-700 mb-1.5">{{ 'COMPANIES.MODAL.TAX_NUMBER' | translate }}</label>
               <div class="relative">
                 <lucide-icon [img]="HashIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
                 <input pInputText id="taxNumber" formControlName="taxNumber" dir="ltr"
-                       class="w-full !h-10 !rounded-xl !ps-10 text-left" placeholder="xxx-xxx-xxx" />
+                       class="w-full !h-10 !rounded-xl !ps-10 text-start" placeholder="xxx-xxx-xxx" />
               </div>
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1.5">الحد الائتماني</label>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">{{ 'COMPANIES.MODAL.CREDIT_LIMIT' | translate }}</label>
               <p-inputNumber formControlName="creditLimit" mode="currency" currency="EGP" locale="en-EG"
-                             [min]="0" [fluid]="true" inputStyleClass="!h-10 !rounded-xl">
+                           [min]="0" [fluid]="true" inputStyleClass="!h-10 !rounded-xl">
               </p-inputNumber>
               @if (isFieldInvalid('creditLimit')) {
-                <span class="text-xs text-rose-600 mt-1 block">يجب أن تكون القيمة 0 أو أكثر</span>
+                <span class="text-xs text-rose-600 mt-1 block">{{ 'COMPANIES.MODAL.ERR_CREDIT' | translate }}</span>
               }
             </div>
 
             <div>
               <label class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>المعلومات الضريبية</span>
+                <span>{{ 'COMPANIES.MODAL.TAX_INFO_AR' | translate }}</span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
               </label>
               <textarea pTextarea formControlName="taxInformationAr" rows="3" dir="rtl"
@@ -170,7 +172,7 @@
 
             <div>
               <label class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>Tax Information</span>
+                <span>{{ 'COMPANIES.MODAL.TAX_INFO_EN' | translate }}</span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
               </label>
               <textarea pTextarea formControlName="taxInformationEn" rows="3" dir="ltr"
@@ -185,13 +187,13 @@
             <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
               <lucide-icon [img]="ContractIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">تفاصيل العقد والشروط</h4>
+            <h4 class="text-sm font-extrabold text-slate-800">{{ 'COMPANIES.MODAL.CONTRACT_SECTION' | translate }}</h4>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>تفاصيل العقد</span>
+                <span>{{ 'COMPANIES.MODAL.CONTRACT_AR' | translate }}</span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
               </label>
               <textarea pTextarea formControlName="contractDetailsAr" rows="3" dir="rtl"
@@ -200,7 +202,7 @@
 
             <div>
               <label class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>Contract Details</span>
+                <span>{{ 'COMPANIES.MODAL.CONTRACT_EN' | translate }}</span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
               </label>
               <textarea pTextarea formControlName="contractDetailsEn" rows="3" dir="ltr"
@@ -212,16 +214,18 @@
 
       <!-- Footer (ثابت) -->
       <div class="shrink-0 flex items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
-        <p class="hidden sm:block text-[11px] text-slate-400"><span class="text-rose-500">*</span> حقول مطلوبة</p>
+        <p class="hidden sm:block text-[11px] text-slate-400">
+          <span class="text-rose-500">*</span> {{ 'COMPANIES.MODAL.REQUIRED_NOTE' | translate }}
+        </p>
         <div class="flex items-center gap-3 ms-auto">
           <button type="button" (click)="onClose()" [disabled]="isSubmitting()"
-                  class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
-            إلغاء
+                  class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50 cursor-pointer">
+            {{ 'COMPANIES.MODAL.CANCEL' | translate }}
           </button>
           <button type="submit" [disabled]="isSubmitting() || isLoadingTranslations()"
-                  class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2">
+                  class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2 cursor-pointer">
             <lucide-icon [img]="SaveIcon" class="w-4 h-4"></lucide-icon>
-            <span>{{ isSubmitting() ? 'جاري الحفظ...' : (companyToEdit() ? 'حفظ التعديلات' : 'حفظ الشركة') }}</span>
+            <span>{{ (isSubmitting() ? 'COMPANIES.MODAL.SAVING' : (companyToEdit() ? 'COMPANIES.MODAL.SAVE_EDITS' : 'COMPANIES.MODAL.SAVE')) | translate }}</span>
           </button>
         </div>
       </div>

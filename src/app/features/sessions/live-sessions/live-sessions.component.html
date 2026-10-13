@@ -7,7 +7,7 @@
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
 </style>
 
-<div dir="rtl" class="p-4 sm:p-8 space-y-6 max-w-7xl mx-auto">
+<div class="p-4 sm:p-8 space-y-6 max-w-7xl mx-auto">
 
   <!-- Header -->
   <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-5 fade-up">
@@ -17,19 +17,19 @@
       </div>
       <div>
         <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 flex items-center gap-2">
-          الجلسات النشطة
+          {{ 'SESSIONS.LIVE.TITLE' | translate }}
           <span class="px-2.5 py-0.5 text-xs font-bold bg-emerald-50 text-emerald-600 rounded-full">
             {{ sessionsCount() }}
           </span>
         </h1>
-        <p class="text-sm text-slate-500 mt-1">عرض وإدارة الحضور المباشر وحساب الوقت في الوقت الفعلي</p>
+        <p class="text-sm text-slate-500 mt-1">{{ 'SESSIONS.LIVE.SUBTITLE' | translate }}</p>
       </div>
     </div>
 
-    <button (click)="isStartModalOpen.set(true)"
+    <button type="button" (click)="isStartModalOpen.set(true)"
       class="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all">
       <lucide-icon [img]="PlayIcon" class="w-4 h-4"></lucide-icon>
-      <span>بدء جلسة جديدة</span>
+      <span>{{ 'SESSIONS.LIVE.START_BUTTON' | translate }}</span>
     </button>
   </div>
 
@@ -52,7 +52,7 @@
                   <span class="absolute inline-flex w-full h-full rounded-full bg-emerald-400 opacity-75 animate-ping"></span>
                   <span class="relative inline-flex w-2 h-2 rounded-full bg-emerald-500"></span>
                 </span>
-                جلسة نشطة
+                {{ 'SESSIONS.LIVE.ACTIVE_BADGE' | translate }}
               </span>
               <span class="text-xs text-slate-400">#{{ session.id }}</span>
             </div>
@@ -61,7 +61,7 @@
             <p class="text-xs text-slate-500 mt-0.5">{{ session.workspaceName }}</p>
 
             <div class="my-5 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
-              <span class="text-xs text-slate-400 block mb-1">المدة المنقضية الحالية</span>
+              <span class="text-xs text-slate-400 block mb-1">{{ 'SESSIONS.LIVE.ELAPSED' | translate }}</span>
               <span dir="ltr" class="text-3xl font-extrabold text-blue-600 font-mono tracking-wider tabular-nums">
                 {{ getElapsedTime(session.startTime) }}
               </span>
@@ -69,28 +69,28 @@
           </div>
 
           <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100">
-            <button (click)="openTransferModal(session)"
-              class="px-2 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-700 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
-              <lucide-icon [img]="MoveIcon" class="w-3.5 h-3.5"></lucide-icon>
-              <span>نقل المكان</span>
+            <button type="button" (click)="openTransferModal(session)"
+              class="px-2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
+              <lucide-icon [img]="MoveIcon" class="w-3.5 h-3.5 rtl:rotate-0 ltr:rotate-180"></lucide-icon>
+              <span>{{ 'SESSIONS.LIVE.TRANSFER' | translate }}</span>
             </button>
 
-            <button (click)="openPosModal(session)"
+            <button type="button" (click)="openPosModal(session)"
               class="px-2 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
               <lucide-icon [img]="PlusIcon" class="w-3.5 h-3.5"></lucide-icon>
-              <span>منتج POS</span>
+              <span>{{ 'SESSIONS.LIVE.POS' | translate }}</span>
             </button>
 
-            <button (click)="openCheckoutModal(session)"
+            <button type="button" (click)="openCheckoutModal(session)"
               class="px-2 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
               <lucide-icon [img]="StopIcon" class="w-3.5 h-3.5"></lucide-icon>
-              <span>إنهاء</span>
+              <span>{{ 'SESSIONS.LIVE.END' | translate }}</span>
             </button>
           </div>
         </div>
       } @empty {
         <div class="col-span-full py-16 text-center text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200">
-          لا توجد جلسات نشطة حالياً.
+          {{ 'SESSIONS.LIVE.EMPTY' | translate }}
         </div>
       }
     </div>
@@ -107,7 +107,7 @@
     </app-transfer-workspace-modal>
   }
 
-  <!-- POS Modal (تعديل المنتجات والخدمات) -->
+  <!-- POS Modal -->
   @if (selectedSessionForPos(); as s) {
     <app-session-pos-modal
       mode="edit"
@@ -117,7 +117,7 @@
     </app-session-pos-modal>
   }
 
-  <!-- Checkout Modal (الفاتورة + الخصم + إنهاء وتحصيل) -->
+  <!-- Checkout Modal -->
   @if (selectedSessionForCheckout(); as s) {
     <app-session-pos-modal
       mode="checkout"

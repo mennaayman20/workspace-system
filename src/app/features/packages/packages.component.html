@@ -1,21 +1,36 @@
 <div [dir]="isAr() ? 'rtl' : 'ltr'" class="p-4 sm:p-8 space-y-6 max-w-7xl mx-auto">
 
   <!-- Tabs -->
+  <!-- Tabs -->
   <div class="w-full mb-6">
-    <nav class="inline-flex items-center gap-1.5 p-1.5 bg-slate-200/40 backdrop-blur-md rounded-2xl border border-slate-200/60 overflow-x-auto no-scrollbar" aria-label="Tabs">
+    <nav
+      class="inline-flex items-center gap-1.5 p-1.5 bg-slate-200/40 backdrop-blur-md rounded-2xl border border-slate-200/60 overflow-x-auto no-scrollbar"
+      aria-label="Tabs">
 
-      <a [routerLink]="['/discounts']"
-         routerLinkActive="bg-white text-blue-600 shadow-sm border-slate-200/80 font-bold"
-         class="group inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 border border-transparent transition-all duration-200 shrink-0 cursor-pointer select-none">
-        <lucide-icon [img]="PercentIcon" class="w-4 h-4 text-slate-400 group-[.font-bold]:text-blue-600 transition-colors"></lucide-icon>
-        <span>{{ isAr() ? 'الخصومات' : 'Discounts' }}</span>
+      <a
+        [routerLink]="['/discounts']"
+        routerLinkActive="bg-white text-blue-600 shadow-sm border-slate-200/80 font-bold"
+        class="group inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 border border-transparent transition-all duration-200 shrink-0 cursor-pointer select-none">
+
+        <lucide-icon
+          [img]="PercentIcon"
+          class="w-4 h-4 text-slate-400 group-[.font-bold]:text-blue-600 transition-colors">
+        </lucide-icon>
+
+        <span>{{ 'TABS.DISCOUNTS' | translate }}</span>
       </a>
 
-      <a [routerLink]="['/packages']"
-         routerLinkActive="bg-white text-blue-600 shadow-sm border-slate-200/80 font-bold"
-         class="group inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 border border-transparent transition-all duration-200 shrink-0 cursor-pointer select-none">
-        <lucide-icon [img]="PackageIcon" class="w-4 h-4 text-slate-400 group-[.font-bold]:text-blue-600 transition-colors"></lucide-icon>
-        <span>{{ isAr() ? 'الباقات' : 'Packages' }}</span>
+      <a
+        [routerLink]="['/packages']"
+        routerLinkActive="bg-white text-blue-600 shadow-sm border-slate-200/80 font-bold"
+        class="group inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 border border-transparent transition-all duration-200 shrink-0 cursor-pointer select-none">
+
+        <lucide-icon
+          [img]="PackageIcon"
+          class="w-4 h-4 text-slate-400 group-[.font-bold]:text-blue-600 transition-colors">
+        </lucide-icon>
+
+        <span>{{ 'TABS.PACKAGES' | translate }}</span>
       </a>
 
     </nav>
@@ -28,21 +43,20 @@
         <lucide-icon [img]="PackageIcon" class="w-6 h-6"></lucide-icon>
       </div>
       <div>
-        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 flex items-center gap-2">
-          {{ isAr() ? 'إدارة الباقات' : 'Package Management' }}
-          <span class="px-2.5 py-0.5 text-xs font-bold bg-blue-50 text-blue-600 rounded-full">{{ count() }}</span>
-        </h1>
-        <p class="text-sm text-slate-500 mt-1">
-          {{ isAr() ? 'باقات ساعات مسبقة الدفع تتباع للعملاء' : 'Prepaid hour packages sold to customers' }}
-        </p>
+<h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 flex items-center gap-2">
+  {{ 'PACKAGES.TITLE' | translate }}
+  <span class="px-2.5 py-0.5 text-xs font-bold bg-blue-50 text-blue-600 rounded-full">{{ count() }}</span>
+</h1>
+<p class="text-sm text-slate-500 mt-1">
+  {{ 'PACKAGES.SUBTITLE' | translate }}
+</p>
       </div>
     </div>
 
     <button type="button" (click)="openCreate()"
       class="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all">
       <lucide-icon [img]="PlusIcon" class="w-4 h-4"></lucide-icon>
-      <span>{{ isAr() ? 'باقة جديدة' : 'New Package' }}</span>
-    </button>
+<span>{{ 'PACKAGES.NEW' | translate }}</span>    </button>
   </div>
 
   <!-- List -->
@@ -63,9 +77,15 @@
                 [class]="p.isDeleted ? 'bg-slate-100 text-slate-500'
                        : p.isActive ? 'bg-emerald-50 text-emerald-700'
                        : 'bg-amber-50 text-amber-700'">
-                @if (p.isDeleted) { {{ isAr() ? 'محذوفة' : 'Deleted' }} }
-                @else if (p.isActive) { {{ isAr() ? 'فعّالة' : 'Active' }} }
-                @else { {{ isAr() ? 'متوقفة' : 'Inactive' }} }
+                @if (p.isDeleted) {
+  {{ 'PACKAGES.STATUS.DELETED' | translate }}
+}
+@else if (p.isActive) {
+  {{ 'PACKAGES.STATUS.ACTIVE' | translate }}
+}
+@else {
+  {{ 'PACKAGES.STATUS.INACTIVE' | translate }}
+}
               </span>
               <span class="text-xs text-slate-400">{{ typeLabel(p.packageType) }}</span>
             </div>
@@ -77,18 +97,20 @@
             </p>
 
             <div class="flex items-center gap-4 mt-3 text-xs text-slate-500">
-              <span>
-                <b class="text-slate-800">{{ p.totalHours }}</b> {{ isAr() ? 'ساعة' : 'hours' }}
-              </span>
-              <span>
-                @if (p.durationDays) {
-                  {{ isAr() ? 'صلاحية' : 'Valid for' }}
-                  <b class="text-slate-800">{{ p.durationDays }}</b>
-                  {{ isAr() ? 'يوم' : 'days' }}
-                } @else {
-                  {{ isAr() ? 'بدون مدة صلاحية' : 'No expiry' }}
-                }
-              </span>
+             <span>
+  <b class="text-slate-800">{{ p.totalHours }}</b>
+  {{ 'PACKAGES.HOURS' | translate }}
+</span>
+
+<span>
+  @if (p.durationDays) {
+    {{ 'PACKAGES.VALID_FOR' | translate }}
+    <b class="text-slate-800">{{ p.durationDays }}</b>
+    {{ 'PACKAGES.DAYS' | translate }}
+  } @else {
+    {{ 'PACKAGES.NO_EXPIRY' | translate }}
+  }
+</span>
             </div>
 
             @if (displayDescription(p); as desc) {
@@ -102,34 +124,38 @@
               <button type="button" (click)="restore(p)" [disabled]="busyId() === p.id"
                 class="flex-1 px-3 py-2.5 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-50 text-emerald-700 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
                 <lucide-icon [img]="RestoreIcon" class="w-3.5 h-3.5"></lucide-icon>
-                <span>{{ isAr() ? 'استعادة' : 'Restore' }}</span>
+<span>{{ 'PACKAGES.ACTIONS.RESTORE' | translate }}</span>
               </button>
             } @else {
               <button type="button" (click)="openEdit(p)"
                 class="flex-1 px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
                 <lucide-icon [img]="EditIcon" class="w-3.5 h-3.5"></lucide-icon>
-                <span>{{ isAr() ? 'تعديل' : 'Edit' }}</span>
+<span>{{ 'PACKAGES.ACTIONS.EDIT' | translate }}</span>
               </button>
               <button type="button" (click)="toggleActive(p)" [disabled]="busyId() === p.id"
                 class="flex-1 px-3 py-2.5 bg-amber-50 hover:bg-amber-100 disabled:opacity-50 text-amber-700 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
                 <lucide-icon [img]="PowerIcon" class="w-3.5 h-3.5"></lucide-icon>
                 <span>
-                  @if (p.isActive) { {{ isAr() ? 'إيقاف' : 'Deactivate' }} }
-                  @else { {{ isAr() ? 'تفعيل' : 'Activate' }} }
+                 @if (p.isActive) {
+  {{ 'PACKAGES.ACTIONS.DEACTIVATE' | translate }}
+} @else {
+  {{ 'PACKAGES.ACTIONS.ACTIVATE' | translate }}
+}
                 </span>
               </button>
               <button type="button" (click)="askDelete(p)"
                 class="flex-1 px-3 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1">
                 <lucide-icon [img]="TrashIcon" class="w-3.5 h-3.5"></lucide-icon>
-                <span>{{ isAr() ? 'حذف' : 'Delete' }}</span>
-              </button>
+<span>{{ 'PACKAGES.ACTIONS.DELETE' | translate }}</span>              </button>
             }
           </div>
         </div>
       } @empty {
-        <div class="col-span-full py-16 text-center text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200">
-          {{ isAr() ? 'لا توجد باقات بعد. اضغطي "باقة جديدة" للبدء.' : 'No packages yet. Click "New Package" to start.' }}
-        </div>
+      
+<div class="col-span-full py-16 text-center text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200">
+  {{ 'PACKAGES.EMPTY' | translate }}
+</div>
+
       }
     </div>
   }
@@ -144,7 +170,7 @@
   }
 <app-confirm-dialog
   [open]="!!pendingDelete()"
-  title="حذف الباقه"
+[title]="'PACKAGES.CONFIRM_DELETE_TITLE' | translate"
   [itemName]="pendingDelete() ? displayName(pendingDelete()!) : ''"
   [loading]="busyId() !== null && busyId() === pendingDelete()?.id"
   (confirmed)="confirmDelete()"
