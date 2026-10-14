@@ -9,16 +9,25 @@ import Aura from '@primeuix/themes/aura';
 import { provideToastr } from 'ngx-toastr';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { provideAppInitializer, inject } from '@angular/core';
+import { of, catchError } from 'rxjs';
+import { AuthService } from './core/services/auth.service';
+import { PermissionService } from './core/services/permission.service';
+import { errorInterceptor } from './core/interceptors/error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideAnimationsAsync(),
     providePrimeNG({
-      theme: { preset: Aura },
-      // اختياري: لو عايز نصوص PrimeNG نفسها (زي Calendar) تتترجم، شوف الخطوة 4
-    }),
-    provideHttpClient(withInterceptors([authInterceptor])),
+  theme: {
+    preset: Aura,
+    options: {
+      darkModeSelector: false
+    }
+  }
+}),
+    provideHttpClient(withInterceptors([authInterceptor,errorInterceptor])),
     provideTranslateService({
       lang: 'ar',
       fallbackLang: 'ar',
@@ -33,5 +42,21 @@ export const appConfig: ApplicationConfig = {
       timeOut: 1000,
       closeButton: true,
     }),
+  
+  
+  
+  provideAppInitializer(() => {
+  const auth = inject(AuthService);
+  const perms = inject(PermissionService);
+  return auth.isLoggedIn()
+    ? perms.load().pipe(catchError(() => of(null)))
+    : of(null);
+}),
+  
+  
+  
+  
+  
+  
   ],
 };
