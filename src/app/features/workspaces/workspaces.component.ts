@@ -54,6 +54,7 @@ interface StatCard {
 })
 export class WorkspacesComponent {
   private readonly workspaceService = inject(WorkspaceService);
+  
   private readonly destroyRef = inject(DestroyRef);
   private readonly toastr = inject(ToastrService);
   private readonly lang = inject(LanguageService);

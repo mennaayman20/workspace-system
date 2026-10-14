@@ -1,28 +1,29 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, switchMap, map, of } from 'rxjs';
 import { environment } from '../environments/environment';
 import { AuthResponse, LoginUserCommand } from '../interfaces/Iauth';
+import { PermissionService } from './permission.service';
 
-
-
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
+  private http = inject(HttpClient);
+  private permissionService = inject(PermissionService);
   private readonly apiUrl = `${environment.apiUrl}/api/Authentication`;
   private readonly TOKEN_KEY = 'auth_token';
-
-  constructor(private http: HttpClient) {}
 
   login(credentials: LoginUserCommand): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap(response => {
-        // الوصول للتوكن الصحيح وفقاً للـ Response
-        if (response && response.succeeded && response.data?.accessToken) {
+        if (response?.succeeded && response.data?.accessToken) {
           this.saveToken(response.data.accessToken);
         }
-      })
+      }),
+      switchMap(response =>
+        response?.succeeded
+          ? this.permissionService.load().pipe(map(() => response))
+          : of(response)
+      )
     );
   }
 
@@ -36,6 +37,7 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
+    this.permissionService.clear();
   }
 
   isLoggedIn(): boolean {
