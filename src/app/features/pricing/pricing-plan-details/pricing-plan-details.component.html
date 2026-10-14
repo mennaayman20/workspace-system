@@ -2,8 +2,8 @@
 
   <a routerLink="/pricing"
     class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">
-    <lucide-icon [img]="ArrowBackIcon" class="w-4 h-4"></lucide-icon>
-    خطط التسعير
+    <lucide-icon [img]="ArrowBackIcon" class="w-4 h-4 ltr:rotate-180"></lucide-icon>
+    {{ 'PRICING.DETAILS.BACK' | translate }}
   </a>
 
   @if (isLoading()) {
@@ -18,30 +18,35 @@
       <span class="font-medium">{{ errorMessage() }}</span>
       <button type="button" (click)="load()"
         class="px-4 py-2 bg-white border border-rose-200 rounded-xl font-bold hover:bg-rose-100 transition-colors">
-        إعادة المحاولة
+        {{ 'PRICING.COMMON.RETRY' | translate }}
       </button>
     </div>
   } @else {
     @if (plan(); as plan) {
       <!-- بيانات الخطة -->
       <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="min-w-0">
-          <div class="flex flex-wrap items-center gap-3">
-            <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">{{ plan.name }}</h1>
-            <span
-              [class]="plan.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-100 text-slate-600 ring-slate-500/20'"
-              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ring-1 ring-inset">
-              <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-              {{ plan.isActive ? 'نشطة' : 'غير نشطة' }}
-            </span>
+        <div class="flex items-center gap-4 min-w-0">
+          <div class="w-12 h-12 shrink-0 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 font-extrabold flex items-center justify-center text-xl">
+            {{ (plan.name || plan.nameAr || plan.nameEn || '#').charAt(0) }}
           </div>
-          <p class="text-sm text-slate-500 mt-1.5">{{ plan.description || 'بدون وصف' }}</p>
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-3">
+              <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">{{ plan.name }}</h1>
+              <span
+                [class]="plan.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-100 text-slate-600 ring-slate-500/20'"
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ring-1 ring-inset">
+                <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                {{ (plan.isActive ? 'PRICING.STATUS.ACTIVE' : 'PRICING.STATUS.INACTIVE') | translate }}
+              </span>
+            </div>
+            <p class="text-sm text-slate-500 mt-1.5">{{ plan.description || ('PRICING.PLANS.NO_DESCRIPTION' | translate) }}</p>
+          </div>
         </div>
 
         <button type="button" (click)="isEditOpen.set(true)"
           class="inline-flex items-center justify-center gap-2 px-4 h-10 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-sm font-bold text-slate-700 transition-colors shrink-0">
           <lucide-icon [img]="EditIcon" class="w-4 h-4"></lucide-icon>
-          تعديل الخطة
+          {{ 'PRICING.DETAILS.EDIT_PLAN' | translate }}
         </button>
       </div>
 
@@ -56,9 +61,9 @@
       <!-- ملخص الجاهزية -->
       @if (workspaceTypes().length > 0) {
         <div class="flex items-center justify-between gap-3 px-1">
-          <h2 class="text-base font-extrabold text-slate-900">أسعار أنواع المساحات</h2>
+          <h2 class="text-base font-extrabold text-slate-900">{{ 'PRICING.DETAILS.PRICES_TITLE' | translate }}</h2>
           <span class="text-sm font-semibold text-slate-500">
-            {{ readyCount() }} من {{ workspaceTypes().length }} جاهز
+            {{ 'PRICING.DETAILS.READY_COUNT' | translate: { ready: readyCount(), total: workspaceTypes().length } }}
           </span>
         </div>
 
@@ -73,12 +78,12 @@
         </div>
 
         <p class="text-xs text-slate-400 leading-relaxed px-1">
-          السعر يسري على كل مساحات النوع الواحد. يتم حساب الفاتورة النهائية في الـ checkout من الباك إند بناءً على هذه القيم.
+          {{ 'PRICING.DETAILS.FOOTNOTE' | translate }}
         </p>
       } @else {
         <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center space-y-3">
-          <p class="text-base font-bold text-slate-800">لا توجد أنواع مساحات بعد</p>
-          <p class="text-sm text-slate-500">أضف نوع مساحة أولًا ليظهر هنا ويمكنك تسعيره.</p>
+          <p class="text-base font-bold text-slate-800">{{ 'PRICING.DETAILS.NO_TYPES_TITLE' | translate }}</p>
+          <p class="text-sm text-slate-500">{{ 'PRICING.DETAILS.NO_TYPES_HINT' | translate }}</p>
         </div>
       }
     }

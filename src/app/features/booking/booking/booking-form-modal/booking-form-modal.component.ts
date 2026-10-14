@@ -8,6 +8,7 @@ import {
 } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
+import { TranslatePipe } from '@ngx-translate/core';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -17,6 +18,7 @@ import {
 } from 'lucide-angular';
 
 import { BookingService } from '../booking.service';
+import { LanguageService } from '../../../../core/services/lang.service'; // عدّل المسار لو مختلف
 import { Booking, CreateBookingDto, LookupItem } from '../Ibooking';
 
 // ---------- helpers ----------
@@ -58,7 +60,7 @@ function notPastDate(c: AbstractControl): ValidationErrors | null {
   selector: 'app-booking-form-modal',
   standalone: true,
   imports: [
-    ReactiveFormsModule, LucideAngularModule,
+    ReactiveFormsModule, LucideAngularModule, TranslatePipe,
     SelectModule, DatePickerModule, InputNumberModule, TextareaModule,
   ],
   templateUrl: './booking-form-modal.component.html'
@@ -67,6 +69,7 @@ export class BookingFormModalComponent implements OnInit {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly bookingService = inject(BookingService);
   private readonly toastr = inject(ToastrService);
+  private readonly lang = inject(LanguageService);
 
   booking = input<Booking | null>(null);
   customers = input<LookupItem[]>([]);
@@ -95,10 +98,10 @@ export class BookingFormModalComponent implements OnInit {
   /** بدايات سريعة (بالدقائق من بداية اليوم) */
   readonly startSlots = [9, 10, 11, 12, 14, 16].map(h => h * 60);
   readonly durations = [
-    { hours: 1, label: 'ساعة' },
-    { hours: 2, label: 'ساعتين' },
-    { hours: 3, label: '3 ساعات' },
-    { hours: 4, label: '4 ساعات' }
+    { hours: 1, labelKey: 'BOOKINGS.FORM.DURATIONS.H1' },
+    { hours: 2, labelKey: 'BOOKINGS.FORM.DURATIONS.H2' },
+    { hours: 3, labelKey: 'BOOKINGS.FORM.DURATIONS.H3' },
+    { hours: 4, labelKey: 'BOOKINGS.FORM.DURATIONS.H4' }
   ];
 
   readonly form = this.fb.group(
@@ -116,6 +119,19 @@ export class BookingFormModalComponent implements OnInit {
 
   get isEdit(): boolean {
     return !!this.booking();
+  }
+
+  /** locale الحالي للتواريخ والأوقات */
+  private get locale(): string {
+    return this.lang.currentLang() === 'ar' ? 'ar-EG' : 'en-US';
+  }
+
+  /** ترجمة مع استبدال {{param}} (لأن lang.t مش بتاخد params) */
+  private tr(key: string, params: Record<string, string | number> = {}): string {
+    return Object.entries(params).reduce(
+      (text, [k, v]) => text.replaceAll(`{{${k}}}`, String(v)),
+      this.lang.t(key)
+    );
   }
 
   ngOnInit(): void {
@@ -157,10 +173,10 @@ export class BookingFormModalComponent implements OnInit {
 
   errorOf(name: string): string {
     const e = this.form.get(name)?.errors;
-    if (e?.['required']) return 'هذا الحقل مطلوب';
-    if (e?.['min']) return 'لازم يكون 1 على الأقل';
-    if (e?.['pastDate']) return 'لا يمكن الحجز في تاريخ سابق';
-    return 'قيمة غير صالحة';
+    if (e?.['required']) return this.lang.t('BOOKINGS.FORM.ERRORS.REQUIRED');
+    if (e?.['min']) return this.lang.t('BOOKINGS.FORM.ERRORS.MIN_ONE');
+    if (e?.['pastDate']) return this.lang.t('BOOKINGS.FORM.ERRORS.PAST_DATE');
+    return this.lang.t('BOOKINGS.FORM.ERRORS.INVALID');
   }
 
   // ---------- Quick date ----------
@@ -221,7 +237,7 @@ export class BookingFormModalComponent implements OnInit {
 
   // ---------- Display ----------
   fmt12(min: number): string {
-    return timeDate(min).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit', hour12: true });
+    return timeDate(min).toLocaleTimeString(this.locale, { hour: 'numeric', minute: '2-digit', hour12: true });
   }
 
   summary(): string {
@@ -229,21 +245,32 @@ export class BookingFormModalComponent implements OnInit {
     const start = minutesOf(startTime);
     if (!bookingDate || start === null) return '';
 
-    const day = bookingDate.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+    const day = bookingDate.toLocaleDateString(this.locale, { weekday: 'long', day: 'numeric', month: 'long' });
     let text = `${day} · ${this.fmt12(start)}`;
 
     const mins = this.durationMinutes();
     const end = minutesOf(expectedEndTime);
-    if (end !== null && mins) text += ` ← ${this.fmt12(end)} (${this.durationLabel(mins)})`;
+    if (end !== null && mins) {
+      const arrow = this.lang.currentLang() === 'ar' ? '←' : '→';
+      text += ` ${arrow} ${this.fmt12(end)} (${this.durationLabel(mins)})`;
+    }
     return text;
   }
 
   private durationLabel(mins: number): string {
     const h = Math.floor(mins / 60);
     const m = mins % 60;
-    const hours = h === 1 ? 'ساعة' : h === 2 ? 'ساعتين' : h >= 3 && h <= 10 ? `${h} ساعات` : `${h} ساعة`;
+
+    const hours =
+      h === 0 ? ''
+      : h === 1 ? this.lang.t('BOOKINGS.FORM.DURATION.HOUR_ONE')
+      : h === 2 ? this.lang.t('BOOKINGS.FORM.DURATION.HOUR_TWO')
+      : h <= 10 ? this.tr('BOOKINGS.FORM.DURATION.HOURS_FEW', { n: h })
+      : this.tr('BOOKINGS.FORM.DURATION.HOURS_MANY', { n: h });
+
     if (m === 0) return hours;
-    return h === 0 ? `${m} دقيقة` : `${hours} و${m} دقيقة`;
+    if (h === 0) return this.tr('BOOKINGS.FORM.DURATION.MINUTES_ONLY', { m });
+    return this.tr('BOOKINGS.FORM.DURATION.HOURS_AND_MINUTES', { hours, m });
   }
 
   // ---------- Save ----------
@@ -279,7 +306,9 @@ export class BookingFormModalComponent implements OnInit {
     request$.subscribe({
       next: () => {
         this.isSubmitting.set(false);
-        this.toastr.success(current ? 'تم تعديل الحجز بنجاح' : 'تمت إضافة الحجز بنجاح');
+        this.toastr.success(
+          this.lang.t(current ? 'BOOKINGS.FORM.TOAST.UPDATED' : 'BOOKINGS.FORM.TOAST.CREATED')
+        );
         this.saved.emit(key);
       },
       error: err => {
@@ -305,6 +334,6 @@ export class BookingFormModalComponent implements OnInit {
       if (typeof first === 'string') return first;
       if (first?.description) return first.description;
     }
-    return 'تعذر حفظ الحجز، حاولي مرة أخرى.';
+    return this.lang.t('BOOKINGS.FORM.ERRORS.SAVE');
   }
 }

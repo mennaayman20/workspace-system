@@ -1,13 +1,12 @@
 import { Component, DestroyRef, computed, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastrService } from 'ngx-toastr';
-
-// استيراد Lucide Icons
+import { TranslatePipe } from '@ngx-translate/core';
 import { LucideAngularModule, ChevronDown } from 'lucide-angular';
 
 import { PricingRuleService } from '../../pricing-rule.service';
-import { NotifyService } from '../../notify.service';
 import { apiErrorMessage } from '../../../../core/utils/api-error';
+import { LanguageService } from '../../../../core/services/lang.service'; // عدّل المسار لو مختلف
 import { WorkspaceType } from '../../../../core/interfaces/Iworkspace';
 import { configToOperations, isReadyForCheckout, rulesToConfig } from '../../pricing-rules.mapper';
 import { PricingRule, TypePricingConfig } from '../../Ipricing';
@@ -17,16 +16,16 @@ import { TypePricingFormComponent } from '../type-pricing-form/type-pricing-form
 @Component({
   selector: 'app-workspace-type-pricing-card',
   standalone: true,
-  imports: [TypePricingFormComponent, LucideAngularModule],
+  imports: [TypePricingFormComponent, LucideAngularModule, TranslatePipe],
   templateUrl: './workspace-type-pricing-card.component.html',
 })
 export class WorkspaceTypePricingCardComponent {
   readonly ChevronDownIcon = ChevronDown;
 
   private readonly ruleService = inject(PricingRuleService);
-  private readonly notify = inject(NotifyService);
   private readonly destroyRef = inject(DestroyRef);
-private readonly toastr = inject(ToastrService);   // بدل NotifyService
+  private readonly toastr = inject(ToastrService);
+  private readonly lang = inject(LanguageService);
 
   readonly planId = input.required<number>();
   readonly workspaceType = input.required<WorkspaceType>();
@@ -36,43 +35,39 @@ private readonly toastr = inject(ToastrService);   // بدل NotifyService
 
   readonly isSaving = signal(false);
   private readonly manualToggle = signal<boolean | null>(null);
-readonly isOpen = computed(() => this.manualToggle() ?? !this.isReady());
+  /** مفتوح تلقائيًا لو النوع لسه ملوش سعر، إلا لو المستخدم غيّر بنفسه */
+  readonly isOpen = computed(() => this.manualToggle() ?? !this.isReady());
 
   readonly config = computed(() => rulesToConfig(this.rules()));
   readonly isReady = computed(() => isReadyForCheckout(this.config()));
-  /** مفتوح تلقائيًا لو النوع لسه ملوش سعر، إلا لو المستخدم غيّر بنفسه */
-  readonly summary = computed(() => {
-    const rate = this.config().hourlyRate;
-    return rate ? `${rate} ج / ساعة` : 'لم يتم تحديد السعر بعد';
-  });
 
   toggle(): void {
     this.manualToggle.set(!this.isOpen());
   }
 
- onSave(config: TypePricingConfig): void {
-  const operations = configToOperations(this.planId(), this.workspaceType().id, this.rules(), config);
-  if (operations.length === 0) {
-    this.toastr.info('لا توجد تغييرات للحفظ');
-    return;
-  }
+  onSave(config: TypePricingConfig): void {
+    const operations = configToOperations(this.planId(), this.workspaceType().id, this.rules(), config);
+    if (operations.length === 0) {
+      this.toastr.info(this.lang.t('PRICING.CARD.TOAST.NO_CHANGES'));
+      return;
+    }
 
-  this.isSaving.set(true);
-  this.ruleService
-    .applyOperations(operations)
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe({
-      next: () => {
-        this.isSaving.set(false);
-        this.manualToggle.set(false);          // اقفل الكارت بعد الحفظ صراحةً
-        this.toastr.success('تم حفظ التسعير بنجاح');
-        this.changed.emit();
-      },
-      error: (err: unknown) => {
-        this.isSaving.set(false);
-        this.toastr.error(apiErrorMessage(err, 'تعذر حفظ التسعير، حاول مرة أخرى'));
-        // مفيش changed.emit هنا: عشان الفورم ميتمسحش
-      },
-    });
-}
+    this.isSaving.set(true);
+    this.ruleService
+      .applyOperations(operations)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.isSaving.set(false);
+          this.manualToggle.set(false); // اقفل الكارت بعد الحفظ صراحةً
+          this.toastr.success(this.lang.t('PRICING.CARD.TOAST.SAVED'));
+          this.changed.emit();
+        },
+        error: (err: unknown) => {
+          this.isSaving.set(false);
+          this.toastr.error(apiErrorMessage(err, this.lang.t('PRICING.CARD.ERRORS.SAVE')));
+          // مفيش changed.emit هنا: عشان الفورم ميتمسحش
+        },
+      });
+  }
 }

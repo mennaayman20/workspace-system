@@ -826,6 +826,261 @@
       "CHECKOUT_SUCCESS": "Session ended and invoice collected successfully"
     }
   }
+
+
+,
+  "PRICING": {
+    "COMMON": {
+      "RETRY": "Retry",
+      "CANCEL": "Cancel",
+      "SAVING": "Saving...",
+      "REQUIRED_FIELDS": "Required fields",
+      "CURRENCY": "EGP"
+    },
+    "STATUS": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive"
+    },
+    "PLANS": {
+      "TITLE": "Pricing Plans",
+      "SUBTITLE": "Create price lists and set the price of each workspace type within each plan",
+      "ADD": "Add New Plan",
+      "ADD_FIRST": "Add the first plan",
+      "SEARCH_PLACEHOLDER": "Search by name or description...",
+      "SEARCH_ARIA": "Search plans",
+      "FILTER_ARIA": "Filter by status",
+      "FILTERS": { "ALL": "All", "ACTIVE": "Active", "INACTIVE": "Inactive" },
+      "EMPTY_FILTERED_TITLE": "No matching results",
+      "EMPTY_FILTERED_HINT": "Try changing the search term or status",
+      "EMPTY_TITLE": "No pricing plans yet",
+      "EMPTY_HINT": "Start with a base plan like \"Standard Plan\", then set the type prices",
+      "NO_DESCRIPTION": "No description",
+      "MANAGE_PRICES": "Manage Prices",
+      "EDIT": "Edit",
+      "DELETE": "Delete",
+      "PREV": "Previous",
+      "NEXT": "Next",
+      "PAGE_OF": "Page {{page}} of {{total}}",
+      "DELETE_TITLE": "Delete Plan",
+      "TOAST": {
+        "CREATED": "Plan created, now set the workspace type prices",
+        "UPDATED": "Plan updated successfully",
+        "DELETED": "Plan deleted successfully"
+      },
+      "ERRORS": {
+        "LOAD": "Failed to load pricing plans, please try again.",
+        "DELETE": "Failed to delete the plan"
+      }
+    },
+    "DETAILS": {
+      "BACK": "Pricing Plans",
+      "EDIT_PLAN": "Edit Plan",
+      "PRICES_TITLE": "Workspace Type Prices",
+      "READY_COUNT": "{{ready}} of {{total}} ready",
+      "FOOTNOTE": "The price applies to all workspaces of the same type. The final invoice is calculated by the backend at checkout based on these values.",
+      "NO_TYPES_TITLE": "No workspace types yet",
+      "NO_TYPES_HINT": "Add a workspace type first so it appears here and can be priced.",
+      "TOAST": { "PLAN_UPDATED": "Plan updated successfully" },
+      "ERRORS": {
+        "INVALID_LINK": "Invalid plan link.",
+        "LOAD": "Failed to load plan data, please try again.",
+        "REFRESH_RULES": "Failed to refresh prices, reload the page",
+        "REFRESH_PLAN": "Failed to refresh plan data, reload the page"
+      }
+    },
+    "MODAL": {
+      "ADD_TITLE": "Add Pricing Plan",
+      "EDIT_TITLE": "Edit Plan",
+      "ADD_SUBTITLE": "After saving you'll move on to set the workspace type prices.",
+      "EDIT_SUBTITLE": "Edit the plan's basic details.",
+      "CLOSE": "Close",
+      "LOADING_TRANSLATIONS": "Loading translations...",
+      "OPTIONAL": "optional",
+      "SAVE_ADD": "Create Plan",
+      "SAVE_EDIT": "Save Changes",
+      "ACTIVE_TITLE": "Active plan",
+      "ACTIVE_HINT": "Shown when choosing a plan for a customer or company",
+      "SECTIONS": {
+        "NAME": "Plan Name",
+        "DESCRIPTION": "Description"
+      },
+      "FIELDS": {
+        "NAME_AR": "Arabic Name",
+        "NAME_EN": "English Name",
+        "DESC_AR": "Arabic Description",
+        "DESC_EN": "English Description"
+      },
+      "PLACEHOLDERS": {
+        "NAME_AR": "مثال: الخطة القياسية",
+        "NAME_EN": "e.g. Standard Plan",
+        "DESC_AR": "مثال: أسعار الزبائن العاديين",
+        "DESC_EN": "e.g. Regular customers pricing"
+      },
+      "ERRORS": {
+        "NAME_AR_REQUIRED": "Arabic name is required",
+        "NAME_EN_REQUIRED": "English name is required",
+        "SAVE": "Failed to save the plan, please try again"
+      }
+    },
+    "CARD": {
+      "READY": "Ready for checkout",
+      "MISSING_RATE": "Hourly rate missing",
+      "RATE_SUMMARY": "{{rate}} EGP / hour",
+      "NO_RATE": "Price not set yet",
+      "TOAST": {
+        "NO_CHANGES": "No changes to save",
+        "SAVED": "Pricing saved successfully"
+      },
+      "ERRORS": { "SAVE": "Failed to save pricing, please try again" }
+    },
+    "FORM": {
+      "SAVE": "Save Pricing",
+      "FIELDS": {
+        "HOURLY_RATE": "Hourly Rate",
+        "MIN_CHARGE": "Minimum Charge",
+        "MAX_CHARGE": "Maximum Charge"
+      },
+      "UNITS": { "PER_HOUR": "EGP / hour" },
+      "HINTS": {
+        "HOURLY_RATE": "Required: without it the invoice calculation fails when ending a session.",
+        "MIN_CHARGE": "If the calculated amount is lower, it is raised to this value.",
+        "MAX_CHARGE": "If the calculated amount is higher, it is lowered to this value."
+      },
+      "ROUNDING": {
+        "TITLE": "Session duration rounding",
+        "NONE": "No rounding",
+        "UP": "Round up",
+        "DOWN": "Round down",
+        "MINUTES_LABEL": "Round to nearest (minutes)",
+        "MINUTE_UNIT": "min",
+        "EXAMPLE": "Example: a 65-minute session rounded to 30 is billed as {{result}} minutes."
+      },
+      "ERRORS": {
+        "RATE_POSITIVE": "Enter a price greater than zero",
+        "NEGATIVE": "The value cannot be negative",
+        "MAX_BELOW_MIN": "Maximum charge cannot be less than the minimum charge.",
+        "ROUNDING_MINUTES": "Enter a valid number of minutes greater than zero"
+      }
+    }
+  
+}
+
+
+
+,
+  "BOOKINGS": {
+    "TITLE": "Bookings Management",
+    "SUBTITLE": "A weekly board of customer bookings, drag any booking to another day to reschedule it",
+    "NEW": "New Booking",
+    "PREV_WEEK": "Previous week",
+    "NEXT_WEEK": "Next week",
+    "CURRENT_WEEK": "Current week",
+    "WEEK_COUNT": "{{count}} bookings this week",
+    "SEARCH_PLACEHOLDER": "Search by customer or workspace...",
+    "RETRY": "Retry",
+    "TODAY": "Today",
+    "NEW_IN_DAY": "New booking on this day",
+    "NO_BOOKINGS": "No bookings",
+    "OPTIONS": "Booking options",
+    "NO_WEEK_BOOKINGS": "No bookings this week. Navigate between weeks or press + on any day to add one.",
+    "EMPTY_TITLE": "No bookings yet",
+    "ADD_FIRST": "Add the first booking",
+    "CHANGE_STATUS": "Change status",
+    "EDIT": "Edit",
+    "DELETE": "Delete",
+    "DELETE_TITLE": "Delete Booking",
+    "STATS": { "ALL": "Total Bookings" },
+    "STATUS": {
+      "PENDING": "Pending",
+      "CONFIRMED": "Confirmed",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+   "TOAST": {
+  "STATUS_CHANGED": "Booking status changed",
+  "MOVED": "Booking moved to {{date}}",
+  "DELETED": "Booking deleted"
+},
+"ERRORS": {
+  "LOAD": "Failed to load bookings. Please try again.",
+  "REFRESH": "Failed to refresh the list, reload the page",
+  "LOAD_CUSTOMERS": "Failed to load the customers list",
+  "LOAD_WORKSPACES": "Failed to load the workspaces list",
+  "STATUS": "Failed to change status.",
+  "MOVE": "Failed to move the booking.",
+  "DELETE": "Failed to delete the booking."
+},
+    "FORM": {
+      "ADD_TITLE": "New Booking",
+      "EDIT_TITLE": "Edit Booking",
+      "ADD_SUBTITLE": "Choose the customer, workspace and time",
+      "EDIT_SUBTITLE": "Edit the booking details then save",
+      "CLOSE": "Close",
+      "SECTIONS": {
+        "CLIENT_WORKSPACE": "Customer & Workspace",
+        "SCHEDULE": "Schedule",
+        "PEOPLE": "Number of People",
+        "NOTES": "Notes"
+      },
+      "CUSTOMER": "Customer",
+      "CUSTOMER_PLACEHOLDER": "Select a customer...",
+      "CUSTOMER_SEARCH": "Search for a customer...",
+      "WORKSPACE": "Workspace",
+      "WORKSPACE_PLACEHOLDER": "Select a workspace...",
+      "WORKSPACE_SEARCH": "Search for a workspace...",
+      "DATE": "Booking Date",
+      "TODAY": "Today",
+      "TOMORROW": "Tomorrow",
+      "START_TIME": "Start Time",
+      "END_TIME": "End Time",
+      "OPTIONAL": "optional",
+      "END_AFTER_START": "Must be after the start time",
+      "QUICK_START": "Quick start",
+      "QUICK_DURATION": "Quick duration",
+      "DECREASE": "Decrease",
+      "INCREASE": "Increase",
+      "NOTES_PLACEHOLDER": "Any additional details about the booking...",
+      "REQUIRED_FIELDS": "Required fields",
+      "CANCEL": "Cancel",
+      "SAVING": "Saving...",
+      "SAVE_ADD": "Save Booking",
+      "SAVE_EDIT": "Save Changes",
+      "DURATIONS": {
+        "H1": "1 hour",
+        "H2": "2 hours",
+        "H3": "3 hours",
+        "H4": "4 hours"
+      },
+      "DURATION": {
+        "HOUR_ONE": "1 hour",
+        "HOUR_TWO": "2 hours",
+        "HOURS_FEW": "{{n}} hours",
+        "HOURS_MANY": "{{n}} hours",
+        "MINUTES_ONLY": "{{m}} min",
+        "HOURS_AND_MINUTES": "{{hours}} and {{m}} min"
+      },
+      "ERRORS": {
+        "REQUIRED": "This field is required",
+        "MIN_ONE": "Must be at least 1",
+        "PAST_DATE": "Cannot book a past date",
+        "INVALID": "Invalid value",
+        "SAVE": "Failed to save the booking, please try again."
+      },
+      "TOAST": {
+        "CREATED": "Booking added successfully",
+        "UPDATED": "Booking updated successfully"
+      }
+    }
+  
+}
+
+
+
+
+
+
+
+
     
 
   

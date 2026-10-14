@@ -2,12 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { unwrapList } from '../../../core/utils/unwrap-list';
+import { LanguageService } from '../../../core/services/lang.service'; // عدّل المسار لو مختلف
 import { Booking, BookingStatus, CreateBookingDto, UpdateBookingDto } from './Ibooking';
 import { environment } from '../../../core/environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class BookingService {
   private http = inject(HttpClient);
+  private lang = inject(LanguageService);
   private baseUrl = `${environment.apiUrl}/api/Bookings`;
 
   /** الباك بيرجّع صفحات، فبنطلب صفحة كبيرة عشان البورد الأسبوعي */
@@ -40,19 +42,38 @@ export class BookingService {
     return this.http.patch<void>(`${this.baseUrl}/${id}/status`, { status });
   }
 
+  /** بيختار الاسم بلغة الواجهة، وبيرجع للغة التانية لو الأولى فاضية */
+  private pickName(ar?: string | null, en?: string | null, ...fallbacks: (string | null | undefined)[]): string {
+    const isAr = this.lang.currentLang() === 'ar';
+    const primary = isAr ? ar : en;
+    const secondary = isAr ? en : ar;
+    return primary || secondary || fallbacks.find(f => !!f) || '-';
+  }
+
   private normalize(raw: any): Booking {
     return {
       id: raw.id,
+      bookingNumber: raw.bookingNumber,
       customerId: raw.customerId ?? raw.customer?.id,
-      customerName: raw.customerName ?? raw.customer?.fullName ?? '-',
+      customerNameAr: raw.customerNameAr ?? null,
+      customerNameEn: raw.customerNameEn ?? null,
+      customerName: this.pickName(
+        raw.customerNameAr, raw.customerNameEn, raw.customerName, raw.customer?.fullName
+      ),
       workspaceId: raw.workspaceId ?? raw.workspace?.id,
-      workspaceName: raw.workspaceName ?? raw.workspace?.name ?? '-',
+      workspaceNameAr: raw.workspaceNameAr ?? null,
+      workspaceNameEn: raw.workspaceNameEn ?? null,
+      workspaceName: this.pickName(
+        raw.workspaceNameAr, raw.workspaceNameEn, raw.workspaceName, raw.workspace?.name
+      ),
+      workspaceCode: raw.workspaceCode ?? null,
       bookingDate: raw.bookingDate,
       startTime: raw.startTime,
       expectedEndTime: raw.expectedEndTime ?? null,
       numberOfPeople: raw.numberOfPeople ?? 1,
       notes: raw.notes ?? null,
-      status: raw.status ?? 'Pending'
+      status: raw.status ?? 'Pending',
+      hasSession: raw.hasSession ?? false
     };
   }
 }

@@ -3,12 +3,12 @@
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .fade-up { animation: fadeUp .35s ease-out both; }
+  .fade-up { animation: fadeUp .35s ease-out backwards; }
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
 </style>
 
-<div dir="rtl" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-up">
-  <div role="dialog" aria-modal="true"
+<div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-up">
+  <div role="dialog" aria-modal="true" aria-labelledby="plan-modal-title"
        class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col overflow-hidden">
 
     <!-- Header -->
@@ -19,15 +19,16 @@
             <lucide-icon [img]="LayersIcon" class="w-6 h-6"></lucide-icon>
           </div>
           <div>
-            <h3 class="text-lg font-extrabold text-slate-900 leading-tight">
-              {{ isEdit ? 'تعديل الخطة' : 'إضافة خطة تسعير' }}
+            <h3 id="plan-modal-title" class="text-lg font-extrabold text-slate-900 leading-tight">
+              {{ (isEdit ? 'PRICING.MODAL.EDIT_TITLE' : 'PRICING.MODAL.ADD_TITLE') | translate }}
             </h3>
             <p class="text-xs text-slate-500 mt-0.5">
-              {{ isEdit ? 'عدّل بيانات الخطة الأساسية.' : 'بعد الحفظ ستنتقل لتحديد أسعار أنواع المساحات.' }}
+              {{ (isEdit ? 'PRICING.MODAL.EDIT_SUBTITLE' : 'PRICING.MODAL.ADD_SUBTITLE') | translate }}
             </p>
           </div>
         </div>
-        <button type="button" (click)="cancel()" [disabled]="isSaving()" aria-label="إغلاق"
+        <button type="button" (click)="cancel()" [disabled]="isSaving()"
+                [attr.aria-label]="'PRICING.MODAL.CLOSE' | translate"
                 class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white disabled:opacity-50 transition-colors">
           <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
         </button>
@@ -48,7 +49,7 @@
         @if (isLoadingTranslations()) {
           <div class="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
             <span class="inline-block w-3.5 h-3.5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></span>
-            جاري تحميل الترجمات...
+            {{ 'PRICING.MODAL.LOADING_TRANSLATIONS' | translate }}
           </div>
         }
 
@@ -58,33 +59,35 @@
             <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
               <lucide-icon [img]="LayersIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">اسم الخطة</h4>
+            <h4 class="text-sm font-extrabold text-slate-800">{{ 'PRICING.MODAL.SECTIONS.NAME' | translate }}</h4>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label for="plan-name-ar" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>الاسم بالعربي <span class="text-rose-500">*</span></span>
+                <span>{{ 'PRICING.MODAL.FIELDS.NAME_AR' | translate }} <span class="text-rose-500">*</span></span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
               </label>
               <input pInputText id="plan-name-ar" formControlName="nameAr" dir="rtl" maxlength="100"
-                     class="w-full !h-11 !rounded-xl" placeholder="مثال: الخطة القياسية"
+                     class="w-full !h-11 !rounded-xl"
+                     [placeholder]="'PRICING.MODAL.PLACEHOLDERS.NAME_AR' | translate"
                      [class.ng-invalid]="isInvalid('nameAr')" [class.ng-dirty]="isInvalid('nameAr')" />
               @if (isInvalid('nameAr')) {
-                <p class="text-xs text-rose-600 mt-1">الاسم بالعربي مطلوب</p>
+                <p class="text-xs text-rose-600 mt-1">{{ 'PRICING.MODAL.ERRORS.NAME_AR_REQUIRED' | translate }}</p>
               }
             </div>
 
             <div>
               <label for="plan-name-en" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>Plan Name <span class="text-rose-500">*</span></span>
+                <span>{{ 'PRICING.MODAL.FIELDS.NAME_EN' | translate }} <span class="text-rose-500">*</span></span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
               </label>
               <input pInputText id="plan-name-en" formControlName="nameEn" dir="ltr" maxlength="100"
-                     class="w-full !h-11 !rounded-xl" placeholder="e.g. Standard Plan"
+                     class="w-full !h-11 !rounded-xl text-left"
+                     [placeholder]="'PRICING.MODAL.PLACEHOLDERS.NAME_EN' | translate"
                      [class.ng-invalid]="isInvalid('nameEn')" [class.ng-dirty]="isInvalid('nameEn')" />
               @if (isInvalid('nameEn')) {
-                <p class="text-xs text-rose-600 mt-1">English name is required</p>
+                <p class="text-xs text-rose-600 mt-1">{{ 'PRICING.MODAL.ERRORS.NAME_EN_REQUIRED' | translate }}</p>
               }
             </div>
           </div>
@@ -96,26 +99,31 @@
             <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
               <lucide-icon [img]="TextIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">الوصف <span class="font-normal text-slate-400">(اختياري)</span></h4>
+            <h4 class="text-sm font-extrabold text-slate-800">
+              {{ 'PRICING.MODAL.SECTIONS.DESCRIPTION' | translate }}
+              <span class="font-normal text-slate-400">({{ 'PRICING.MODAL.OPTIONAL' | translate }})</span>
+            </h4>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>الوصف</span>
+              <label for="plan-desc-ar" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+                <span>{{ 'PRICING.MODAL.FIELDS.DESC_AR' | translate }}</span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">AR</span>
               </label>
-              <textarea pTextarea formControlName="descriptionAr" rows="3" dir="rtl" maxlength="500"
-                        class="w-full !rounded-xl resize-none" placeholder="مثال: أسعار الزبائن العاديين"></textarea>
+              <textarea pTextarea id="plan-desc-ar" formControlName="descriptionAr" rows="3" dir="rtl" maxlength="500"
+                        class="w-full !rounded-xl resize-none"
+                        [placeholder]="'PRICING.MODAL.PLACEHOLDERS.DESC_AR' | translate"></textarea>
             </div>
 
             <div>
-              <label class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>Description</span>
+              <label for="plan-desc-en" class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+                <span>{{ 'PRICING.MODAL.FIELDS.DESC_EN' | translate }}</span>
                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">EN</span>
               </label>
-              <textarea pTextarea formControlName="descriptionEn" rows="3" dir="ltr" maxlength="500"
-                        class="w-full !rounded-xl resize-none" placeholder="e.g. Regular customers pricing"></textarea>
+              <textarea pTextarea id="plan-desc-en" formControlName="descriptionEn" rows="3" dir="ltr" maxlength="500"
+                        class="w-full !rounded-xl resize-none text-left"
+                        [placeholder]="'PRICING.MODAL.PLACEHOLDERS.DESC_EN' | translate"></textarea>
             </div>
           </div>
         </section>
@@ -124,8 +132,8 @@
         <section class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
           <div class="flex items-center justify-between gap-4">
             <div>
-              <p class="text-sm font-extrabold text-slate-800">خطة نشطة</p>
-              <p class="text-xs text-slate-500 mt-0.5">تظهر عند اختيار خطة لعميل أو شركة</p>
+              <p class="text-sm font-extrabold text-slate-800">{{ 'PRICING.MODAL.ACTIVE_TITLE' | translate }}</p>
+              <p class="text-xs text-slate-500 mt-0.5">{{ 'PRICING.MODAL.ACTIVE_HINT' | translate }}</p>
             </div>
             <p-toggleswitch formControlName="isActive" />
           </div>
@@ -134,16 +142,18 @@
 
       <!-- Footer -->
       <div class="shrink-0 flex items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
-        <p class="hidden sm:block text-[11px] text-slate-400"><span class="text-rose-500">*</span> حقول مطلوبة</p>
+        <p class="hidden sm:block text-[11px] text-slate-400">
+          <span class="text-rose-500">*</span> {{ 'PRICING.COMMON.REQUIRED_FIELDS' | translate }}
+        </p>
         <div class="flex items-center gap-3 ms-auto">
           <button type="button" (click)="cancel()" [disabled]="isSaving()"
                   class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
-            إلغاء
+            {{ 'PRICING.COMMON.CANCEL' | translate }}
           </button>
           <button type="submit" [disabled]="isSaving() || isLoadingTranslations()"
                   class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2">
             <lucide-icon [img]="SaveIcon" class="w-4 h-4"></lucide-icon>
-            {{ isSaving() ? 'جارٍ الحفظ...' : isEdit ? 'حفظ التعديلات' : 'إنشاء الخطة' }}
+            {{ (isSaving() ? 'PRICING.COMMON.SAVING' : (isEdit ? 'PRICING.MODAL.SAVE_EDIT' : 'PRICING.MODAL.SAVE_ADD')) | translate }}
           </button>
         </div>
       </div>

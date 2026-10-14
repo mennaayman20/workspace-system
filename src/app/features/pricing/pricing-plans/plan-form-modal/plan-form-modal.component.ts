@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { TranslatePipe } from '@ngx-translate/core';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -9,6 +10,7 @@ import { LucideAngularModule, Layers, X, Save, FileText } from 'lucide-angular';
 
 import { PricingPlanService } from '../../../pricing/pricing-plan.service';
 import { apiErrorMessage } from '../../../../core/utils/api-error';
+import { LanguageService } from '../../../../core/services/lang.service'; // عدّل المسار لو مختلف
 import { PricingPlan, PricingPlanPayload } from '../../Ipricing';
 
 export interface PlanFormResult {
@@ -19,13 +21,21 @@ export interface PlanFormResult {
 @Component({
   selector: 'app-plan-form-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, LucideAngularModule, InputTextModule, TextareaModule, ToggleSwitchModule],
+  imports: [
+    ReactiveFormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    InputTextModule,
+    TextareaModule,
+    ToggleSwitchModule,
+  ],
   templateUrl: './plan-form-modal.component.html',
 })
 export class PlanFormModalComponent implements OnInit {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly planService = inject(PricingPlanService);
   private readonly toastr = inject(ToastrService);
+  private readonly lang = inject(LanguageService);
 
   plan = input<PricingPlan | null>(null);
   saved = output<PlanFormResult>();
@@ -107,7 +117,7 @@ export class PlanFormModalComponent implements OnInit {
         this.saved.emit(result);
       },
       error: (err) => {
-        const msg = apiErrorMessage(err, 'تعذر حفظ الخطة، حاول مرة أخرى');
+        const msg = apiErrorMessage(err, this.lang.t('PRICING.MODAL.ERRORS.SAVE'));
         this.isSaving.set(false);
         this.errorMessage.set(msg);
         this.toastr.error(msg);

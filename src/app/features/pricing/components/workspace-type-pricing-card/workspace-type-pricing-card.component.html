@@ -8,7 +8,13 @@
       </div>
       <div class="min-w-0">
         <h3 class="font-bold text-slate-900 truncate">{{ workspaceType().name }}</h3>
-        <p class="text-xs text-slate-500 mt-0.5">{{ summary() }}</p>
+        <p class="text-xs text-slate-500 mt-0.5">
+          @if (config().hourlyRate; as rate) {
+            {{ 'PRICING.CARD.RATE_SUMMARY' | translate: { rate: rate } }}
+          } @else {
+            {{ 'PRICING.CARD.NO_RATE' | translate }}
+          }
+        </p>
       </div>
     </div>
 
@@ -17,14 +23,14 @@
         [class]="isReady() ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-amber-50 text-amber-700 ring-amber-600/20'"
         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset">
         <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-        {{ isReady() ? 'جاهز للـ checkout' : 'ناقص سعر الساعة' }}
+        {{ (isReady() ? 'PRICING.CARD.READY' : 'PRICING.CARD.MISSING_RATE') | translate }}
       </span>
       <lucide-icon [img]="ChevronDownIcon" class="w-5 h-5 text-slate-400 transition-transform duration-200" [class.rotate-180]="isOpen()"></lucide-icon>
     </div>
   </button>
 
   @if (isOpen()) {
-    <div class="border-t border-slate-100 p-4 sm:p-5">
+    <div class="border-t border-slate-100 p-4 sm:p-5 bg-slate-50/40">
       <app-type-pricing-form [config]="config()" [isSaving]="isSaving()" (save)="onSave($event)" />
     </div>
   }

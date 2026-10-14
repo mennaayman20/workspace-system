@@ -7,6 +7,7 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { RoundingMode, TypePricingConfig } from '../../Ipricing';
 
@@ -32,7 +33,7 @@ const pricingFormValidator: ValidatorFn = (control: AbstractControl): Validation
 @Component({
   selector: 'app-type-pricing-form',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './type-pricing-form.component.html',
 })
 export class TypePricingFormComponent {
@@ -44,20 +45,38 @@ export class TypePricingFormComponent {
 
   readonly priceFields: {
     control: PriceControl;
-    label: string;
-    unit: string;
-    hint: string;
+    labelKey: string;
+    unitKey: string;
+    hintKey: string;
     required: boolean;
   }[] = [
-    { control: 'hourlyRate', label: 'سعر الساعة', unit: 'ج / ساعة', hint: 'إجباري: بدونه يفشل حساب الفاتورة عند إنهاء الجلسة.', required: true },
-    { control: 'minimumCharge', label: 'أقل مبلغ', unit: 'ج', hint: 'لو المبلغ المحسوب أقل منه يُرفع إليه.', required: false },
-    { control: 'fullDayMaximum', label: 'أقصى مبلغ', unit: 'ج', hint: 'لو المبلغ المحسوب أكبر منه يُخفَّض إليه.', required: false },
+    {
+      control: 'hourlyRate',
+      labelKey: 'PRICING.FORM.FIELDS.HOURLY_RATE',
+      unitKey: 'PRICING.FORM.UNITS.PER_HOUR',
+      hintKey: 'PRICING.FORM.HINTS.HOURLY_RATE',
+      required: true,
+    },
+    {
+      control: 'minimumCharge',
+      labelKey: 'PRICING.FORM.FIELDS.MIN_CHARGE',
+      unitKey: 'PRICING.COMMON.CURRENCY',
+      hintKey: 'PRICING.FORM.HINTS.MIN_CHARGE',
+      required: false,
+    },
+    {
+      control: 'fullDayMaximum',
+      labelKey: 'PRICING.FORM.FIELDS.MAX_CHARGE',
+      unitKey: 'PRICING.COMMON.CURRENCY',
+      hintKey: 'PRICING.FORM.HINTS.MAX_CHARGE',
+      required: false,
+    },
   ];
 
-  readonly roundingOptions: { value: RoundingMode; label: string }[] = [
-    { value: 'none', label: 'بدون تقريب' },
-    { value: 'up', label: 'تقريب لأعلى' },
-    { value: 'down', label: 'تقريب لأسفل' },
+  readonly roundingOptions: { value: RoundingMode; labelKey: string }[] = [
+    { value: 'none', labelKey: 'PRICING.FORM.ROUNDING.NONE' },
+    { value: 'up', labelKey: 'PRICING.FORM.ROUNDING.UP' },
+    { value: 'down', labelKey: 'PRICING.FORM.ROUNDING.DOWN' },
   ];
 
   readonly form = this.fb.group(
@@ -90,8 +109,11 @@ export class TypePricingFormComponent {
     return c.invalid && (c.touched || c.dirty);
   }
 
-  errorText(control: PriceControl): string {
-    return control === 'hourlyRate' ? 'أدخل سعرًا أكبر من صفر' : 'القيمة لا يمكن أن تكون سالبة';
+  /** بيرجّع مفتاح الترجمة، والـ template بيترجمه */
+  errorKey(control: PriceControl): string {
+    return control === 'hourlyRate'
+      ? 'PRICING.FORM.ERRORS.RATE_POSITIVE'
+      : 'PRICING.FORM.ERRORS.NEGATIVE';
   }
 
   get roundingMinutesInvalid(): boolean {

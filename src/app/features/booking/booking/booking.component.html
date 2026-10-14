@@ -3,11 +3,11 @@
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .fade-up { animation: fadeUp .35s ease-out both; }
+  .fade-up { animation: fadeUp .35s ease-out backwards; }
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
 </style>
 
-<div  class="p-4 sm:p-8 space-y-6 max-w-7xl mx-auto">
+<div class="p-4 sm:p-8 space-y-6 max-w-7xl mx-auto">
 
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-up">
@@ -16,15 +16,15 @@
         <lucide-icon [img]="CalendarIcon" class="w-6 h-6"></lucide-icon>
       </div>
       <div>
-        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">إدارة الحجوزات</h1>
-        <p class="text-sm text-slate-500 mt-1">جدول أسبوعي لحجوزات العملاء، اسحبي أي حجز ليوم تاني لتغيير موعده</p>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">{{ 'BOOKINGS.TITLE' | translate }}</h1>
+        <p class="text-sm text-slate-500 mt-1">{{ 'BOOKINGS.SUBTITLE' | translate }}</p>
       </div>
     </div>
 
     <button type="button" (click)="openForm()"
       class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
       <lucide-icon [img]="PlusIcon" class="w-4 h-4 transition-transform duration-200 group-hover:rotate-90"></lucide-icon>
-      <span>حجز جديد</span>
+      <span>{{ 'BOOKINGS.NEW' | translate }}</span>
     </button>
   </div>
 
@@ -35,25 +35,29 @@
 
       <!-- التنقل بين الأسابيع -->
       <div class="flex items-center gap-2">
-        <button type="button" (click)="shiftWeek(-1)" aria-label="الأسبوع السابق" title="الأسبوع السابق"
+        <button type="button" (click)="shiftWeek(-1)"
+          [attr.aria-label]="'BOOKINGS.PREV_WEEK' | translate" [attr.title]="'BOOKINGS.PREV_WEEK' | translate"
           class="w-10 h-10 rounded-xl flex items-center justify-center border border-slate-200 text-slate-600 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-200">
-          <lucide-icon [img]="PrevIcon" class="w-5 h-5"></lucide-icon>
+          <lucide-icon [img]="PrevIcon" class="w-5 h-5 ltr:rotate-180"></lucide-icon>
         </button>
 
         <div class="min-w-[13rem] text-center">
           <p class="text-sm font-extrabold text-slate-900">{{ weekLabel() }}</p>
-          <p class="text-[11px] text-slate-400 mt-0.5">{{ weekBookings().length }} حجز في هذا الأسبوع</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">
+            {{ 'BOOKINGS.WEEK_COUNT' | translate: { count: weekBookings().length } }}
+          </p>
         </div>
 
-        <button type="button" (click)="shiftWeek(1)" aria-label="الأسبوع التالي" title="الأسبوع التالي"
+        <button type="button" (click)="shiftWeek(1)"
+          [attr.aria-label]="'BOOKINGS.NEXT_WEEK' | translate" [attr.title]="'BOOKINGS.NEXT_WEEK' | translate"
           class="w-10 h-10 rounded-xl flex items-center justify-center border border-slate-200 text-slate-600 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-200">
-          <lucide-icon [img]="NextIcon" class="w-5 h-5"></lucide-icon>
+          <lucide-icon [img]="NextIcon" class="w-5 h-5 ltr:rotate-180"></lucide-icon>
         </button>
 
         @if (!isCurrentWeek()) {
           <button type="button" (click)="goToToday()"
             class="px-4 h-10 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-bold transition-colors">
-            الأسبوع الحالي
+            {{ 'BOOKINGS.CURRENT_WEEK' | translate }}
           </button>
         }
       </div>
@@ -63,56 +67,33 @@
         <lucide-icon [img]="SearchIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
         <input type="search" [value]="searchTerm()"
           (input)="onSearch($any($event.target).value)"
-          placeholder="ابحث باسم العميل أو المساحة..."
+          [placeholder]="'BOOKINGS.SEARCH_PLACEHOLDER' | translate"
           class="w-full ps-9 pe-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
       </div>
     </div>
 
-<!-- كروت الإحصائيات والفلاتر السريعة (بنفس ستايل الـ Workspace) -->
-<!-- كروت الإحصائيات والفلاتر السريعة -->
-  <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 pt-1">
-    @for (c of statCards; track c.value; let i = $index) {
-      <button type="button" (click)="onFilterStatus($any(c.value))"
-        [attr.aria-pressed]="statusFilter() === c.value"
-        [style.animation-delay.ms]="i * 50"
-        [class]="c.border + ' ' + c.tint + (statusFilter() === c.value ? ' ring-2 ring-offset-1 ' + c.ring : '')"
-        class="fade-up flex items-center justify-between gap-3 text-start p-4 sm:p-5 rounded-2xl border border-slate-200 border-s-4 bg-gradient-to-br via-white to-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-        
-        <div class="min-w-0">
-          <div class="text-sm font-semibold text-slate-600 leading-snug">{{ c.label }}</div>
-          <div class="mt-1 text-3xl font-extrabold text-slate-800 tabular-nums">
-            {{ statusCounts()[c.value] }}
+    <!-- كروت الإحصائيات والفلاتر السريعة -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 pt-1">
+      @for (c of statCards; track c.value; let i = $index) {
+        <button type="button" (click)="onFilterStatus($any(c.value))"
+          [attr.aria-pressed]="statusFilter() === c.value"
+          [style.animation-delay.ms]="i * 50"
+          [class]="c.border + ' ' + c.tint + (statusFilter() === c.value ? ' ring-2 ring-offset-1 ' + c.ring : '')"
+          class="fade-up flex items-center justify-between gap-3 text-start p-4 sm:p-5 rounded-2xl border border-slate-200 border-s-4 bg-gradient-to-br via-white to-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+
+          <div class="min-w-0">
+            <div class="text-sm font-semibold text-slate-600 leading-snug">{{ c.labelKey | translate }}</div>
+            <div class="mt-1 text-3xl font-extrabold text-slate-800 tabular-nums">
+              {{ statusCounts()[c.value] }}
+            </div>
           </div>
-        </div>
 
-        <span [class]="c.chip" class="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center">
-          <lucide-icon [img]="c.icon" class="w-5 h-5"></lucide-icon>
-        </span>
-      </button>
-    }
-  </div>
-
-  <!-- زر مسح الفلاتر لو في بحث أو فلاتر مفعلة -->
-  <!-- @if (searchTerm() || statusFilter() !== 'all') {
-    <div class="flex items-center justify-between pt-1">
-      <span class="text-xs text-slate-500 font-medium">تم تطبيق الفلاتر والبحث النشط</span>
-      <button type="button" (click)="resetFilters()"
-        class="px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors flex items-center gap-1">
-        <span>مسح الفلاتر والبحث</span>
-      </button>
-    </div>
-  } -->
-
-    <!-- زر مسح الفلاتر لو في بحث أو فلاتر مفعلة -->
-    <!-- @if (searchTerm() || statusFilter() !== 'all') {
-      <div class="flex items-center justify-between pt-2">
-        <span class="text-xs text-slate-500 font-medium">تم تطبيق الفلاتر والبحث النشط</span>
-        <button type="button" (click)="resetFilters()"
-          class="px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors flex items-center gap-1">
-          <span>مسح الفلاتر والبحث</span>
+          <span [class]="c.chip" class="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center">
+            <lucide-icon [img]="c.icon" class="w-5 h-5"></lucide-icon>
+          </span>
         </button>
-      </div>
-    } -->
+      }
+    </div>
   </div>
 
   <!-- Loading -->
@@ -130,7 +111,7 @@
       <span>{{ errorMessage() }}</span>
       <button type="button" (click)="loadBookings()"
         class="px-4 py-2 bg-white border border-rose-200 rounded-xl font-bold hover:bg-rose-100 transition-colors">
-        إعادة المحاولة
+        {{ 'BOOKINGS.RETRY' | translate }}
       </button>
     </div>
   }
@@ -156,7 +137,7 @@
 
             <div class="flex items-center gap-1.5">
               @if (day.isToday) {
-                <span class="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold">اليوم</span>
+                <span class="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold">{{ 'BOOKINGS.TODAY' | translate }}</span>
               }
               <span class="min-w-6 h-6 px-1.5 rounded-full flex items-center justify-center text-xs font-extrabold"
                     [class]="day.isToday ? 'bg-white/20 text-white' : 'bg-white text-slate-600 border border-blue-100'">
@@ -164,7 +145,7 @@
               </span>
               @if (!day.isPast) {
                 <button type="button" (click)="openForm(null, day.key)"
-                        title="حجز جديد في هذا اليوم" aria-label="حجز جديد في هذا اليوم"
+                        [attr.title]="'BOOKINGS.NEW_IN_DAY' | translate" [attr.aria-label]="'BOOKINGS.NEW_IN_DAY' | translate"
                         class="w-7 h-7 rounded-full flex items-center justify-center transition-colors"
                         [class]="day.isToday ? 'text-white hover:bg-white/20' : 'text-blue-600 hover:bg-blue-100'">
                   <lucide-icon [img]="PlusIcon" class="w-4 h-4"></lucide-icon>
@@ -183,7 +164,7 @@
                [class.opacity-60]="day.isPast">
 
             @if (day.items.length === 0) {
-              <p class="py-10 text-center text-xs text-slate-300 select-none">لا توجد حجوزات</p>
+              <p class="py-10 text-center text-xs text-slate-300 select-none">{{ 'BOOKINGS.NO_BOOKINGS' | translate }}</p>
             }
 
             <ol class="relative ms-1.5 border-s-2 border-slate-200 space-y-5">
@@ -215,7 +196,7 @@
 
                     <div class="flex items-start justify-between gap-2">
                       <div class="min-w-0">
-                        <h3 class="font-bold text-slate-900 text-sm truncate" [title]="b.customerName">{{ b.customerName }}</h3>
+                        <h3 class="font-bold text-slate-900 text-sm truncate" [attr.title]="b.customerName">{{ b.customerName }}</h3>
                         <p class="flex items-center gap-1.5 mt-0.5 text-xs text-slate-500">
                           <lucide-icon [img]="BuildingIcon" class="w-3.5 h-3.5 shrink-0"></lucide-icon>
                           <span class="truncate">{{ b.workspaceName }}</span>
@@ -223,7 +204,7 @@
                       </div>
 
                       <button type="button" (click)="openMenu($event, b)"
-                              aria-label="خيارات الحجز" aria-haspopup="menu"
+                              [attr.aria-label]="'BOOKINGS.OPTIONS' | translate" aria-haspopup="menu"
                               class="w-8 h-8 -me-1 -mt-1 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors shrink-0">
                         <lucide-icon [img]="MoreIcon" class="w-4 h-4"></lucide-icon>
                       </button>
@@ -232,7 +213,7 @@
                     <div class="flex items-center justify-between gap-2 mt-2.5">
                       <span [class]="statusInfo(b.status).badge"
                             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold">
-                        {{ statusInfo(b.status).label }}
+                        {{ statusInfo(b.status).labelKey | translate }}
                       </span>
                       <span class="inline-flex items-center gap-1 text-xs text-slate-500">
                         <lucide-icon [img]="PeopleIcon" class="w-3.5 h-3.5"></lucide-icon>
@@ -241,7 +222,7 @@
                     </div>
 
                     @if (b.notes) {
-                      <p class="mt-2 flex items-start gap-1.5 text-xs text-slate-400 bg-slate-50 rounded-lg px-2 py-1.5" [title]="b.notes">
+                      <p class="mt-2 flex items-start gap-1.5 text-xs text-slate-400 bg-slate-50 rounded-lg px-2 py-1.5" [attr.title]="b.notes">
                         <lucide-icon [img]="NoteIcon" class="w-3.5 h-3.5 shrink-0 mt-0.5"></lucide-icon>
                         <span class="line-clamp-2">{{ b.notes }}</span>
                       </p>
@@ -249,7 +230,7 @@
                   </article>
 
                   <!-- شكل الكارت أثناء السحب -->
-                  <div *cdkDragPreview 
+                  <div *cdkDragPreview
                        class="w-60 rounded-xl border border-blue-300 bg-white p-3 shadow-2xl">
                     <p class="text-xs font-bold text-blue-600">{{ formatTime(b.startTime) }}</p>
                     <p class="font-bold text-sm text-slate-900 truncate mt-0.5">{{ b.customerName }}</p>
@@ -269,7 +250,7 @@
 
     @if (weekBookings().length === 0 && bookings().length > 0) {
       <p class="text-center text-sm text-slate-400">
-        مفيش حجوزات في الأسبوع ده. تنقّل بين الأسابيع أو اضغط + على أي يوم لإضافة حجز.
+        {{ 'BOOKINGS.NO_WEEK_BOOKINGS' | translate }}
       </p>
     }
 
@@ -278,10 +259,10 @@
         <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
           <lucide-icon [img]="CalendarIcon" class="w-8 h-8"></lucide-icon>
         </div>
-        <p class="text-base font-bold text-slate-800">لا توجد حجوزات حتى الآن</p>
+        <p class="text-base font-bold text-slate-800">{{ 'BOOKINGS.EMPTY_TITLE' | translate }}</p>
         <button type="button" (click)="openForm()"
           class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors">
-          + أضيفي أول حجز
+          + {{ 'BOOKINGS.ADD_FIRST' | translate }}
         </button>
       </div>
     }
@@ -303,13 +284,13 @@
   <p-popover #menuPop appendTo="body">
     @if (activeBooking(); as b) {
       <div class="flex flex-col min-w-52 p-1" role="menu">
-        <p class="px-3 pt-2 pb-1 text-[11px] font-bold text-slate-400">تغيير الحالة</p>
+        <p class="px-3 pt-2 pb-1 text-[11px] font-bold text-slate-400">{{ 'BOOKINGS.CHANGE_STATUS' | translate }}</p>
 
         @for (s of statusOptions; track s.value) {
           <button type="button" role="menuitem" (click)="onMenuStatus(s.value)"
                   class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-start text-slate-700 hover:bg-slate-100 transition-colors">
             <span class="w-2.5 h-2.5 rounded-full" [class]="s.dot"></span>
-            <span class="flex-1">{{ s.label }}</span>
+            <span class="flex-1">{{ s.labelKey | translate }}</span>
             @if (b.status === s.value) {
               <lucide-icon [img]="CheckIcon" class="w-4 h-4 text-blue-600"></lucide-icon>
             }
@@ -321,13 +302,13 @@
         <button type="button" role="menuitem" (click)="onMenuEdit()"
                 class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-start text-slate-700 hover:bg-slate-100 transition-colors">
           <lucide-icon [img]="EditIcon" class="w-4 h-4 shrink-0"></lucide-icon>
-          <span>تعديل</span>
+          <span>{{ 'BOOKINGS.EDIT' | translate }}</span>
         </button>
 
         <button type="button" role="menuitem" (click)="onMenuDelete()"
                 class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-start text-rose-600 hover:bg-rose-50 transition-colors">
           <lucide-icon [img]="TrashIcon" class="w-4 h-4 shrink-0"></lucide-icon>
-          <span>حذف</span>
+          <span>{{ 'BOOKINGS.DELETE' | translate }}</span>
         </button>
       </div>
     }
@@ -336,7 +317,7 @@
   <!-- تأكيد الحذف -->
   <app-confirm-dialog
     [open]="!!pendingDelete()"
-    title="حذف الحجز"
+    [title]="'BOOKINGS.DELETE_TITLE' | translate"
     [itemName]="pendingDelete()?.customerName ?? ''"
     [loading]="isDeleting()"
     (confirmed)="confirmDelete()"

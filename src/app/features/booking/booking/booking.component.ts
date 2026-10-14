@@ -1,6 +1,8 @@
-import { Component, OnInit, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { ToastrService } from 'ngx-toastr';
+import { TranslatePipe } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 import { Popover, PopoverModule } from 'primeng/popover';
 import {
   LucideAngularModule, CalendarDays, Plus, Search, Clock, Users, Building2, StickyNote,
@@ -11,6 +13,7 @@ import { BookingService } from './booking.service';
 import { Booking, BookingStatus, CreateBookingDto, LookupItem } from './Ibooking';
 import { CustomerService } from '../../customers/customer.service';
 import { WorkspaceService } from '../../../core/services/workspace.service';
+import { LanguageService } from '../../../core/services/lang.service'; // عدّل المسار لو مختلف
 import { unwrapList } from '../../../core/utils/unwrap-list';
 import { BookingFormModalComponent } from './booking-form-modal/booking-form-modal.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -32,19 +35,19 @@ const startOfWeek = (d: Date): Date => {
   return x;
 };
 
-const STATUS_INFO: Record<BookingStatus, { label: string; dot: string; border: string; badge: string }> = {
-  Pending:   { label: 'قيد الانتظار', dot: 'bg-amber-500',   border: 'border-s-amber-400',   badge: 'bg-amber-100 text-amber-700' },
-  Confirmed: { label: 'مؤكد',         dot: 'bg-blue-500',    border: 'border-s-blue-500',    badge: 'bg-blue-100 text-blue-700' },
-  Completed: { label: 'مكتمل',        dot: 'bg-emerald-500', border: 'border-s-emerald-500', badge: 'bg-emerald-100 text-emerald-700' },
-  Cancelled: { label: 'ملغي',         dot: 'bg-rose-500',    border: 'border-s-rose-400',    badge: 'bg-rose-100 text-rose-700' },
+const STATUS_INFO: Record<BookingStatus, { labelKey: string; dot: string; border: string; badge: string }> = {
+  Pending:   { labelKey: 'BOOKINGS.STATUS.PENDING',   dot: 'bg-amber-500',   border: 'border-s-amber-400',   badge: 'bg-amber-100 text-amber-700' },
+  Confirmed: { labelKey: 'BOOKINGS.STATUS.CONFIRMED', dot: 'bg-blue-500',    border: 'border-s-blue-500',    badge: 'bg-blue-100 text-blue-700' },
+  Completed: { labelKey: 'BOOKINGS.STATUS.COMPLETED', dot: 'bg-emerald-500', border: 'border-s-emerald-500', badge: 'bg-emerald-100 text-emerald-700' },
+  Cancelled: { labelKey: 'BOOKINGS.STATUS.CANCELLED', dot: 'bg-rose-500',    border: 'border-s-rose-400',    badge: 'bg-rose-100 text-rose-700' },
 };
 const STATUS_ORDER: BookingStatus[] = ['Pending', 'Confirmed', 'Completed', 'Cancelled'];
 
 export interface WeekDay {
   key: string;            // yyyy-MM-dd
-  weekday: string;        // السبت
-  day: string;            // ١٠
-  month: string;          // أكتوبر
+  weekday: string;        // السبت / Saturday
+  day: string;            // ١٠ / 10
+  month: string;          // أكتوبر / October
   isToday: boolean;
   isPast: boolean;
   items: Booking[];
@@ -52,33 +55,39 @@ export interface WeekDay {
   enterPredicate: () => boolean;
 }
 
-
-// أضيفي الكونستانت ده أو الـ Array الجديدة فوق الكومبوننت أو جوه الكلاس
+/** كروت الإحصائيات (بتشتغل كفلاتر سريعة). كلاسات Tailwind لازم تتكتب كاملة عشان تتلقط في الـ build */
 export const BOOKING_STAT_CARDS = [
-  { value: 'all', label: 'كل الحجوزات', border: 'border-s-blue-600', tint: 'from-blue-50/50', ring: 'ring-blue-600', chip: 'bg-blue-600 text-white', icon: CalendarDays },
-  { value: 'Pending', label: 'قيد الانتظار', border: 'border-s-amber-400', tint: 'from-amber-50/50', ring: 'ring-amber-500', chip: 'bg-amber-100 text-amber-700', icon: Clock },
-  { value: 'Confirmed', label: 'مؤكد', border: 'border-s-blue-500', tint: 'from-blue-50/50', ring: 'ring-blue-500', chip: 'bg-blue-100 text-blue-700', icon: Check },
-  { value: 'Completed', label: 'مكتمل', border: 'border-s-emerald-500', tint: 'from-emerald-50/50', ring: 'ring-emerald-500', chip: 'bg-emerald-100 text-emerald-700', icon: Check },
-  { value: 'Cancelled', label: 'ملغي', border: 'border-s-rose-400', tint: 'from-rose-50/50', ring: 'ring-rose-500', chip: 'bg-rose-100 text-rose-700', icon: Trash2 }, // أو أيقونة X لو حابة
+  { value: 'all',       labelKey: 'BOOKINGS.STATS.ALL',         border: 'border-s-blue-600',    tint: 'from-blue-50/50',    ring: 'ring-blue-600',    chip: 'bg-blue-600 text-white',                icon: CalendarDays },
+  { value: 'Pending',   labelKey: 'BOOKINGS.STATUS.PENDING',    border: 'border-s-amber-400',   tint: 'from-amber-50/50',   ring: 'ring-amber-500',   chip: 'bg-amber-100 text-amber-700',           icon: Clock },
+  { value: 'Confirmed', labelKey: 'BOOKINGS.STATUS.CONFIRMED',  border: 'border-s-blue-500',    tint: 'from-blue-50/50',    ring: 'ring-blue-500',    chip: 'bg-blue-100 text-blue-700',             icon: Check },
+  { value: 'Completed', labelKey: 'BOOKINGS.STATUS.COMPLETED',  border: 'border-s-emerald-500', tint: 'from-emerald-50/50', ring: 'ring-emerald-500', chip: 'bg-emerald-100 text-emerald-700',       icon: Check },
+  { value: 'Cancelled', labelKey: 'BOOKINGS.STATUS.CANCELLED',  border: 'border-s-rose-400',    tint: 'from-rose-50/50',    ring: 'ring-rose-500',    chip: 'bg-rose-100 text-rose-700',             icon: Trash2 },
 ];
 
 @Component({
   selector: 'app-booking',
   standalone: true,
   imports: [
-    LucideAngularModule, DragDropModule, PopoverModule,
+    LucideAngularModule, DragDropModule, PopoverModule, TranslatePipe,
     BookingFormModalComponent, ConfirmDialogComponent,
   ],
   templateUrl: './booking.component.html'
 })
-export class BookingComponent implements OnInit {
+export class BookingComponent {
   private bookingService = inject(BookingService);
   private customerService = inject(CustomerService);
   private workspaceService = inject(WorkspaceService);
   private toastr = inject(ToastrService);
+  private lang = inject(LanguageService);
 
   private readonly menuPopover = viewChild<Popover>('menuPop');
-readonly statCards = BOOKING_STAT_CARDS;
+  private bookingsSub?: Subscription;
+  private customersSub?: Subscription;
+  private workspacesSub?: Subscription;
+  private firstLoad = true;
+
+  readonly statCards = BOOKING_STAT_CARDS;
+
   // Icons
   readonly CalendarIcon = CalendarDays;
   readonly PlusIcon = Plus;
@@ -88,7 +97,7 @@ readonly statCards = BOOKING_STAT_CARDS;
   readonly BuildingIcon = Building2;
   readonly NoteIcon = StickyNote;
   readonly MoreIcon = EllipsisVertical;
-  readonly PrevIcon = ChevronRight;   // RTL: السابق على اليمين
+  readonly PrevIcon = ChevronRight;   // RTL: السابق على اليمين (الـ template بيقلبه في الإنجليزي)
   readonly NextIcon = ChevronLeft;
   readonly EditIcon = Pencil;
   readonly TrashIcon = Trash2;
@@ -96,9 +105,12 @@ readonly statCards = BOOKING_STAT_CARDS;
 
   readonly statusOptions = STATUS_ORDER.map(value => ({
     value,
-    label: STATUS_INFO[value].label,
+    labelKey: STATUS_INFO[value].labelKey,
     dot: STATUS_INFO[value].dot,
   }));
+
+  /** locale التواريخ والأوقات حسب لغة الواجهة */
+  readonly locale = computed(() => (this.lang.currentLang() === 'ar' ? 'ar-EG' : 'en-US'));
 
   // ---------- State ----------
   bookings = signal<Booking[]>([]);
@@ -132,10 +144,12 @@ readonly statCards = BOOKING_STAT_CARDS;
 
     if (status !== 'all') list = list.filter(b => b.status === status);
     if (term) {
-      list = list.filter(
-        b =>
-          b.customerName?.toLowerCase().includes(term) ||
-          b.workspaceName?.toLowerCase().includes(term)
+      // البحث بيشمل الاسمين (عربي وإنجليزي) بغض النظر عن لغة الواجهة
+      list = list.filter(b =>
+        [
+          b.customerName, b.customerNameAr, b.customerNameEn,
+          b.workspaceName, b.workspaceNameAr, b.workspaceNameEn,
+        ].some(v => v?.toLowerCase().includes(term))
       );
     }
     return list;
@@ -166,15 +180,17 @@ readonly statCards = BOOKING_STAT_CARDS;
   isCurrentWeek = computed(() => dateKey(this.weekStart()) === dateKey(startOfWeek(new Date())));
 
   weekLabel = computed(() => {
+    const locale = this.locale();
     const start = this.weekStart();
     const end = new Date(start);
     end.setDate(start.getDate() + 6);
-    const a = start.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' });
-    const b = end.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+    const a = start.toLocaleDateString(locale, { day: 'numeric', month: 'long' });
+    const b = end.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
     return `${a} – ${b}`;
   });
 
   weekDays = computed<WeekDay[]>(() => {
+    const locale = this.locale();
     const start = this.weekStart();
     const todayKey = dateKey(new Date());
 
@@ -198,9 +214,9 @@ readonly statCards = BOOKING_STAT_CARDS;
 
       return {
         key,
-        weekday: date.toLocaleDateString('ar-EG', { weekday: 'long' }),
-        day: date.toLocaleDateString('ar-EG', { day: 'numeric' }),
-        month: date.toLocaleDateString('ar-EG', { month: 'long' }),
+        weekday: date.toLocaleDateString(locale, { weekday: 'long' }),
+        day: date.toLocaleDateString(locale, { day: 'numeric' }),
+        month: date.toLocaleDateString(locale, { month: 'long' }),
         isToday: key === todayKey,
         isPast,
         items,
@@ -209,53 +225,80 @@ readonly statCards = BOOKING_STAT_CARDS;
     });
   });
 
-  ngOnInit(): void {
-    this.loadBookings();
-    this.loadLookups();
+  constructor() {
+    // أول مرة: تحميل كامل. بعد كده كل ما اللغة تتغير: تحديث صامت (من غير skeleton)
+    // عشان الأسماء والـ lookups ترجع بلغة الواجهة الجديدة
+    effect(() => {
+      this.lang.currentLang();
+      untracked(() => {
+        if (this.firstLoad) {
+          this.firstLoad = false;
+          this.loadBookings();
+        } else {
+          this.refreshSilently();
+        }
+        this.loadLookups();
+      });
+    });
   }
 
   // ---------- Loading ----------
   loadBookings(): void {
+    this.bookingsSub?.unsubscribe();
+
     this.isLoading.set(true);
     this.errorMessage.set(null);
-    this.bookingService.getBookings().subscribe({
+    this.bookingsSub = this.bookingService.getBookings().subscribe({
       next: data => {
         this.bookings.set(data);
         this.isLoading.set(false);
         this.scrollToToday();
       },
       error: () => {
-        this.errorMessage.set('تعذر تحميل الحجوزات. حاولي مرة أخرى.');
+        this.errorMessage.set(this.lang.t('BOOKINGS.ERRORS.LOAD'));
         this.isLoading.set(false);
       }
     });
   }
 
   private refreshSilently(): void {
-    this.bookingService.getBookings().subscribe({
+    this.bookingsSub?.unsubscribe();
+
+    this.bookingsSub = this.bookingService.getBookings().subscribe({
       next: data => this.bookings.set(data),
-      error: () => this.toastr.warning('تعذر تحديث القائمة، حدّثي الصفحة')
+      error: () => this.toastr.warning(this.lang.t('BOOKINGS.ERRORS.REFRESH'))
     });
   }
 
+  /** اسم العنصر بلغة الواجهة (لو الـ API رجّع name مترجم بياخده، وإلا بيختار Ar/En) */
+  private pickName(item: any, ...fallbacks: (string | null | undefined)[]): string {
+    const isAr = this.lang.currentLang() === 'ar';
+    const primary = isAr ? item.nameAr : item.nameEn;
+    const secondary = isAr ? item.nameEn : item.nameAr;
+    return item.name || primary || secondary || fallbacks.find(f => !!f) || `#${item.id}`;
+  }
+
   private loadLookups(): void {
-    this.customerService.getCustomers(1, 100).subscribe({
+    this.customersSub?.unsubscribe();
+    this.workspacesSub?.unsubscribe();
+
+    this.customersSub = this.customerService.getCustomers(1, 100).subscribe({
       next: (res: any) =>
         this.customers.set(
           unwrapList(res).map((c: any) => ({
             id: Number(c.id),
-            name: c.fullName || c.mobileNumber || `#${c.id}`
+            name: c.fullName || this.pickName(c, c.mobileNumber)
           }))
         ),
-      error: () => this.toastr.error('تعذر تحميل قائمة العملاء')
+      error: () => this.toastr.error(this.lang.t('BOOKINGS.ERRORS.LOAD_CUSTOMERS'))
     });
 
-    this.workspaceService.getWorkspaces().subscribe({
+    this.workspacesSub = this.workspaceService.getWorkspaces().subscribe({
       next: (res: any) =>
         this.workspaces.set(
-          unwrapList(res).map((w: any) => ({ id: Number(w.id), name: w.name }))
+          unwrapList(res).map((w: any) => ({ id: Number(w.id), name: this.pickName(w) }))
         ),
-      error: () => this.toastr.error('تعذر تحميل قائمة المساحات')
+      error: () => this.toastr.error(this.lang.t('BOOKINGS.ERRORS.LOAD_WORKSPACES'))
     });
   }
 
@@ -341,12 +384,14 @@ readonly statCards = BOOKING_STAT_CARDS;
     this.bookingService.updateBooking(b.id, dto).subscribe({
       next: () => {
         this.setBusy(b.id, false);
-        this.toastr.success(`تم نقل الحجز إلى ${target.weekday} ${target.day} ${target.month}`);
+        this.toastr.success(
+          this.tr('BOOKINGS.TOAST.MOVED', { date: `${target.weekday} ${target.day} ${target.month}` })
+        );
       },
       error: err => {
         this.bookings.set(snapshot); // رجوع للحالة القديمة
         this.setBusy(b.id, false);
-        this.toastr.error(this.extractError(err, 'تعذر نقل الحجز.'));
+        this.toastr.error(this.extractError(err, this.lang.t('BOOKINGS.ERRORS.MOVE')));
       }
     });
   }
@@ -405,12 +450,12 @@ readonly statCards = BOOKING_STAT_CARDS;
     this.bookingService.changeStatus(b.id, status).subscribe({
       next: () => {
         this.setBusy(b.id, false);
-        this.toastr.success('تم تغيير حالة الحجز');
+        this.toastr.success(this.lang.t('BOOKINGS.TOAST.STATUS_CHANGED'));
       },
       error: err => {
         this.patchBooking(b.id, { status: previous });
         this.setBusy(b.id, false);
-        this.toastr.error(this.extractError(err, 'تعذر تغيير الحالة.'));
+        this.toastr.error(this.extractError(err, this.lang.t('BOOKINGS.ERRORS.STATUS')));
       }
     });
   }
@@ -437,13 +482,13 @@ readonly statCards = BOOKING_STAT_CARDS;
         this.isDeleting.set(false);
         this.setBusy(b.id, false);
         this.pendingDelete.set(null);
-        this.toastr.success('تم حذف الحجز');
+        this.toastr.success(this.lang.t('BOOKINGS.TOAST.DELETED'));
         this.refreshSilently();
       },
       error: err => {
         this.isDeleting.set(false);
         this.setBusy(b.id, false);
-        this.toastr.error(this.extractError(err, 'تعذر حذف الحجز.'));
+        this.toastr.error(this.extractError(err, this.lang.t('BOOKINGS.ERRORS.DELETE')));
       }
     });
   }
@@ -479,11 +524,19 @@ readonly statCards = BOOKING_STAT_CARDS;
     if (!value) return '';
     const d = new Date(value);
     if (isNaN(d.getTime())) return '';
-    return d.toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit', hour12: true });
+    return d.toLocaleTimeString(this.locale(), { hour: 'numeric', minute: '2-digit', hour12: true });
   }
 
   statusInfo(status: string) {
     return STATUS_INFO[status as BookingStatus] ?? STATUS_INFO.Pending;
+  }
+
+  /** ترجمة مع استبدال {{param}} (لأن lang.t مش بتاخد params) */
+  private tr(key: string, params: Record<string, string | number> = {}): string {
+    return Object.entries(params).reduce(
+      (text, [k, v]) => text.replaceAll(`{{${k}}}`, String(v)),
+      this.lang.t(key)
+    );
   }
 
   private extractError(err: any, fallback: string): string {

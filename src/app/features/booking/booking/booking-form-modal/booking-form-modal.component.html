@@ -7,7 +7,7 @@
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
 </style>
 
-<div  class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-up">
+<div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-up">
   <div role="dialog" aria-modal="true" aria-labelledby="booking-modal-title"
        class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col overflow-hidden">
 
@@ -20,14 +20,15 @@
           </div>
           <div>
             <h3 id="booking-modal-title" class="text-lg font-extrabold text-slate-900 leading-tight">
-              {{ isEdit ? 'تعديل الحجز' : 'حجز جديد' }}
+              {{ (isEdit ? 'BOOKINGS.FORM.EDIT_TITLE' : 'BOOKINGS.FORM.ADD_TITLE') | translate }}
             </h3>
             <p class="text-xs text-slate-500 mt-0.5">
-              {{ isEdit ? 'عدّلي بيانات الحجز ثم احفظي' : 'اختاري العميل والمساحة والموعد' }}
+              {{ (isEdit ? 'BOOKINGS.FORM.EDIT_SUBTITLE' : 'BOOKINGS.FORM.ADD_SUBTITLE') | translate }}
             </p>
           </div>
         </div>
-        <button type="button" (click)="close()" [disabled]="isSubmitting()" aria-label="إغلاق"
+        <button type="button" (click)="close()" [disabled]="isSubmitting()"
+                [attr.aria-label]="'BOOKINGS.FORM.CLOSE' | translate"
                 class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white disabled:opacity-50 transition-colors">
           <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
         </button>
@@ -50,22 +51,22 @@
             <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
               <lucide-icon [img]="UserIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">العميل والمساحة</h4>
+            <h4 class="text-sm font-extrabold text-slate-800">{{ 'BOOKINGS.FORM.SECTIONS.CLIENT_WORKSPACE' | translate }}</h4>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                العميل <span class="text-rose-500">*</span>
+                {{ 'BOOKINGS.FORM.CUSTOMER' | translate }} <span class="text-rose-500">*</span>
               </label>
               <p-select formControlName="customerId"
                         [options]="customers()"
                         optionLabel="name"
                         optionValue="id"
-                        placeholder="اختر العميل..."
+                        [placeholder]="'BOOKINGS.FORM.CUSTOMER_PLACEHOLDER' | translate"
                         [filter]="true"
                         filterBy="name"
-                        filterPlaceholder="ابحث عن عميل..."
+                        [filterPlaceholder]="'BOOKINGS.FORM.CUSTOMER_SEARCH' | translate"
                         appendTo="body"
                         [fluid]="true"
                         styleClass="!rounded-xl !h-11"
@@ -79,16 +80,16 @@
 
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                مساحة العمل <span class="text-rose-500">*</span>
+                {{ 'BOOKINGS.FORM.WORKSPACE' | translate }} <span class="text-rose-500">*</span>
               </label>
               <p-select formControlName="workspaceId"
                         [options]="workspaces()"
                         optionLabel="name"
                         optionValue="id"
-                        placeholder="اختر مكان العمل..."
+                        [placeholder]="'BOOKINGS.FORM.WORKSPACE_PLACEHOLDER' | translate"
                         [filter]="true"
                         filterBy="name"
-                        filterPlaceholder="ابحث عن مساحة..."
+                        [filterPlaceholder]="'BOOKINGS.FORM.WORKSPACE_SEARCH' | translate"
                         appendTo="body"
                         [fluid]="true"
                         styleClass="!rounded-xl !h-11"
@@ -108,13 +109,13 @@
             <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
               <lucide-icon [img]="ClockIcon" class="w-4 h-4"></lucide-icon>
             </span>
-            <h4 class="text-sm font-extrabold text-slate-800">الموعد</h4>
+            <h4 class="text-sm font-extrabold text-slate-800">{{ 'BOOKINGS.FORM.SECTIONS.SCHEDULE' | translate }}</h4>
           </div>
 
           <!-- التاريخ -->
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5">
-              تاريخ الحجز <span class="text-rose-500">*</span>
+              {{ 'BOOKINGS.FORM.DATE' | translate }} <span class="text-rose-500">*</span>
             </label>
             <div class="flex flex-wrap items-center gap-2">
               <div class="flex-1 min-w-[11rem]">
@@ -134,14 +135,14 @@
                   ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
                   : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'"
                 class="px-4 h-10 rounded-xl border text-xs font-bold transition-all duration-200">
-                اليوم
+                {{ 'BOOKINGS.FORM.TODAY' | translate }}
               </button>
               <button type="button" (click)="setDateOffset(1)"
                 [class]="isDateOffset(1)
                   ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
                   : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'"
                 class="px-4 h-10 rounded-xl border text-xs font-bold transition-all duration-200">
-                بكرة
+                {{ 'BOOKINGS.FORM.TOMORROW' | translate }}
               </button>
             </div>
             @if (showError('bookingDate')) {
@@ -154,7 +155,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                  وقت البداية <span class="text-rose-500">*</span>
+                  {{ 'BOOKINGS.FORM.START_TIME' | translate }} <span class="text-rose-500">*</span>
                 </label>
                 <p-datepicker formControlName="startTime"
                               [timeOnly]="true"
@@ -172,7 +173,8 @@
 
               <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                  وقت النهاية <span class="font-normal text-slate-400">(اختياري)</span>
+                  {{ 'BOOKINGS.FORM.END_TIME' | translate }}
+                  <span class="font-normal text-slate-400">({{ 'BOOKINGS.FORM.OPTIONAL' | translate }})</span>
                 </label>
                 <p-datepicker formControlName="expectedEndTime"
                               [timeOnly]="true"
@@ -185,14 +187,14 @@
                               [class.ng-invalid]="form.hasError('endBeforeStart')"
                               [class.ng-dirty]="form.hasError('endBeforeStart')" />
                 @if (form.hasError('endBeforeStart')) {
-                  <p class="text-xs text-rose-600 mt-1">لازم يكون بعد وقت البداية</p>
+                  <p class="text-xs text-rose-600 mt-1">{{ 'BOOKINGS.FORM.END_AFTER_START' | translate }}</p>
                 }
               </div>
             </div>
 
             <!-- بداية سريعة -->
             <div class="space-y-2">
-              <span class="block text-[11px] font-bold text-slate-500">بداية سريعة</span>
+              <span class="block text-[11px] font-bold text-slate-500">{{ 'BOOKINGS.FORM.QUICK_START' | translate }}</span>
               <div class="flex flex-wrap gap-2">
                 @for (m of startSlots; track m) {
                   <button type="button" (click)="setStart(m)"
@@ -208,7 +210,7 @@
 
             <!-- مدة سريعة -->
             <div class="space-y-2">
-              <span class="block text-[11px] font-bold text-slate-500">مدة سريعة</span>
+              <span class="block text-[11px] font-bold text-slate-500">{{ 'BOOKINGS.FORM.QUICK_DURATION' | translate }}</span>
               <div class="flex flex-wrap gap-2">
                 @for (d of durations; track d.hours) {
                   <button type="button" (click)="setDuration(d.hours)"
@@ -217,7 +219,7 @@
                       ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
                       : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'"
                     class="px-3.5 h-8 rounded-full border text-xs font-bold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-slate-200 disabled:hover:text-slate-600">
-                    {{ d.label }}
+                    {{ d.labelKey | translate }}
                   </button>
                 }
               </div>
@@ -240,12 +242,14 @@
               <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
                 <lucide-icon [img]="PeopleIcon" class="w-4 h-4"></lucide-icon>
               </span>
-              <h4 class="text-sm font-extrabold text-slate-800">عدد الأشخاص <span class="text-rose-500">*</span></h4>
+              <h4 class="text-sm font-extrabold text-slate-800">
+                {{ 'BOOKINGS.FORM.SECTIONS.PEOPLE' | translate }} <span class="text-rose-500">*</span>
+              </h4>
             </div>
 
-            <div class="inline-flex items-center gap-1 p-1 bg-slate-50 border rounded-xl"
+            <div class="inline-flex items-center gap-1 p-1 bg-slate-50 border rounded-xl" dir="ltr"
                  [class]="showError('numberOfPeople') ? 'border-rose-400' : 'border-slate-200'">
-              <button type="button" (click)="changePeople(-1)" aria-label="تقليل"
+              <button type="button" (click)="changePeople(-1)" [attr.aria-label]="'BOOKINGS.FORM.DECREASE' | translate"
                 [disabled]="(form.controls.numberOfPeople.value ?? 1) <= 1"
                 class="w-9 h-9 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none">
                 <lucide-icon [img]="MinusIcon" class="w-4 h-4"></lucide-icon>
@@ -254,7 +258,7 @@
               <p-inputNumber formControlName="numberOfPeople" [min]="1" [useGrouping]="false"
                              inputStyleClass="!w-16 !h-9 !text-center !font-bold !border-0 !bg-transparent !shadow-none" />
 
-              <button type="button" (click)="changePeople(1)" aria-label="زيادة"
+              <button type="button" (click)="changePeople(1)" [attr.aria-label]="'BOOKINGS.FORM.INCREASE' | translate"
                 class="w-9 h-9 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-200">
                 <lucide-icon [img]="PlusIcon" class="w-4 h-4"></lucide-icon>
               </button>
@@ -269,10 +273,13 @@
               <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center">
                 <lucide-icon [img]="NoteIcon" class="w-4 h-4"></lucide-icon>
               </span>
-              <h4 class="text-sm font-extrabold text-slate-800">ملاحظات <span class="font-normal text-slate-400">(اختياري)</span></h4>
+              <h4 class="text-sm font-extrabold text-slate-800">
+                {{ 'BOOKINGS.FORM.SECTIONS.NOTES' | translate }}
+                <span class="font-normal text-slate-400">({{ 'BOOKINGS.FORM.OPTIONAL' | translate }})</span>
+              </h4>
             </div>
             <textarea pTextarea formControlName="notes" rows="3"
-                      placeholder="أي تفاصيل إضافية عن الحجز..."
+                      [placeholder]="'BOOKINGS.FORM.NOTES_PLACEHOLDER' | translate"
                       class="w-full !rounded-xl resize-none"></textarea>
           </div>
         </section>
@@ -280,15 +287,17 @@
 
       <!-- Footer -->
       <div class="shrink-0 flex items-center justify-between gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
-        <p class="hidden sm:block text-[11px] text-slate-400"><span class="text-rose-500">*</span> حقول مطلوبة</p>
+        <p class="hidden sm:block text-[11px] text-slate-400">
+          <span class="text-rose-500">*</span> {{ 'BOOKINGS.FORM.REQUIRED_FIELDS' | translate }}
+        </p>
         <div class="flex items-center gap-3 ms-auto">
           <button type="button" (click)="close()" [disabled]="isSubmitting()"
             class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
-            إلغاء
+            {{ 'BOOKINGS.FORM.CANCEL' | translate }}
           </button>
           <button type="submit" [disabled]="isSubmitting()"
             class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:hover:translate-y-0">
-            {{ isSubmitting() ? 'جاري الحفظ...' : (isEdit ? 'حفظ التعديلات' : 'حفظ الحجز') }}
+            {{ (isSubmitting() ? 'BOOKINGS.FORM.SAVING' : (isEdit ? 'BOOKINGS.FORM.SAVE_EDIT' : 'BOOKINGS.FORM.SAVE_ADD')) | translate }}
           </button>
         </div>
       </div>

@@ -8,31 +8,31 @@
   @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
 </style>
 
-<div class="p-4 sm:p-8 space-y-6 max-w-7xl mx-auto fade-up">
+<div class="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto fade-up">
 
   <!-- Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
     <div class="flex items-center gap-4">
       <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
         <lucide-icon [img]="CardIcon" class="w-6 h-6"></lucide-icon>
       </div>
       <div>
         <div class="flex items-center gap-2.5">
-          <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">خطط التسعير</h1>
+          <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">{{ 'PRICING.PLANS.TITLE' | translate }}</h1>
           @if (!isLoading() && !errorMessage()) {
-            <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-extrabold ring-1 ring-inset ring-blue-600/15">
+            <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-extrabold ring-1 ring-inset ring-blue-600/15 tabular-nums">
               {{ totalCount() }}
             </span>
           }
         </div>
-        <p class="text-sm text-slate-500 mt-1">أنشئ قوائم الأسعار وحدّد سعر كل نوع مساحة داخل كل خطة</p>
+        <p class="text-sm text-slate-500 mt-1">{{ 'PRICING.PLANS.SUBTITLE' | translate }}</p>
       </div>
     </div>
 
     <button type="button" (click)="openForm()"
-      class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
-      <lucide-icon [img]="PlusIcon" class="w-5 h-5"></lucide-icon>
-      <span>إضافة خطة جديدة</span>
+      class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+      <lucide-icon [img]="PlusIcon" class="w-4 h-4 transition-transform duration-200 group-hover:rotate-90"></lucide-icon>
+      <span>{{ 'PRICING.PLANS.ADD' | translate }}</span>
     </button>
   </div>
 
@@ -43,12 +43,13 @@
       <input
         type="search"
         (input)="onSearch($any($event.target).value)"
-        placeholder="ابحث بالاسم أو الوصف..."
-        aria-label="بحث في الخطط"
+        [placeholder]="'PRICING.PLANS.SEARCH_PLACEHOLDER' | translate"
+        [attr.aria-label]="'PRICING.PLANS.SEARCH_ARIA' | translate"
         class="w-full h-10 ps-10 pe-3 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all" />
     </div>
 
-    <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-xl self-start sm:self-auto" role="group" aria-label="تصفية بالحالة">
+    <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-xl self-start sm:self-auto" role="group"
+         [attr.aria-label]="'PRICING.PLANS.FILTER_ARIA' | translate">
       @for (option of statusOptions; track option.value) {
         <button type="button" (click)="onFilterStatus(option.value)"
           [attr.aria-pressed]="statusFilter() === option.value"
@@ -56,7 +57,7 @@
             ? 'bg-white text-slate-900 shadow-sm'
             : 'text-slate-500 hover:text-slate-800'"
           class="px-4 h-8 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
-          {{ option.label }}
+          {{ option.labelKey | translate }}
         </button>
       }
     </div>
@@ -74,7 +75,7 @@
       <span class="font-medium">{{ errorMessage() }}</span>
       <button type="button" (click)="load()"
         class="px-4 py-2 bg-white border border-rose-200 rounded-xl font-bold hover:bg-rose-100 transition-colors">
-        إعادة المحاولة
+        {{ 'PRICING.COMMON.RETRY' | translate }}
       </button>
     </div>
   } @else if (!plans() || plans().length === 0) {
@@ -83,14 +84,14 @@
         <lucide-icon [img]="CardIcon" class="w-8 h-8"></lucide-icon>
       </div>
       @if (hasFilters()) {
-        <p class="text-base font-bold text-slate-800">لا توجد نتائج مطابقة</p>
-        <p class="text-sm text-slate-500">جرّب تغيير كلمة البحث أو الحالة</p>
+        <p class="text-base font-bold text-slate-800">{{ 'PRICING.PLANS.EMPTY_FILTERED_TITLE' | translate }}</p>
+        <p class="text-sm text-slate-500">{{ 'PRICING.PLANS.EMPTY_FILTERED_HINT' | translate }}</p>
       } @else {
-        <p class="text-base font-bold text-slate-800">لا توجد خطط تسعير حتى الآن</p>
-        <p class="text-sm text-slate-500">ابدأ بخطة أساسية مثل "Standard Plan" ثم حدّد أسعار الأنواع</p>
+        <p class="text-base font-bold text-slate-800">{{ 'PRICING.PLANS.EMPTY_TITLE' | translate }}</p>
+        <p class="text-sm text-slate-500">{{ 'PRICING.PLANS.EMPTY_HINT' | translate }}</p>
         <button type="button" (click)="openForm()"
           class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors">
-          + أضف أول خطة
+          + {{ 'PRICING.PLANS.ADD_FIRST' | translate }}
         </button>
       }
     </div>
@@ -114,7 +115,7 @@
                 [class]="plan.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-100 text-slate-600 ring-slate-500/20'"
                 class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ring-1 ring-inset shrink-0">
                 <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-                {{ plan.isActive ? 'نشطة' : 'غير نشطة' }}
+                {{ (plan.isActive ? 'PRICING.STATUS.ACTIVE' : 'PRICING.STATUS.INACTIVE') | translate }}
               </span>
             </div>
 
@@ -122,7 +123,7 @@
               {{ displayName(plan) }}
             </h3>
             <p class="mt-1 text-sm text-slate-500 leading-relaxed line-clamp-2 min-h-[2.75rem]">
-              {{ plan.description || plan.descriptionAr || plan.descriptionEn || 'بدون وصف' }}
+              {{ plan.description || plan.descriptionAr || plan.descriptionEn || ('PRICING.PLANS.NO_DESCRIPTION' | translate) }}
             </p>
           </a>
 
@@ -130,14 +131,16 @@
           <div class="flex items-center gap-2 px-5 py-3.5 border-t border-slate-100">
             <a [routerLink]="['/pricing', plan.id]"
               class="flex-1 inline-flex items-center justify-center gap-2 h-10 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white text-sm font-bold transition-colors">
-              إدارة الأسعار
-              <span aria-hidden="true">←</span>
+              {{ 'PRICING.PLANS.MANAGE_PRICES' | translate }}
+              <lucide-icon [img]="ArrowIcon" class="w-4 h-4 ltr:rotate-180"></lucide-icon>
             </a>
-            <button type="button" (click)="openForm(plan)" title="تعديل" aria-label="تعديل"
+            <button type="button" (click)="openForm(plan)"
+              [attr.title]="'PRICING.PLANS.EDIT' | translate" [attr.aria-label]="'PRICING.PLANS.EDIT' | translate"
               class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
               <lucide-icon [img]="EditIcon" class="w-4 h-4"></lucide-icon>
             </button>
-            <button type="button" (click)="askDelete(plan)" title="حذف" aria-label="حذف"
+            <button type="button" (click)="askDelete(plan)"
+              [attr.title]="'PRICING.PLANS.DELETE' | translate" [attr.aria-label]="'PRICING.PLANS.DELETE' | translate"
               class="w-10 h-10 rounded-xl flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white transition-colors">
               <lucide-icon [img]="DeleteIcon" class="w-4 h-4"></lucide-icon>
             </button>
@@ -150,12 +153,14 @@
       <div class="flex items-center justify-between gap-3">
         <button type="button" (click)="goToPage(pageNumber() - 1)" [disabled]="pageNumber() === 1"
           class="px-4 h-10 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none transition-colors">
-          السابق
+          {{ 'PRICING.PLANS.PREV' | translate }}
         </button>
-        <span class="text-sm font-semibold text-slate-500">صفحة {{ pageNumber() }} من {{ totalPages() }}</span>
+        <span class="text-sm font-semibold text-slate-500">
+          {{ 'PRICING.PLANS.PAGE_OF' | translate: { page: pageNumber(), total: totalPages() } }}
+        </span>
         <button type="button" (click)="goToPage(pageNumber() + 1)" [disabled]="pageNumber() === totalPages()"
           class="px-4 h-10 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none transition-colors">
-          التالي
+          {{ 'PRICING.PLANS.NEXT' | translate }}
         </button>
       </div>
     }
@@ -172,37 +177,10 @@
   </app-plan-form-modal>
 }
 
-@if (pendingDelete(); as d) {
-  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
-       (click)="cancelDelete()">
-    <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl fade-up" dir="rtl"
-         role="alertdialog" aria-modal="true" aria-labelledby="delete-title"
-         (click)="$event.stopPropagation()">
-
-      <div class="flex items-start gap-3">
-        <div class="w-11 h-11 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
-          <lucide-icon [img]="DeleteIcon" class="w-5 h-5"></lucide-icon>
-        </div>
-        <div>
-          <h3 id="delete-title" class="text-lg font-bold text-slate-900">حذف الخطة</h3>
-          <p class="text-sm text-slate-500 mt-1.5 leading-relaxed">
-            هل أنت متأكد من حذف
-            <b class="text-slate-800">"{{ displayName(d) }}"</b>؟
-            لن تظهر لباقي الصفحات بعد الحذف.
-          </p>
-        </div>
-      </div>
-
-      <div class="flex gap-3 mt-6">
-        <button type="button" (click)="confirmDelete()" [disabled]="isDeleting()"
-                class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-colors">
-          {{ isDeleting() ? 'جاري الحذف...' : 'نعم، حذف' }}
-        </button>
-        <button type="button" (click)="cancelDelete()" [disabled]="isDeleting()"
-                class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-60 rounded-xl text-sm font-bold text-slate-700 transition-colors">
-          إلغاء
-        </button>
-      </div>
-    </div>
-  </div>
-}
+<app-confirm-dialog
+  [open]="!!pendingDelete()"
+  [title]="'PRICING.PLANS.DELETE_TITLE' | translate"
+  [itemName]="pendingDelete() ? displayName(pendingDelete()!) : ''"
+  [loading]="isDeleting()"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()" />

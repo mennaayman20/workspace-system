@@ -1,14 +1,16 @@
-import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin } from 'rxjs';
+import { TranslatePipe } from '@ngx-translate/core';
+import { Subscription, forkJoin } from 'rxjs';
 import { LucideAngularModule, ArrowRight, Pencil } from 'lucide-angular';
 
 import { PricingPlanService } from '../../pricing/pricing-plan.service';
 import { PricingRuleService } from '../../pricing/pricing-rule.service';
 import { WorkspaceService } from '../../../core/services/workspace.service';
 import { apiErrorMessage } from '../../../core/utils/api-error';
+import { LanguageService } from '../../../core/services/lang.service'; // عدّل المسار لو مختلف
 import { WorkspaceType } from '../../../core/interfaces/Iworkspace';
 import { WorkspaceTypePricingCardComponent } from '../components/workspace-type-pricing-card/workspace-type-pricing-card.component';
 import { PlanFormModalComponent } from '../pricing-plans/plan-form-modal/plan-form-modal.component';
@@ -20,10 +22,16 @@ const NO_RULES: PricingRule[] = [];
 @Component({
   selector: 'app-pricing-plan-details',
   standalone: true,
-  imports: [RouterLink, LucideAngularModule, WorkspaceTypePricingCardComponent, PlanFormModalComponent],
+  imports: [
+    RouterLink,
+    LucideAngularModule,
+    TranslatePipe,
+    WorkspaceTypePricingCardComponent,
+    PlanFormModalComponent,
+  ],
   templateUrl: './pricing-plan-details.component.html',
 })
-export class PricingPlanDetailsComponent implements OnInit {
+export class PricingPlanDetailsComponent {
   readonly ArrowBackIcon = ArrowRight;
   readonly EditIcon = Pencil;
 
@@ -33,6 +41,8 @@ export class PricingPlanDetailsComponent implements OnInit {
   private readonly workspaceService = inject(WorkspaceService);
   private readonly toastr = inject(ToastrService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly lang = inject(LanguageService);
+  private loadSub?: Subscription;
 
   private readonly planId = Number(this.route.snapshot.paramMap.get('id'));
   protected readonly noRules = NO_RULES;
@@ -61,39 +71,45 @@ export class PricingPlanDetailsComponent implements OnInit {
       ).length,
   );
 
-  ngOnInit(): void {
-    this.load();
+  constructor() {
+    // أول مرة + كل ما اللغة تتغير (أسماء الخطة وأنواع المساحات راجعة مترجمة من الباك)
+    effect(() => {
+      this.lang.currentLang();
+      untracked(() => this.load());
+    });
+
+    this.destroyRef.onDestroy(() => this.loadSub?.unsubscribe());
   }
 
   load(): void {
     if (!Number.isInteger(this.planId) || this.planId <= 0) {
-      this.errorMessage.set('رابط الخطة غير صحيح.');
+      this.errorMessage.set(this.lang.t('PRICING.DETAILS.ERRORS.INVALID_LINK'));
       return;
     }
+
+    this.loadSub?.unsubscribe();
 
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    forkJoin({
+    this.loadSub = forkJoin({
       plan: this.planService.getById(this.planId),
       rules: this.ruleService.getByPlan(this.planId),
       types: this.workspaceService.getWorkspaceTypes(true),
-    })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: ({ plan, rules, types }) => {
-          this.plan.set(plan);
-          this.rules.set(rules);
-          // شيل الـ cast ده لو getWorkspaceTypes بيرجّع WorkspaceType[] فعلًا
-          const list = types as any;
-          this.workspaceTypes.set(Array.isArray(list) ? list : (list?.items ?? list?.data?.items ?? list?.data ?? []));
-          this.isLoading.set(false);
-        },
-        error: (err) => {
-          this.isLoading.set(false);
-          this.errorMessage.set(apiErrorMessage(err, 'تعذر تحميل بيانات الخطة، حاول مرة أخرى.'));
-        },
-      });
+    }).subscribe({
+      next: ({ plan, rules, types }) => {
+        this.plan.set(plan);
+        this.rules.set(rules);
+        // شيل الـ cast ده لو getWorkspaceTypes بيرجّع WorkspaceType[] فعلًا
+        const list = types as any;
+        this.workspaceTypes.set(Array.isArray(list) ? list : (list?.items ?? list?.data?.items ?? list?.data ?? []));
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.errorMessage.set(apiErrorMessage(err, this.lang.t('PRICING.DETAILS.ERRORS.LOAD')));
+      },
+    });
   }
 
   refreshRules(): void {
@@ -102,19 +118,19 @@ export class PricingPlanDetailsComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (rules) => this.rules.set(rules),
-        error: () => this.toastr.error('تعذر تحديث الأسعار، حدّث الصفحة'),
+        error: () => this.toastr.error(this.lang.t('PRICING.DETAILS.ERRORS.REFRESH_RULES')),
       });
   }
 
   onPlanSaved(): void {
     this.isEditOpen.set(false);
-    this.toastr.success('تم تحديث الخطة بنجاح');
+    this.toastr.success(this.lang.t('PRICING.DETAILS.TOAST.PLAN_UPDATED'));
     this.planService
       .getById(this.planId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (plan) => this.plan.set(plan),
-        error: () => this.toastr.error('تعذر تحديث بيانات الخطة، حدّث الصفحة'),
+        error: () => this.toastr.error(this.lang.t('PRICING.DETAILS.ERRORS.REFRESH_PLAN')),
       });
   }
 }
