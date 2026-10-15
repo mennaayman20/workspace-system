@@ -24,14 +24,16 @@
 
     <!-- الأزرار -->
     <div class="flex items-center gap-3">
-      <button type="button"
+      <button *hasPermission="Permissions.Companies.View" 
+      type="button"
               (click)="goToCompanies()"
               class="fade-up group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
         <lucide-icon [img]="BuildingIcon" class="w-4 h-4 transition-transform duration-200 group-hover:scale-110"></lucide-icon>
         <span>{{ 'CUSTOMERS.MANAGE_COMPANIES' | translate }}</span>
       </button>
 
-      <button type="button" (click)="openAddModal()"
+      <button *hasPermission="Permissions.Customers.Create"
+      type="button" (click)="openAddModal()"
         class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
         <lucide-icon [img]="PlusIcon" class="w-4 h-4 transition-transform duration-200 group-hover:rotate-90"></lucide-icon>
         <span>{{ 'CUSTOMERS.ADD_BUTTON' | translate }}</span>
@@ -58,11 +60,13 @@
       [columnFilters]="true"
       [emptyTitle]="(searchTerm() ? 'CUSTOMERS.EMPTY_SEARCH' : 'CUSTOMERS.EMPTY_NONE') | translate"
       (action)="onAction($event)">
-
-      <button tableEmptyAction type="button" (click)="openAddModal()"
+<ng-container tableEmptyAction>
+      <button *hasPermission="Permissions.Customers.Create"
+       tableEmptyAction type="button" (click)="openAddModal()"
         class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors">
         {{ 'CUSTOMERS.ADD_FIRST' | translate }}
       </button>
+</ng-container>
     </app-data-table>
   }
 

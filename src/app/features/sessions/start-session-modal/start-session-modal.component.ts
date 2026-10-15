@@ -2,14 +2,15 @@ import {
   Component, OnInit, EventEmitter, Output, DestroyRef, inject, signal, computed
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SelectModule } from 'primeng/select';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 import { InputTextModule } from 'primeng/inputtext';
 import {
-  LucideAngularModule, X, UserPlus, Play, Search, Loader2, User, Building2, Tag, Phone, Mail, Users,
+  LucideAngularModule, X, UserPlus, Play, Loader2, User, Building2, Tag, Phone, Mail, Users,
 } from 'lucide-angular';
-import { Observable, Subject, catchError, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
+import { Observable, Subject, catchError, debounceTime, of, switchMap } from 'rxjs';
 
 import { SessionsService } from '../sessions.service';
 import { CustomerService } from '../../customers/customer.service';
@@ -24,11 +25,17 @@ import { Workspace } from '../../../core/interfaces/Iworkspace';
 import { PricingPlan } from '../../pricing/Ipricing';
 import { Employee } from '../../employee/Iimployee';
 
+interface CustomerOption {
+  id: number;
+  name: string;
+  mobile: string;
+}
+
 @Component({
   selector: 'app-start-session-modal',
   standalone: true,
   imports: [
-    ReactiveFormsModule, LucideAngularModule, SelectModule, InputTextModule, TranslatePipe,
+    ReactiveFormsModule, LucideAngularModule, SelectModule, AutoCompleteModule, InputTextModule, TranslatePipe,
   ],
   templateUrl: './start-session-modal.component.html'
 })
@@ -48,7 +55,6 @@ export class StartSessionModalComponent implements OnInit {
   readonly XIcon = X;
   readonly UserPlusIcon = UserPlus;
   readonly PlayIcon = Play;
-  readonly SearchIcon = Search;
   readonly LoaderIcon = Loader2;
   readonly UserIcon = User;
   readonly WorkspaceIcon = Building2;
@@ -60,7 +66,6 @@ export class StartSessionModalComponent implements OnInit {
   // حالات التحميل منفصلة
   isSubmitting = signal(false);
   isSavingCustomer = signal(false);
-  isSearchingCustomers = signal(false);
 
   errorMessage = signal<string | null>(null);
   quickError = signal<string | null>(null);
@@ -71,17 +76,19 @@ export class StartSessionModalComponent implements OnInit {
   pricingPlansList = signal<PricingPlan[]>([]);
 
   isQuickAddCustomerOpen = signal(false);
-  searchTerm = signal('');
   private searchSubject = new Subject<string>();
 
-  /** خيارات العملاء للـ p-select (الاسم المترجم + الموبايل) */
-  readonly customerOptions = computed(() =>
+  /** خيارات العملاء للـ autocomplete (الاسم المترجم + الموبايل) */
+  readonly customerOptions = computed<CustomerOption[]>(() =>
     this.customersList().map(c => ({
       id: c.id,
       name: c.fullName || c.fullNameAr || c.fullNameEn || '',
       mobile: c.mobileNumber,
     }))
   );
+
+  /** قيمة الـ autocomplete (object أو نص وقت الكتابة) — بتتزامن مع customerId */
+  customerPicker = new FormControl<CustomerOption | string | null>(null);
 
   sessionForm: FormGroup = this.fb.group({
     customerId: [null, [Validators.required]],
@@ -118,6 +125,8 @@ export class StartSessionModalComponent implements OnInit {
   ngOnInit(): void {
     this.loadInitialData();
     this.setupCustomerSearch();
+    this.setupCustomerPicker();
+    this.setupWorkspaceCapacitySync();
   }
 
   // يفك الـ wrapper سواء المصفوفة جاية مباشرة أو جوه data/items
@@ -155,12 +164,11 @@ export class StartSessionModalComponent implements OnInit {
     });
   }
 
+  // ===== بحث العملاء =====
   private setupCustomerSearch(): void {
     this.searchSubject.pipe(
       debounceTime(300),
-      distinctUntilChanged(),
       switchMap((term: string) => {
-        this.isSearchingCustomers.set(true);
         const req$: Observable<any> = term.trim()
           ? this.customerService.searchCustomers(term.trim(), 1, 10)
           : this.customerService.getCustomers(1, 10);
@@ -169,15 +177,26 @@ export class StartSessionModalComponent implements OnInit {
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe((res: any) => {
+      // الـ autocomplete بيفتح القايمة لوحده أول ما الـ suggestions توصل
       this.customersList.set(this.unwrapList<Customer>(res));
-      this.isSearchingCustomers.set(false);
     });
   }
 
-  onSearchCustomer(event: Event): void {
-    const term = (event.target as HTMLInputElement).value;
-    this.searchTerm.set(term);
-    this.searchSubject.next(term);
+  /** بيتنادى من (completeMethod) كل ما تكتب أو تدوس على سهم القايمة */
+  onSearchCustomer(event: { query: string }): void {
+    this.searchSubject.next(event.query ?? '');
+  }
+
+  /** مزامنة الـ autocomplete مع customerId: object = اختيار، نص = لسه بيكتب (مفيش اختيار) */
+  private setupCustomerPicker(): void {
+    this.customerPicker.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
+        const id = value && typeof value === 'object' ? Number(value.id) : null;
+        const ctrl = this.sessionForm.get('customerId');
+        ctrl?.setValue(id);
+        ctrl?.markAsDirty();
+      });
   }
 
   toggleQuickAddCustomer(): void {
@@ -230,10 +249,12 @@ export class StartSessionModalComponent implements OnInit {
 
         // 1) الأول نضيفه للقايمة  2) بعدين نختاره
         this.customersList.update(list => [customer, ...list.filter(c => Number(c.id) !== newId)]);
-        this.sessionForm.patchValue({ customerId: newId });
-        this.sessionForm.get('customerId')?.markAsDirty();
+        this.customerPicker.setValue({
+          id: newId,
+          name: customer.fullName || '',
+          mobile: customer.mobileNumber,
+        });
 
-        this.searchTerm.set('');
         this.quickCustomerForm.reset({ fullNameAr: '', fullNameEn: '', mobileNumber: '', email: '' });
         this.isQuickAddCustomerOpen.set(false);
       },
@@ -245,10 +266,48 @@ export class StartSessionModalComponent implements OnInit {
   }
 
   // ===== عدد الأشخاص =====
+  private maxPeople(workspaceId?: any): number {
+    const id = Number(workspaceId ?? this.sessionForm.value.workspaceId);
+    const ws = this.workspacesList().find(w => Number(w.id) === id);
+    return Number(ws?.capacity) || Infinity;
+  }
+
   changePeople(delta: number): void {
-    const max = Number(this.selectedWorkspace?.capacity) || Infinity;
-    const next = Math.min(max, Math.max(1, this.people + delta));
+    const next = Math.min(this.maxPeople(), Math.max(1, this.people + delta));
     this.sessionForm.patchValue({ numberOfPeople: next });
+  }
+
+  /** clamp فوري وقت الكتابة أو سهم الكيبورد */
+  onPeopleInput(): void {
+    const raw = this.sessionForm.value.numberOfPeople;
+    if (raw === null || raw === '' || raw === undefined) return; // سيبه يمسح ويكتب براحته
+    const n = Math.floor(Number(raw));
+    if (Number.isNaN(n)) return;
+    const clamped = Math.min(this.maxPeople(), Math.max(1, n));
+    if (clamped !== Number(raw)) {
+      this.sessionForm.patchValue({ numberOfPeople: clamped });
+    }
+  }
+
+  /** لو سابه فاضي أو غلط وخرج من الخانة نرجّعه لقيمة صحيحة */
+  onPeopleBlur(): void {
+    const n = Math.floor(Number(this.sessionForm.value.numberOfPeople));
+    const safe = Number.isNaN(n) ? 1 : n;
+    this.sessionForm.patchValue({
+      numberOfPeople: Math.min(this.maxPeople(), Math.max(1, safe))
+    });
+  }
+
+  /** لو غيّرت الورك سبيس والعدد الحالي أكبر من سعته ننزّله */
+  private setupWorkspaceCapacitySync(): void {
+    this.sessionForm.get('workspaceId')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(id => {
+        const max = this.maxPeople(id);
+        if (this.people > max) {
+          this.sessionForm.patchValue({ numberOfPeople: max });
+        }
+      });
   }
 
   // ===== بدء الجلسة =====

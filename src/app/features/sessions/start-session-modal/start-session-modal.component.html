@@ -62,48 +62,35 @@
             </button>
           </div>
 
-          <div class="space-y-3">
-            <!-- بحث -->
-            <div class="relative">
-              <lucide-icon [img]="SearchIcon" class="w-4 h-4 absolute start-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></lucide-icon>
-              <input pInputText type="text" [value]="searchTerm()" (input)="onSearchCustomer($event)"
-                     [placeholder]="'SESSIONS.START_MODAL.SEARCH_PLACEHOLDER' | translate"
-                     class="w-full !h-10 !rounded-xl !ps-10 !pe-10" />
-              @if (isSearchingCustomers()) {
-                <lucide-icon [img]="LoaderIcon" class="w-4 h-4 absolute end-3 top-1/2 -translate-y-1/2 text-blue-500 animate-spin"></lucide-icon>
-              }
-            </div>
-
-            <!-- اختيار العميل -->
-            <div>
-              <p-select formControlName="customerId"
-                        [options]="customerOptions()"
-                        optionLabel="name"
-                        optionValue="id"
-                        [placeholder]="'SESSIONS.START_MODAL.SELECT_CUSTOMER' | translate"
-                        [emptyMessage]="'SESSIONS.START_MODAL.NO_RESULTS' | translate"
-                        appendTo="body"
-                        [fluid]="true"
-                        styleClass="!rounded-xl !h-10"
-                        [class.ng-invalid]="invalid(sessionForm, 'customerId')"
-                        [class.ng-dirty]="invalid(sessionForm, 'customerId')">
-                <ng-template #selectedItem let-c>
-                  <div class="flex items-center gap-2.5">
-                    <span class="font-bold text-slate-800 text-sm">{{ c.name }}</span>
-                    <span dir="ltr" class="text-xs text-slate-400 font-mono">{{ c.mobile }}</span>
-                  </div>
-                </ng-template>
-                <ng-template #item let-c>
-                  <div class="flex items-center justify-between gap-3 w-full">
-                    <span class="font-bold text-slate-800 text-sm">{{ c.name }}</span>
-                    <span dir="ltr" class="text-xs text-slate-400 font-mono">{{ c.mobile }}</span>
-                  </div>
-                </ng-template>
-              </p-select>
-              @if (invalid(sessionForm, 'customerId')) {
-                <p class="text-xs text-rose-600 mt-1">{{ 'SESSIONS.START_MODAL.ERR_CUSTOMER' | translate }}</p>
-              }
-            </div>
+          <!-- بحث + اختيار العميل في خانة واحدة: اكتب والنتايج تظهر لوحدها -->
+          <div>
+            <p-autocomplete [formControl]="customerPicker"
+                            [suggestions]="customerOptions()"
+                            (completeMethod)="onSearchCustomer($event)"
+                            optionLabel="name"
+                            [dropdown]="true"
+                            dropdownMode="blank"
+                            [minLength]="0"
+                            [delay]="0"
+                            [showEmptyMessage]="true"
+                            [emptyMessage]="'SESSIONS.START_MODAL.NO_RESULTS' | translate"
+                            [placeholder]="'SESSIONS.START_MODAL.SEARCH_PLACEHOLDER' | translate"
+                            appendTo="body"
+                            [fluid]="true"
+                            styleClass="w-full"
+                            inputStyleClass="!h-10 !rounded-xl"
+                            [class.ng-invalid]="invalid(sessionForm, 'customerId')"
+                            [class.ng-dirty]="invalid(sessionForm, 'customerId')">
+              <ng-template #item let-c>
+                <div class="flex items-center justify-between gap-3 w-full">
+                  <span class="font-bold text-slate-800 text-sm">{{ c.name }}</span>
+                  <span dir="ltr" class="text-xs text-slate-400 font-mono">{{ c.mobile }}</span>
+                </div>
+              </ng-template>
+            </p-autocomplete>
+            @if (invalid(sessionForm, 'customerId')) {
+              <p class="text-xs text-rose-600 mt-1">{{ 'SESSIONS.START_MODAL.ERR_CUSTOMER' | translate }}</p>
+            }
           </div>
 
           <!-- إضافة عميل سريع -->
@@ -305,7 +292,11 @@
               <div class="flex items-center gap-2">
                 <button type="button" (click)="changePeople(-1)" [disabled]="people <= 1"
                         class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-bold text-lg transition-colors">−</button>
-                <input pInputText id="numberOfPeople" type="number" formControlName="numberOfPeople" min="1" dir="ltr"
+                <input pInputText id="numberOfPeople" type="number" formControlName="numberOfPeople"
+                       min="1" [attr.max]="selectedWorkspace?.capacity || null" step="1" dir="ltr"
+                       (wheel)="$event.preventDefault()"
+                       (input)="onPeopleInput()"
+                       (blur)="onPeopleBlur()"
                        class="w-full min-w-0 !h-10 !rounded-xl text-center font-bold" />
                 <button type="button" (click)="changePeople(1)"
                         class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-lg transition-colors">+</button>

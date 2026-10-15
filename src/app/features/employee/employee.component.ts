@@ -1,4 +1,4 @@
-import { Component, HostListener, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   AbstractControl,
@@ -32,6 +32,7 @@ import {
   TableColumn
 } from '../../shared/components/data-table';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog';
+import { ToBodyDirective } from '../../shared/directives/to-body.directive';
 
 type StatusFilter = 'all' | EmployeeStatus;
 
@@ -49,6 +50,16 @@ interface StatCard {
 const ARABIC_NAME = /^[\u0600-\u06FF\s]+$/;
 const ENGLISH_NAME = /^[A-Za-z\s.'-]+$/;
 
+const passwordStrength: ValidatorFn = (c: AbstractControl): ValidationErrors | null => {
+  const v: string = c.value ?? '';
+  if (!v) return null; // required بيتكفل بالفاضي
+  const errors: ValidationErrors = {};
+  if (!/[A-Z]/.test(v)) errors['uppercase'] = true;
+  if (!/[a-z]/.test(v)) errors['lowercase'] = true;
+  return Object.keys(errors).length ? errors : null;
+};
+
+const PASSWORD_VALIDATORS = [Validators.required, Validators.minLength(8), passwordStrength];
 const matchPassword: ValidatorFn = (c: AbstractControl): ValidationErrors | null => {
   const password = c.parent?.get('password')?.value;
   return c.value && c.value !== password ? { mismatch: true } : null;
@@ -67,7 +78,8 @@ const matchPassword: ValidatorFn = (c: AbstractControl): ValidationErrors | null
     RowActionsDirective,
     InputTextModule,
     SelectModule,
-    ConfirmDialogComponent
+    ConfirmDialogComponent,
+    ToBodyDirective
   ],
   templateUrl: './employee.component.html',
   styleUrls: ['./employee.component.scss']
@@ -226,7 +238,7 @@ export class EmployeeComponent {
     gender: [null as Gender | null, [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9+\-\s]{8,15}$/)]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+   password: ['', PASSWORD_VALIDATORS],
     confirmPassword: ['', [Validators.required, matchPassword]]
   });
 
@@ -322,15 +334,28 @@ export class EmployeeComponent {
   private setPasswordValidation(enabled: boolean): void {
     const password = this.employeeForm.get('password')!;
     const confirm = this.employeeForm.get('confirmPassword')!;
-    if (enabled) {
-      password.setValidators([Validators.required, Validators.minLength(6)]);
-      confirm.setValidators([Validators.required, matchPassword]);
-    } else {
+   if (enabled) {
+  password.setValidators(PASSWORD_VALIDATORS);
+  confirm.setValidators([Validators.required, matchPassword]);
+}else {
       password.clearValidators();
       confirm.clearValidators();
     }
     password.updateValueAndValidity();
     confirm.updateValueAndValidity();
+  }
+private setGenderValidation(required: boolean): void {
+  const gender = this.employeeForm.get('gender')!;
+  gender.setValidators(required ? [Validators.required] : []);
+  gender.updateValueAndValidity();
+}
+  /** بيحوّل أي صيغة جاية من الـ API (Male / male / ذكر ...) للقيمة اللي الـ select فاهمها */
+  private normalizeGender(g: unknown): Gender | null {
+    if (g === null || g === undefined || g === '') return null;
+    const s = String(g).trim().toLowerCase();
+    if (['male', 'm', 'ذكر'].includes(s)) return 'Male';
+    if (['female', 'f', 'أنثى', 'انثى'].includes(s)) return 'Female';
+    return null;
   }
 
   openCreateModal(): void {
@@ -339,6 +364,7 @@ export class EmployeeComponent {
     this.formError.set(null);
     this.employeeForm.reset();
     this.setPasswordValidation(true);
+    this.setGenderValidation(true);
     this.isModalOpen.set(true);
   }
 
@@ -348,11 +374,12 @@ export class EmployeeComponent {
     this.formError.set(null);
     this.employeeForm.reset({
       email: emp.email ?? '',
-      phoneNumber: emp.mobileNumber ?? ''
+      phoneNumber: emp.mobileNumber ?? '',
+      gender: this.normalizeGender((emp as any).gender)
     });
     this.setPasswordValidation(false);
     this.isModalOpen.set(true);
-
+this.setGenderValidation(false);
     // الـ list بترجع الاسم مترجم بس، فبنجيب التفاصيل الكاملة (Ar + En) من الـ API
     this.isFormLoading.set(true);
     this.employeeService.getEmployeeById(emp.id).subscribe({
@@ -362,7 +389,9 @@ export class EmployeeComponent {
           lastNameAr: full.lastNameAr ?? '',
           firstNameEn: full.firstNameEn ?? '',
           lastNameEn: full.lastNameEn ?? '',
-          gender: full.gender ?? null,
+          gender:
+            this.normalizeGender(full.gender) ??
+            this.normalizeGender((emp as any).gender),
           email: full.email ?? emp.email ?? '',
           phoneNumber: full.mobileNumber ?? emp.mobileNumber ?? ''
         });
@@ -376,16 +405,12 @@ export class EmployeeComponent {
     });
   }
 
-  @HostListener('document:keydown.escape')
+  /** بيتنادى من زرار الإلغاء وزرار X، وبعد الحفظ الناجح بس */
   closeModal(): void {
     if (this.isSubmitting() || !this.isModalOpen()) return;
     this.isModalOpen.set(false);
     this.formError.set(null);
     this.employeeForm.reset();
-  }
-
-  onBackdropClick(event: MouseEvent): void {
-    if (event.target === event.currentTarget) this.closeModal();
   }
 
   // ---------- Form helpers ----------
@@ -394,22 +419,31 @@ export class EmployeeComponent {
     return !!c && c.invalid && (c.touched || c.dirty);
   }
 
-  errorOf(name: string): string {
-    const c: AbstractControl | null = this.employeeForm.get(name);
-    if (!c?.errors) return '';
-    const t = (k: string) => this.lang.t(k);
-    if (c.errors['required']) return t('VALIDATION.REQUIRED');
-    if (c.errors['email']) return t('VALIDATION.EMAIL');
-    if (c.errors['minlength'])
-      return t('VALIDATION.MIN_LENGTH').replace('{count}', String(c.errors['minlength'].requiredLength));
-    if (c.errors['mismatch']) return t('VALIDATION.PASSWORD_MISMATCH');
-    if (c.errors['pattern']) {
-      if (name === 'phoneNumber') return t('VALIDATION.PHONE');
-      if (name.endsWith('Ar')) return t('VALIDATION.ARABIC_ONLY');
-      if (name.endsWith('En')) return t('VALIDATION.ENGLISH_ONLY');
-    }
-    return t('VALIDATION.INVALID');
+errorOf(name: string): string {
+  const c: AbstractControl | null = this.employeeForm.get(name);
+  if (!c?.errors) return '';
+  const t = (k: string) => this.lang.t('EMPLOYEES.VALIDATION.' + k);
+
+  if (c.errors['required']) return t('REQUIRED');
+  if (c.errors['email']) return t('EMAIL');
+
+  if (c.errors['minlength']) {
+    const count = String(c.errors['minlength'].requiredLength);
+    const key = name === 'password' ? 'PASSWORD_MIN_LENGTH' : 'MIN_LENGTH';
+    // يدعم {count} و {{count}}
+    return t(key).replace(/\{\{?\s*\w+\s*\}?\}/g, count);
   }
+  if (c.errors['uppercase']) return t('PASSWORD_UPPERCASE');
+  if (c.errors['lowercase']) return t('PASSWORD_LOWERCASE');
+  if (c.errors['mismatch']) return t('PASSWORD_MISMATCH');
+
+  if (c.errors['pattern']) {
+    if (name === 'phoneNumber') return t('PHONE');
+    if (name.endsWith('Ar')) return t('ARABIC_ONLY');
+    if (name.endsWith('En')) return t('ENGLISH_ONLY');
+  }
+  return t('INVALID');
+}
 
   saveEmployee(): void {
     if (this.employeeForm.invalid || this.isFormLoading()) {

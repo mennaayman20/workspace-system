@@ -12,13 +12,15 @@ import { PortalDirective } from '../../shared/directives/portal.directive';
 import {
   BADGE, DataTableComponent, TableAction, TableActionEvent, TableColumn,
 } from '../../shared/components/data-table';
-
+import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
+import { PermissionService } from '../../core/services/permission.service';
+import { Permissions } from '../../core/constants/permissions';
 @Component({
   selector: 'app-customers',
   standalone: true,
   imports: [
     AddCustomerModalComponent, LucideAngularModule, PortalDirective, DataTableComponent,
-    TranslatePipe,
+    TranslatePipe,HasPermissionDirective
   ],
   templateUrl: './customers.component.html'
 })
@@ -27,6 +29,8 @@ export class CustomersComponent {
   private router = inject(Router);
   private toastr = inject(ToastrService);
   private lang = inject(LanguageService);
+  private perms = inject(PermissionService);
+readonly Permissions = Permissions;
 
   private loadSub?: Subscription;
 
@@ -76,10 +80,19 @@ export class CustomersComponent {
     ];
   });
 
-  readonly actions = computed<TableAction<Customer>[]>(() => [
-    { key: 'edit',   label: this.lang.t('CUSTOMERS.ACTIONS.EDIT'),   icon: Pencil, tone: 'primary' },
-    { key: 'delete', label: this.lang.t('CUSTOMERS.ACTIONS.DELETE'), icon: Trash2, tone: 'danger' },
-  ]);
+readonly actions = computed<TableAction<Customer>[]>(() => {
+   this.perms.loaded();
+  const list: TableAction<Customer>[] = [];
+
+  if (this.perms.has(Permissions.Customers.Update)) {
+    list.push({ key: 'edit', label: this.lang.t('CUSTOMERS.ACTIONS.EDIT'), icon: Pencil, tone: 'primary' });
+  }
+  if (this.perms.has(Permissions.Customers.Delete)) {
+    list.push({ key: 'delete', label: this.lang.t('CUSTOMERS.ACTIONS.DELETE'), icon: Trash2, tone: 'danger' });
+  }
+
+  return list;
+});
 
   onAction(e: TableActionEvent<Customer>): void {
     if (e.key === 'edit') this.openEditModal(e.row);

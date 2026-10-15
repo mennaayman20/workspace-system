@@ -642,99 +642,111 @@
   "VALIDATIONEMPLOYEE": {
     "REQUIRED": "This field is required",
     "EMAIL": "Invalid email format",
-    "MIN_LENGTH": "Minimum {{count}} characters",
+    "MIN_LENGTH": "Minimum {{6}} characters",
     "PHONE": "Invalid phone number",
     "ARABIC_ONLY": "Arabic letters only",
     "ENGLISH_ONLY": "English letters only",
     "PASSWORD_MISMATCH": "Passwords do not match",
     "INVALID": "Invalid value"
   },
-  "EMPLOYEES": {
-    "TITLE": "Employee Management",
-    "SUBTITLE": "View and update the roles and statuses of registered employees",
-    "ADD": "Add New Employee",
-    "ADD_FIRST": "Add the first employee",
-    "EMPTY": "No employees have been added yet",
-    "NO_RESULTS": "No matching results",
-    "RETRY": "Retry",
-    "NOT_ASSIGNED": "Not assigned",
-    "CHANGE_WORKSPACE": "Change workspace",
-    "CHANGE_STATUS": "Change status",
-    "DELETE_TITLE": "Delete Employee",
-    "STATS": { "ALL": "Total Employees" },
-    "STATUS": {
-      "ACTIVE": "Active",
-      "INACTIVE": "Inactive",
-      "SUSPENDED": "Suspended",
-      "TERMINATED": "Terminated"
-    },
-    "COLUMNS": {
-      "EMPLOYEE": "Employee",
-      "EMAIL": "Email",
-      "PHONE": "Phone",
-      "WORKSPACE": "Workspace",
-      "STATUS": "Status"
-    },
-    "ACTIONS": { "EDIT": "Edit", "DELETE": "Delete", "RESTORE": "Restore" },
-    "MODAL": {
-      "ADD_TITLE": "Add New Employee",
-      "EDIT_TITLE": "Edit Employee",
-      "ADD_SUBTITLE": "Enter the employee's details and login credentials",
-      "EDIT_SUBTITLE": "Edit the details then save your changes",
-      "CLOSE": "Close",
-      "CANCEL": "Cancel",
-      "REQUIRED_FIELDS": "Required fields",
-      "SAVING": "Saving...",
-      "SAVE_ADD": "Save Employee",
-      "SAVE_EDIT": "Save Changes"
-    },
-    "SECTIONS": {
-      "NAME": "Employee Name",
-      "CONTACT": "Contact Information",
-      "LOGIN": "Login Credentials"
-    },
-    "FIELDS": {
-      "FIRST_NAME_AR": "First Name (Arabic)",
-      "LAST_NAME_AR": "Last Name (Arabic)",
-      "FIRST_NAME_EN": "First Name (English)",
-      "LAST_NAME_EN": "Last Name (English)",
-      "PHONE": "Phone Number",
-      "EMAIL": "Email",
-      "PASSWORD": "Password",
-      "CONFIRM_PASSWORD": "Confirm Password"
-    },
-    "PLACEHOLDERS": {
-      "FIRST_NAME_AR": "مثال: أحمد",
-      "LAST_NAME_AR": "مثال: محمود",
-      "FIRST_NAME_EN": "e.g. Ahmed",
-      "LAST_NAME_EN": "e.g. Mahmoud",
-      "PASSWORD": "At least 6 characters",
-      "CONFIRM_PASSWORD": "Re-enter the password"
-    },
-    "GENDER": {
-      "LABEL": "Gender",
-      "PLACEHOLDER": "Select gender",
-      "MALE": "Male",
-      "FEMALE": "Female"
-    },
-    "TOAST": {
-      "CREATED": "Employee added successfully",
-      "UPDATED": "Employee updated",
-      "DELETED": "Employee deleted",
-      "RESTORED": "Employee restored",
-      "STATUS_CHANGED": "Status changed",
-      "WORKSPACE_CHANGED": "Workspace changed"
-    },
-    "ERRORS": {
-      "LOAD": "Failed to load employees. Check your connection and try again.",
-      "LOAD_DETAILS": "Failed to load the employee's full name details.",
-      "SAVE": "Failed to save, please try again.",
-      "STATUS": "Failed to change status.",
-      "WORKSPACE": "Failed to change workspace.",
-      "DELETE": "Failed to delete employee.",
-      "RESTORE": "Failed to restore employee."
-    }
-  
+"EMPLOYEES": {
+  "TITLE": "Employee Management",
+  "SUBTITLE": "View and update the roles and statuses of registered employees",
+  "ADD": "Add New Employee",
+  "ADD_FIRST": "Add the first employee",
+  "EMPTY": "No employees have been added yet",
+  "NO_RESULTS": "No matching results",
+  "RETRY": "Retry",
+  "NOT_ASSIGNED": "Not assigned",
+  "CHANGE_WORKSPACE": "Change workspace",
+  "CHANGE_STATUS": "Change status",
+  "DELETE_TITLE": "Delete Employee",
+  "STATS": { "ALL": "Total Employees" },
+  "STATUS": {
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive",
+    "SUSPENDED": "Suspended",
+    "TERMINATED": "Terminated"
+  },
+  "COLUMNS": {
+    "EMPLOYEE": "Employee",
+    "EMAIL": "Email",
+    "PHONE": "Phone",
+    "WORKSPACE": "Workspace",
+    "STATUS": "Status"
+  },
+  "ACTIONS": { "EDIT": "Edit", "DELETE": "Delete", "RESTORE": "Restore" },
+  "MODAL": {
+    "ADD_TITLE": "Add New Employee",
+    "EDIT_TITLE": "Edit Employee",
+    "ADD_SUBTITLE": "Enter the employee's details and login credentials",
+    "EDIT_SUBTITLE": "Edit the details then save your changes",
+    "CLOSE": "Close",
+    "CANCEL": "Cancel",
+    "REQUIRED_FIELDS": "Required fields",
+    "SAVING": "Saving...",
+    "SAVE_ADD": "Save Employee",
+    "SAVE_EDIT": "Save Changes"
+  },
+  "SECTIONS": {
+    "NAME": "Employee Name",
+    "CONTACT": "Contact Information",
+    "LOGIN": "Login Credentials"
+  },
+  "FIELDS": {
+    "FIRST_NAME_AR": "First Name (Arabic)",
+    "LAST_NAME_AR": "Last Name (Arabic)",
+    "FIRST_NAME_EN": "First Name (English)",
+    "LAST_NAME_EN": "Last Name (English)",
+    "PHONE": "Phone Number",
+    "EMAIL": "Email",
+    "PASSWORD": "Password",
+    "CONFIRM_PASSWORD": "Confirm Password"
+  },
+  "PLACEHOLDERS": {
+    "FIRST_NAME_AR": "مثال: أحمد",
+    "LAST_NAME_AR": "مثال: محمود",
+    "FIRST_NAME_EN": "e.g. Ahmed",
+    "LAST_NAME_EN": "e.g. Mahmoud",
+    "PASSWORD": "At least 8 characters",
+    "CONFIRM_PASSWORD": "Re-enter the password"
+  },
+  "GENDER": {
+    "LABEL": "Gender",
+    "PLACEHOLDER": "Select gender",
+    "MALE": "Male",
+    "FEMALE": "Female"
+  },
+  "VALIDATION": {
+    "REQUIRED": "This field is required",
+    "EMAIL": "Invalid email format",
+    "MIN_LENGTH": "Must be at least {count} characters.",
+    "PASSWORD_MIN_LENGTH": "Password must be at least {count} characters.",
+    "PASSWORD_UPPERCASE": "Password must contain at least one uppercase letter.",
+    "PASSWORD_LOWERCASE": "Password must contain at least one lowercase letter.",
+    "PASSWORD_MISMATCH": "Passwords do not match",
+    "PHONE": "Invalid phone number",
+    "ARABIC_ONLY": "Arabic letters only",
+    "ENGLISH_ONLY": "English letters only",
+    "INVALID": "Invalid value"
+  },
+  "TOAST": {
+    "CREATED": "Employee added successfully",
+    "UPDATED": "Employee updated",
+    "DELETED": "Employee deleted",
+    "RESTORED": "Employee restored",
+    "STATUS_CHANGED": "Status changed",
+    "WORKSPACE_CHANGED": "Workspace changed"
+  },
+  "ERRORS": {
+    "LOAD": "Failed to load employees. Check your connection and try again.",
+    "LOAD_DETAILS": "Failed to load the employee's full name details.",
+    "SAVE": "Failed to save, please try again.",
+    "STATUS": "Failed to change status.",
+    "WORKSPACE": "Failed to change workspace.",
+    "DELETE": "Failed to delete employee.",
+    "RESTORE": "Failed to restore employee."
+  }
 }
 
 

@@ -644,102 +644,104 @@
 
 
 ,
-  "VALIDATIONEMPLOYEE": {
+"EMPLOYEES": {
+  "TITLE": "إدارة الموظفين",
+  "SUBTITLE": "عرض وتحديث أدوار وحالات الموظفين المسجلين",
+  "ADD": "إضافة موظف جديد",
+  "ADD_FIRST": "أضف أول موظف",
+  "EMPTY": "لم تتم إضافة أي موظفين بعد",
+  "NO_RESULTS": "لا توجد نتائج مطابقة",
+  "RETRY": "إعادة المحاولة",
+  "NOT_ASSIGNED": "غير معيّن",
+  "CHANGE_WORKSPACE": "تغيير مساحة العمل",
+  "CHANGE_STATUS": "تغيير الحالة",
+  "DELETE_TITLE": "حذف الموظف",
+  "STATS": { "ALL": "إجمالي الموظفين" },
+  "STATUS": {
+    "ACTIVE": "نشط",
+    "INACTIVE": "غير نشط",
+    "SUSPENDED": "موقوف",
+    "TERMINATED": "منتهي الخدمة"
+  },
+  "COLUMNS": {
+    "EMPLOYEE": "الموظف",
+    "EMAIL": "البريد الإلكتروني",
+    "PHONE": "الهاتف",
+    "WORKSPACE": "مساحة العمل",
+    "STATUS": "الحالة"
+  },
+  "ACTIONS": { "EDIT": "تعديل", "DELETE": "حذف", "RESTORE": "استعادة" },
+  "MODAL": {
+    "ADD_TITLE": "إضافة موظف جديد",
+    "EDIT_TITLE": "تعديل بيانات الموظف",
+    "ADD_SUBTITLE": "أدخل بيانات الموظف وبيانات الدخول للنظام",
+    "EDIT_SUBTITLE": "عدّل البيانات ثم احفظ التغييرات",
+    "CLOSE": "إغلاق",
+    "CANCEL": "إلغاء",
+    "REQUIRED_FIELDS": "حقول مطلوبة",
+    "SAVING": "جارٍ الحفظ...",
+    "SAVE_ADD": "حفظ الموظف",
+    "SAVE_EDIT": "حفظ التغييرات"
+  },
+  "SECTIONS": {
+    "NAME": "اسم الموظف",
+    "CONTACT": "بيانات التواصل",
+    "LOGIN": "بيانات الدخول"
+  },
+  "FIELDS": {
+    "FIRST_NAME_AR": "الاسم الأول (عربي)",
+    "LAST_NAME_AR": "اسم العائلة (عربي)",
+    "FIRST_NAME_EN": "الاسم الأول (إنجليزي)",
+    "LAST_NAME_EN": "اسم العائلة (إنجليزي)",
+    "PHONE": "رقم الهاتف",
+    "EMAIL": "البريد الإلكتروني",
+    "PASSWORD": "كلمة المرور",
+    "CONFIRM_PASSWORD": "تأكيد كلمة المرور"
+  },
+  "PLACEHOLDERS": {
+    "FIRST_NAME_AR": "مثال: أحمد",
+    "LAST_NAME_AR": "مثال: محمود",
+    "FIRST_NAME_EN": "e.g. Ahmed",
+    "LAST_NAME_EN": "e.g. Mahmoud",
+    "PASSWORD": "8 أحرف على الأقل",
+    "CONFIRM_PASSWORD": "أعد إدخال كلمة المرور"
+  },
+  "GENDER": {
+    "LABEL": "النوع",
+    "PLACEHOLDER": "اختر النوع",
+    "MALE": "ذكر",
+    "FEMALE": "أنثى"
+  },
+  "VALIDATION": {
     "REQUIRED": "هذا الحقل مطلوب",
     "EMAIL": "صيغة البريد الإلكتروني غير صحيحة",
-    "MIN_LENGTH": "الحد الأدنى {{count}} أحرف",
-    "PHONE": "رقم الهاتف غير صحيح",
-    "ARABIC_ONLY": "يجب إدخال حروف عربية فقط",
-    "ENGLISH_ONLY": "يجب إدخال حروف إنجليزية فقط",
+    "MIN_LENGTH": "يجب ألا يقل عن {count} أحرف",
+    "PASSWORD_MIN_LENGTH": "يجب أن تتكون كلمة المرور من {count} أحرف على الأقل.",
+    "PASSWORD_UPPERCASE": "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل (A-Z).",
+    "PASSWORD_LOWERCASE": "يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل (a-z).",
     "PASSWORD_MISMATCH": "كلمتا المرور غير متطابقتين",
+    "PHONE": "رقم الهاتف غير صحيح",
+    "ARABIC_ONLY": "حروف عربية فقط",
+    "ENGLISH_ONLY": "حروف إنجليزية فقط",
     "INVALID": "قيمة غير صالحة"
   },
-  "EMPLOYEES": {
-    "TITLE": "إدارة الموظفين",
-    "SUBTITLE": "عرض وتحديث صلاحيات وحالات الموظفين المسجلين بالنظام",
-    "ADD": "إضافة موظف جديد",
-    "ADD_FIRST": "أضف أول موظف",
-    "EMPTY": "لا يوجد موظفين مضافين حتى الآن",
-    "NO_RESULTS": "لا توجد نتائج مطابقة",
-    "RETRY": "إعادة المحاولة",
-    "NOT_ASSIGNED": "غير محدد",
-    "CHANGE_WORKSPACE": "تغيير مكان العمل",
-    "CHANGE_STATUS": "تغيير الحالة",
-    "DELETE_TITLE": "حذف الموظف",
-    "STATS": { "ALL": "إجمالي الموظفين" },
-    "STATUS": {
-      "ACTIVE": "نشط",
-      "INACTIVE": "غير نشط",
-      "SUSPENDED": "معلق",
-      "TERMINATED": "منتهي"
-    },
-    "COLUMNS": {
-      "EMPLOYEE": "الموظف",
-      "EMAIL": "البريد الإلكتروني",
-      "PHONE": "رقم الهاتف",
-      "WORKSPACE": "مكان العمل",
-      "STATUS": "الحالة"
-    },
-    "ACTIONS": { "EDIT": "تعديل", "DELETE": "حذف", "RESTORE": "استعادة" },
-    "MODAL": {
-      "ADD_TITLE": "إضافة موظف جديد",
-      "EDIT_TITLE": "تعديل بيانات الموظف",
-      "ADD_SUBTITLE": "أدخل بيانات الموظف وبيانات الدخول للنظام",
-      "EDIT_SUBTITLE": "عدّل البيانات ثم احفظ التغييرات",
-      "CLOSE": "إغلاق",
-      "CANCEL": "إلغاء",
-      "REQUIRED_FIELDS": "حقول مطلوبة",
-      "SAVING": "جاري الحفظ...",
-      "SAVE_ADD": "حفظ الموظف",
-      "SAVE_EDIT": "حفظ التعديلات"
-    },
-    "SECTIONS": {
-      "NAME": "اسم الموظف",
-      "CONTACT": "بيانات التواصل",
-      "LOGIN": "بيانات الدخول"
-    },
-    "FIELDS": {
-      "FIRST_NAME_AR": "الاسم الأول (عربي)",
-      "LAST_NAME_AR": "اسم العائلة (عربي)",
-      "FIRST_NAME_EN": "الاسم الأول (إنجليزي)",
-      "LAST_NAME_EN": "اسم العائلة (إنجليزي)",
-      "PHONE": "رقم الهاتف",
-      "EMAIL": "البريد الإلكتروني",
-      "PASSWORD": "كلمة المرور",
-      "CONFIRM_PASSWORD": "تأكيد كلمة المرور"
-    },
-    "PLACEHOLDERS": {
-      "FIRST_NAME_AR": "مثال: أحمد",
-      "LAST_NAME_AR": "مثال: محمود",
-      "FIRST_NAME_EN": "e.g. Ahmed",
-      "LAST_NAME_EN": "e.g. Mahmoud",
-      "PASSWORD": "6 أحرف على الأقل",
-      "CONFIRM_PASSWORD": "أعد كتابة كلمة المرور"
-    },
-    "GENDER": {
-      "LABEL": "النوع",
-      "PLACEHOLDER": "اختر النوع",
-      "MALE": "ذكر",
-      "FEMALE": "أنثى"
-    },
-    "TOAST": {
-      "CREATED": "تمت إضافة الموظف بنجاح",
-      "UPDATED": "تم تعديل بيانات الموظف",
-      "DELETED": "تم حذف الموظف",
-      "RESTORED": "تمت استعادة الموظف",
-      "STATUS_CHANGED": "تم تغيير الحالة",
-      "WORKSPACE_CHANGED": "تم تغيير مكان العمل"
-    },
-    "ERRORS": {
-      "LOAD": "تعذر تحميل قائمة الموظفين. يرجى التأكد من الاتصال وإعادة المحاولة.",
-      "LOAD_DETAILS": "تعذر تحميل بيانات الاسم الكاملة للموظف.",
-      "SAVE": "تعذر حفظ البيانات، حاول مرة أخرى.",
-      "STATUS": "تعذر تغيير الحالة.",
-      "WORKSPACE": "تعذر تغيير مكان العمل.",
-      "DELETE": "تعذر حذف الموظف.",
-      "RESTORE": "تعذر استعادة الموظف."
-    }
-  
+  "TOAST": {
+    "CREATED": "تمت إضافة الموظف بنجاح",
+    "UPDATED": "تم تحديث بيانات الموظف",
+    "DELETED": "تم حذف الموظف",
+    "RESTORED": "تمت استعادة الموظف",
+    "STATUS_CHANGED": "تم تغيير الحالة",
+    "WORKSPACE_CHANGED": "تم تغيير مساحة العمل"
+  },
+  "ERRORS": {
+    "LOAD": "تعذّر تحميل الموظفين. تحقق من الاتصال وحاول مرة أخرى.",
+    "LOAD_DETAILS": "تعذّر تحميل تفاصيل أسماء الموظف.",
+    "SAVE": "تعذّر الحفظ، حاول مرة أخرى.",
+    "STATUS": "تعذّر تغيير الحالة.",
+    "WORKSPACE": "تعذّر تغيير مساحة العمل.",
+    "DELETE": "تعذّر حذف الموظف.",
+    "RESTORE": "تعذّر استعادة الموظف."
+  }
 }
 ,
 

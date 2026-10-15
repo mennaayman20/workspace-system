@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -8,11 +8,14 @@ import { MatRippleModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
+import { PermissionService } from '../../core/services/permission.service';
+import { Permissions } from '../../core/constants/permissions';
 
 interface NavItem {
   labelKey: string; // مفتاح الترجمة (بيتترجم في الـ HTML بالـ pipe)
   route: string;
   icon: string; // Material Icons
+  permissions: string[]; // يكفي واحد منهم لإظهار اللينك
   badge?: { text: string; variant: 'slate' | 'amber' };
 }
 
@@ -35,25 +38,30 @@ interface NavItem {
 export class SidebarComponent {
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
+  private perms = inject(PermissionService);
 
   // الروابط اللي بتفضل برّه
-  mainItems: NavItem[] = [
-    { labelKey: 'SIDEBAR.ITEMS.WORKSPACES',    route: '/Workspaces',    icon: 'meeting_room' },
-    { labelKey: 'SIDEBAR.ITEMS.LIVE_SESSIONS', route: '/live-sessions', icon: 'timer' },
-    { labelKey: 'SIDEBAR.ITEMS.BOOKINGS',      route: '/bookings',      icon: 'event' },
+  private allMainItems: NavItem[] = [
+    { labelKey: 'SIDEBAR.ITEMS.WORKSPACES',    route: '/Workspaces',    icon: 'meeting_room', permissions: [Permissions.Workspaces.View] },
+    { labelKey: 'SIDEBAR.ITEMS.LIVE_SESSIONS', route: '/live-sessions', icon: 'timer',        permissions: [Permissions.Sessions.View, Permissions.SessionProducts.View] },
+    { labelKey: 'SIDEBAR.ITEMS.BOOKINGS',      route: '/bookings',      icon: 'event',        permissions: [Permissions.Bookings.View] },
   ];
 
   // الروابط اللي جوه الإعدادات
-  settingsItems: NavItem[] = [
-    { labelKey: 'SIDEBAR.ITEMS.CUSTOMERS',          route: '/customers', icon: 'group' },
-    { labelKey: 'SIDEBAR.ITEMS.EMPLOYEES',          route: '/employee',  icon: 'badge' },
-    { labelKey: 'SIDEBAR.ITEMS.PRICING',            route: '/pricing',   icon: 'payments' },
-    { labelKey: 'SIDEBAR.ITEMS.DISCOUNTS_PACKAGES', route: '/discounts', icon: 'percent' },
-    { labelKey: 'SIDEBAR.ITEMS.POS',                route: '/products',  icon: 'point_of_sale' },
-    { labelKey: 'SIDEBAR.ITEMS.SERVICES',           route: '/services',  icon: 'room_service' },
+  private allSettingsItems: NavItem[] = [
+    { labelKey: 'SIDEBAR.ITEMS.CUSTOMERS',          route: '/customers', icon: 'group',         permissions: [Permissions.Customers.View] },
+    { labelKey: 'SIDEBAR.ITEMS.EMPLOYEES',          route: '/employee',  icon: 'badge',         permissions: [Permissions.Employees.View] },
+    { labelKey: 'SIDEBAR.ITEMS.PRICING',            route: '/pricing',   icon: 'payments',      permissions: [Permissions.PricingPlans.View] },
+    { labelKey: 'SIDEBAR.ITEMS.DISCOUNTS_PACKAGES', route: '/discounts', icon: 'percent',       permissions: [Permissions.Discounts.View, Permissions.Packages.View] },
+    { labelKey: 'SIDEBAR.ITEMS.POS',                route: '/products',  icon: 'point_of_sale', permissions: [Permissions.Products.View] },
+    { labelKey: 'SIDEBAR.ITEMS.SERVICES',           route: '/services',  icon: 'room_service',  permissions: [Permissions.Services.View] },
   ];
 
-  // لازم تتعرف بعد settingsItems
+  // القوائم المفلترة حسب صلاحيات اليوزر (بتتحدث تلقائي لما الصلاحيات تتحمل)
+  mainItems = computed(() => this.filterByPermission(this.allMainItems));
+  settingsItems = computed(() => this.filterByPermission(this.allSettingsItems));
+
+  // لازم تتعرف بعد allSettingsItems
   settingsOpen = signal(this.isSettingsRoute(this.router.url));
 
   constructor() {
@@ -72,8 +80,14 @@ export class SidebarComponent {
     this.settingsOpen.update((v) => !v);
   }
 
+  private filterByPermission(items: NavItem[]): NavItem[] {
+    // قراءة loaded() بتخلي الـ computed يتحدث لما الصلاحيات تتحمل
+    this.perms.loaded();
+    return items.filter((i) => this.perms.hasAny(i.permissions));
+  }
+
   private isSettingsRoute(url: string): boolean {
-    return this.settingsItems.some((i) => url.startsWith(i.route));
+    return this.allSettingsItems.some((i) => url.startsWith(i.route));
   }
 
   onContactSupport() {}
