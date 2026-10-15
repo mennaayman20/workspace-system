@@ -6,10 +6,11 @@ import { filter } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatRippleModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
+import { TranslatePipe } from '@ngx-translate/core';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 
 interface NavItem {
-  label: string;
+  labelKey: string; // مفتاح الترجمة (بيتترجم في الـ HTML بالـ pipe)
   route: string;
   icon: string; // Material Icons
   badge?: { text: string; variant: 'slate' | 'amber' };
@@ -26,6 +27,7 @@ interface NavItem {
     MatIconModule,
     MatRippleModule,
     MatButtonModule,
+    TranslatePipe,
   ],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
@@ -36,21 +38,19 @@ export class SidebarComponent {
 
   // الروابط اللي بتفضل برّه
   mainItems: NavItem[] = [
-    { label: 'مساحات العمل', route: '/Workspaces', icon: 'meeting_room' },
-    { label: 'الجلسات الحيّة', route: '/live-sessions', icon: 'timer' },
-        { label: 'الحجوزات والمواعيد', route: '/bookings', icon: 'event' },
-
+    { labelKey: 'SIDEBAR.ITEMS.WORKSPACES',    route: '/Workspaces',    icon: 'meeting_room' },
+    { labelKey: 'SIDEBAR.ITEMS.LIVE_SESSIONS', route: '/live-sessions', icon: 'timer' },
+    { labelKey: 'SIDEBAR.ITEMS.BOOKINGS',      route: '/bookings',      icon: 'event' },
   ];
 
   // الروابط اللي جوه الإعدادات
   settingsItems: NavItem[] = [
-    { label: 'إدارة العملاء', route: '/customers', icon: 'group' },
- { label: 'إدارة الموظفين', route: '/employee', icon: 'badge' },
-
-    { label: 'خطط التسعير', route: '/pricing', icon: 'payments' },
-    { label: 'إدارة الخصومات والباقات', route: '/discounts', icon: 'percent' },
-    { label: 'POS', route: '/products', icon: 'point_of_sale' },
-    { label: 'إدارة الخدمات', route: '/services', icon: 'room_service' },
+    { labelKey: 'SIDEBAR.ITEMS.CUSTOMERS',          route: '/customers', icon: 'group' },
+    { labelKey: 'SIDEBAR.ITEMS.EMPLOYEES',          route: '/employee',  icon: 'badge' },
+    { labelKey: 'SIDEBAR.ITEMS.PRICING',            route: '/pricing',   icon: 'payments' },
+    { labelKey: 'SIDEBAR.ITEMS.DISCOUNTS_PACKAGES', route: '/discounts', icon: 'percent' },
+    { labelKey: 'SIDEBAR.ITEMS.POS',                route: '/products',  icon: 'point_of_sale' },
+    { labelKey: 'SIDEBAR.ITEMS.SERVICES',           route: '/services',  icon: 'room_service' },
   ];
 
   // لازم تتعرف بعد settingsItems

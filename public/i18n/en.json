@@ -20,9 +20,29 @@
 ,
 
 
+"SIDEBAR": {
+  "BRANCH": {
+    "NAME": "Main Branch",
+    "ADDRESS": "Beni Suef - Al-Ibasiri"
+  },
+  "MAIN_MENU": "Main menu",
+  "GENERAL_SETTINGS": "General settings",
+  "BASIC_SETTINGS": "Core settings",
+  "SYSTEM_SETTINGS": "System settings",
+  "ITEMS": {
+    "WORKSPACES": "Workspaces",
+    "LIVE_SESSIONS": "Live sessions",
+    "BOOKINGS": "Bookings & appointments",
+    "CUSTOMERS": "Customer management",
+    "EMPLOYEES": "Employee management",
+    "PRICING": "Pricing plans",
+    "DISCOUNTS_PACKAGES": "Discounts & packages",
+    "POS": "Point of sale",
+    "SERVICES": "Service management"
+  }
+}
 
-
-
+,
   
   "HEADER": {
     "PLATFORM": "Platform",

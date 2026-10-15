@@ -22,12 +22,35 @@
 ,
 
 
+"SIDEBAR": {
+  "BRANCH": {
+    "NAME": "الفرع الرئيسي",
+    "ADDRESS": "بني سويف - الإباصيري"
+  },
+  "MAIN_MENU": "القائمة الرئيسية",
+  "GENERAL_SETTINGS": "الإعدادات العامة",
+  "BASIC_SETTINGS": "الإعدادات الأساسية",
+  "SYSTEM_SETTINGS": "إعدادات النظام",
+  "ITEMS": {
+    "WORKSPACES": "مساحات العمل",
+    "LIVE_SESSIONS": "الجلسات الحيّة",
+    "BOOKINGS": "الحجوزات والمواعيد",
+    "CUSTOMERS": "إدارة العملاء",
+    "EMPLOYEES": "إدارة الموظفين",
+    "PRICING": "خطط التسعير",
+    "DISCOUNTS_PACKAGES": "إدارة الخصومات والباقات",
+    "POS": "نقطة البيع",
+    "SERVICES": "إدارة الخدمات"
+  }
+}
 
 
 
 
 
 
+
+,
   "HEADER": {
     "PLATFORM": "Platform",
     "SEARCH_PLACEHOLDER": "بحث سريع عن المقاعد، الغرف، أو الأعضاء...",

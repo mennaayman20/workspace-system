@@ -1,4 +1,4 @@
-<aside class="w-70 h-[calc(100vh-4rem)] bg-white/90 backdrop-blur-md border-l border-slate-200/80 flex flex-col justify-between p-4 sticky top-16 select-none shrink-0 overflow-y-auto">
+<aside class="w-70 h-[calc(100vh-4rem)] bg-white/90 backdrop-blur-md border-e border-slate-200/80 flex flex-col justify-between p-4 sticky top-16 select-none shrink-0 overflow-y-auto">
 
   <div class="space-y-6">
 
@@ -12,15 +12,15 @@
           HQ
         </div>
         <div class="flex flex-col min-w-0">
-          <span class="text-xs font-bold text-slate-900 leading-tight truncate">الفرع الرئيسي</span>
-          <span class="text-[10px] font-medium text-slate-500 truncate mt-0.5">بني سويف - الإباصيري</span>
+          <span class="text-xs font-bold text-slate-900 leading-tight truncate">{{ 'SIDEBAR.BRANCH.NAME' | translate }}</span>
+          <span class="text-[10px] font-medium text-slate-500 truncate mt-0.5">{{ 'SIDEBAR.BRANCH.ADDRESS' | translate }}</span>
         </div>
       </div>
     </div>
 
     <!-- القائمة الرئيسية -->
     <nav class="space-y-1.5">
-      <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2.5">القائمة الرئيسية</p>
+      <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2.5">{{ 'SIDEBAR.MAIN_MENU' | translate }}</p>
 
       @for (item of mainItems; track item.route) {
         <a
@@ -32,7 +32,7 @@
           class="nav-link flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 font-semibold text-sm border border-transparent">
           <div class="flex items-center gap-3 min-w-0">
             <mat-icon class="!w-5 !h-5 !text-[20px] shrink-0">{{ item.icon }}</mat-icon>
-            <span class="truncate">{{ item.label }}</span>
+            <span class="truncate">{{ item.labelKey | translate }}</span>
           </div>
           @if (item.badge) {
             <app-badge [variant]="'slate'" [size]="item.badge.variant === 'slate' ? 'md' : 'sm'">
@@ -47,7 +47,7 @@
     <div>
       <!-- عنوان القسم بخط جانبي -->
       <div class="flex items-center gap-3 px-1 mb-3">
-        <span class="text-[11px] font-extrabold text-slate-500 whitespace-nowrap">الإعدادات العامة</span>
+        <span class="text-[11px] font-extrabold text-slate-500 whitespace-nowrap">{{ 'SIDEBAR.GENERAL_SETTINGS' | translate }}</span>
         <span class="h-px flex-1 bg-slate-200"></span>
       </div>
 
@@ -61,7 +61,7 @@
           class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-blue-600 hover:bg-blue-50/60 transition-colors font-semibold text-sm">
           <div class="flex items-center gap-3 min-w-0">
             <mat-icon class="!w-5 !h-5 !text-[20px] shrink-0">tune</mat-icon>
-            <span class="truncate">الإعدادات الأساسية</span>
+            <span class="truncate">{{ 'SIDEBAR.BASIC_SETTINGS' | translate }}</span>
           </div>
           <span class="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
             <mat-icon
@@ -89,7 +89,7 @@
                   [matRippleColor]="'rgba(37, 99, 235, 0.08)'"
                   class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 font-semibold text-[13px] transition-colors">
                   <mat-icon class="!w-[18px] !h-[18px] !text-[18px] shrink-0">{{ item.icon }}</mat-icon>
-                  <span class="truncate">{{ item.label }}</span>
+                  <span class="truncate">{{ item.labelKey | translate }}</span>
                 </a>
               }
             </div>
@@ -109,7 +109,7 @@
       matRipple
       [matRippleColor]="'rgba(255, 255, 255, 0.25)'"
       class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 font-semibold text-xs border border-transparent">
-      <span>إعدادات النظام</span>
+      <span>{{ 'SIDEBAR.SYSTEM_SETTINGS' | translate }}</span>
     </a>
   </div> -->
 
