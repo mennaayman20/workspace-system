@@ -1,3 +1,4 @@
+
 import { Component, DestroyRef, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -55,6 +56,10 @@ export class SidebarComponent {
     { labelKey: 'SIDEBAR.ITEMS.DISCOUNTS_PACKAGES', route: '/discounts', icon: 'percent',       permissions: [Permissions.Discounts.View, Permissions.Packages.View] },
     { labelKey: 'SIDEBAR.ITEMS.POS',                route: '/products',  icon: 'point_of_sale', permissions: [Permissions.Products.View] },
     { labelKey: 'SIDEBAR.ITEMS.SERVICES',           route: '/services',  icon: 'room_service',  permissions: [Permissions.Services.View] },
+     { labelKey: 'SIDEBAR.ITEMS.USERS', route: '/users', icon: 'manage_accounts', permissions: [Permissions.Users.View] },
+  
+  
+  
   ];
 
   // القوائم المفلترة حسب صلاحيات اليوزر (بتتحدث تلقائي لما الصلاحيات تتحمل)

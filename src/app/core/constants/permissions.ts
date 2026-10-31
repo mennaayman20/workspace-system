@@ -1,4 +1,6 @@
 export const Permissions = {
+
+  Users: { View: 'Users.View', AssignRole: 'Users.AssignRole' },
   Bookings: {
     Cancel: 'Bookings.Cancel',
     ChangeStatus: 'Bookings.ChangeStatus',

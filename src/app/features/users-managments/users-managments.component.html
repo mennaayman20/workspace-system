@@ -1,0 +1,186 @@
+<style>
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp .35s ease-out backwards; }
+  @media (prefers-reduced-motion: reduce) { .fade-up { animation: none; } }
+</style>
+
+<div class="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto fade-up">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5 fade-up">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+        <lucide-icon [img]="UserCogIcon" class="w-6 h-6"></lucide-icon>
+      </div>
+      <div>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">{{ 'USERS.TITLE' | translate }}</h1>
+        <p class="text-sm text-slate-500 mt-1">{{ 'USERS.SUBTITLE' | translate }}</p>
+      </div>
+    </div>
+
+    <!-- بحث (من السيرفر) -->
+    <div class="relative w-full sm:w-80">
+      <lucide-icon [img]="SearchIcon" class="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none"></lucide-icon>
+      <input type="search" #searchBox (input)="onSearch(searchBox.value)"
+             [placeholder]="'USERS.SEARCH_PLACEHOLDER' | translate"
+             class="w-full h-11 ps-10 pe-4 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 hover:border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all" />
+    </div>
+  </div>
+
+  <!-- Error -->
+  @if (errorMessage() && !isLoading()) {
+    <div role="alert" class="p-5 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-2xl flex items-center justify-between gap-3 fade-up">
+      <span class="font-medium">{{ errorMessage() }}</span>
+      <button type="button" (click)="loadUsers()"
+        class="px-4 py-2 bg-white border border-rose-200 rounded-xl font-bold hover:bg-rose-100 transition-colors">
+        {{ 'USERS.RETRY' | translate }}
+      </button>
+    </div>
+  } @else {
+
+    <!-- الجدول المشترك -->
+    <app-data-table
+      class="fade-up block"
+      [value]="users()"
+      [columns]="columns()"
+      [actions]="actions()"
+      [loading]="isLoading()"
+      [searchable]="false"
+      [columnFilters]="false"
+      [minWidth]="'48rem'"
+      [emptyTitle]="(searchTerm() ? 'USERS.NO_RESULTS' : 'USERS.EMPTY') | translate"
+      (action)="onAction($event)">
+
+      <!-- عمود المستخدم: أفاتار + الاسم -->
+      <ng-template appCell="fullName" let-u>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 font-extrabold flex items-center justify-center text-base">
+            {{ u.fullName?.charAt(0)?.toUpperCase() }}
+          </div>
+          <span class="font-bold text-slate-900 text-[15px]">{{ u.fullName }}</span>
+        </div>
+      </ng-template>
+
+      <!-- عمود الأدوار -->
+      <ng-template appCell="roles" let-u>
+        @if (u.roles.length) {
+          <div class="flex flex-wrap gap-1.5">
+            @for (r of u.roles; track r) {
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-100 text-xs font-bold">
+                <lucide-icon [img]="RoleIcon" class="w-3.5 h-3.5"></lucide-icon>
+                {{ r }}
+              </span>
+            }
+          </div>
+        } @else {
+          <span class="inline-flex px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-100 text-xs font-bold">
+            {{ 'USERS.NO_ROLE' | translate }}
+          </span>
+        }
+      </ng-template>
+    </app-data-table>
+
+    <!-- Pagination -->
+    @if (totalCount() > 0) {
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 fade-up">
+        <p class="text-sm text-slate-500 tabular-nums">
+          {{ rangeFrom() }} – {{ rangeTo() }} / {{ totalCount() }}
+        </p>
+        <div class="flex items-center gap-2">
+          <button type="button" (click)="goToPage(pageNumber() - 1)"
+                  [disabled]="pageNumber() <= 1 || isLoading()"
+                  [attr.aria-label]="'USERS.PREV' | translate"
+                  class="w-10 h-10 rounded-xl border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none transition-colors rtl:rotate-180">
+            <lucide-icon [img]="PrevIcon" class="w-4 h-4"></lucide-icon>
+          </button>
+          <span class="px-3 text-sm font-bold text-slate-700 tabular-nums">{{ pageNumber() }} / {{ totalPages() }}</span>
+          <button type="button" (click)="goToPage(pageNumber() + 1)"
+                  [disabled]="pageNumber() >= totalPages() || isLoading()"
+                  [attr.aria-label]="'USERS.NEXT' | translate"
+                  class="w-10 h-10 rounded-xl border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none transition-colors rtl:rotate-180">
+            <lucide-icon [img]="NextIcon" class="w-4 h-4"></lucide-icon>
+          </button>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- Modal: تعيين دور -->
+  @if (pendingUser(); as user) {
+    <div appToBody
+         class="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 fade-up">
+      <div role="dialog" aria-modal="true" aria-labelledby="role-modal-title"
+           class="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col overflow-hidden">
+
+        <!-- Header -->
+        <div class="px-6 sm:px-8 py-5 border-b border-slate-100 bg-gradient-to-l from-blue-50/70 to-white shrink-0">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3.5 min-w-0">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
+                <lucide-icon [img]="RoleIcon" class="w-6 h-6"></lucide-icon>
+              </div>
+              <div class="min-w-0">
+                <h3 id="role-modal-title" class="text-lg font-extrabold text-slate-900 leading-tight">
+                  {{ 'USERS.MODAL.TITLE' | translate }}
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5 truncate">{{ user.fullName }}</p>
+              </div>
+            </div>
+            <button type="button" (click)="closeModal()" [attr.aria-label]="'USERS.MODAL.CLOSE' | translate"
+                    class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-white transition-colors">
+              <lucide-icon [img]="CloseIcon" class="w-5 h-5"></lucide-icon>
+            </button>
+          </div>
+        </div>
+
+        <form (ngSubmit)="saveRole()" class="flex flex-col min-h-0 flex-1" novalidate>
+          <div class="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-5 bg-slate-50/50">
+
+            @if (formError()) {
+              <div role="alert" class="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-2xl font-medium">
+                {{ formError() }}
+              </div>
+            }
+
+            <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+              <div class="text-xs text-slate-500 space-y-0.5">
+                <div class="font-mono" dir="ltr">{{ user.email }}</div>
+              </div>
+
+              <div>
+                <label for="roleName" class="block text-xs font-bold text-slate-700 mb-1.5">
+                  {{ 'USERS.FIELDS.ROLE' | translate }} <span class="text-rose-500">*</span>
+                </label>
+                <p-select inputId="roleName" [formControl]="roleControl"
+                          [options]="roleOptions()" optionLabel="label" optionValue="value"
+                          [placeholder]="'USERS.FIELDS.ROLE_PLACEHOLDER' | translate"
+                          appendTo="body" styleClass="w-full !h-10 !rounded-xl"
+                          [class.ng-invalid]="roleControl.invalid && roleControl.touched"
+                          [class.ng-dirty]="roleControl.invalid && roleControl.touched" />
+                @if (roleControl.invalid && roleControl.touched) {
+                  <p class="text-xs text-rose-600 mt-1">{{ 'USERS.VALIDATION.ROLE_REQUIRED' | translate }}</p>
+                }
+              </div>
+            </section>
+          </div>
+
+          <!-- Footer -->
+          <div class="shrink-0 flex items-center justify-end gap-3 px-6 sm:px-8 py-4 border-t border-slate-100 bg-white">
+            <button type="button" (click)="closeModal()" [disabled]="isSubmitting()"
+                    class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
+              {{ 'USERS.MODAL.CANCEL' | translate }}
+            </button>
+            <button type="submit" [disabled]="isSubmitting()"
+                    class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2">
+              <lucide-icon [img]="SaveIcon" class="w-4 h-4"></lucide-icon>
+              {{ (isSubmitting() ? 'USERS.MODAL.SAVING' : 'USERS.MODAL.SAVE') | translate }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

@@ -81,6 +81,20 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/employee/employee.component').then((m) => m.EmployeeComponent),
       },
+
+      {
+  path: 'users',
+  canActivate: [permissionGuard],
+  data: { permissions: [Permissions.Users.View] },
+  loadComponent: () =>
+    import('./features/users-managments/users-managments.component').then(
+      (m) => m.UserManagementComponent
+    ),
+},
+
+
+
+
       {
         path: 'customers',
         canActivate: [permissionGuard],
@@ -102,6 +116,7 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/pricing/pricing.routes').then((m) => m.PRICING_ROUTES),
       },
+
       {
         path: 'payments',
         loadComponent: () =>

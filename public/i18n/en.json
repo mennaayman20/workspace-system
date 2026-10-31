@@ -38,10 +38,47 @@
     "PRICING": "Pricing plans",
     "DISCOUNTS_PACKAGES": "Discounts & packages",
     "POS": "Point of sale",
-    "SERVICES": "Service management"
+    "SERVICES": "Service management",
+    "USERS": "User management"
+  }
+},
+"USERS": {
+  "TITLE": "User Management",
+  "SUBTITLE": "View all users and manage their roles",
+  "SEARCH_PLACEHOLDER": "Search by username or email...",
+  "RETRY": "Retry",
+  "EMPTY": "No users found",
+  "NO_RESULTS": "No matching results",
+  "NO_ROLE": "No role",
+  "PREV": "Previous",
+  "NEXT": "Next",
+  "COLUMNS": {
+    "USER": "User",
+    "USERNAME": "Username",
+    "EMAIL": "Email",
+    "ROLES": "Roles"
+  },
+  "ACTIONS": { "ASSIGN_ROLE": "Assign role" },
+  "FIELDS": {
+    "ROLE": "Role",
+    "ROLE_PLACEHOLDER": "Select a role"
+  },
+  "VALIDATION": { "ROLE_REQUIRED": "Please select a role" },
+  "MODAL": {
+    "TITLE": "Assign role",
+    "CLOSE": "Close",
+    "CANCEL": "Cancel",
+    "SAVE": "Save",
+    "SAVING": "Saving..."
+  },
+  "TOAST": { "ROLE_ASSIGNED": "Role assigned successfully" },
+  "ERRORS": {
+    "LOAD": "Failed to load users. Check your connection and try again.",
+    "ASSIGN": "Failed to assign role, please try again.",
+    "ALREADY_HAS_ROLE": "This user already has a role.",
+    "NOT_FOUND": "User not found."
   }
 }
-
 ,
   
   "HEADER": {
