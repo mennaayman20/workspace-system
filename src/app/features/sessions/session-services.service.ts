@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { SessionServiceDto } from './Isessions';
 import { environment } from '../../core/environments/environment';
 import { map, Observable } from 'rxjs';
@@ -10,11 +10,11 @@ export class SessionServicesService {
   private base = `${environment.apiUrl}/api/SessionService/sessions`;
 
 getSessionServices(sessionId: number): Observable<SessionServiceDto[]> {
+  const params = new HttpParams().set('pageNumber', 1).set('pageSize', 1000);
   return this.http
-    .get<any>(`${this.base}/${sessionId}/services`)
-    .pipe(map((res) => (Array.isArray(res) ? res : res?.data ?? [])));
+    .get<any>(`${this.base}/${sessionId}/services`, { params })
+    .pipe(map((res) => (Array.isArray(res) ? res : res?.items ?? res?.data ?? [])));
 }
-
   addService(sessionId: number, serviceId: number, quantity: number) {
     return this.http.post<void>(`${this.base}/${sessionId}/services`, { serviceId, quantity });
   }

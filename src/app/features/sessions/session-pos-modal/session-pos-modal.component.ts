@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
 import { TranslatePipe } from '@ngx-translate/core';
 import { forkJoin, Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, switchMap, tap } from 'rxjs/operators';
 import { LucideAngularModule, X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-angular';
 
 import { ProductService } from '../../products/services/product.service'; // عدّلي المسارات
@@ -13,6 +13,7 @@ import { ServiceCatalogService } from '../../services/service-catalog.service';
 import { ServiceItem } from '../../services/Iservice';
 import { SessionProductsService } from '../session-products.service';
 import { SessionServicesService } from '../session-services.service';
+import { SessionsService } from '../sessions.service';
 import { SessionProductDto, SessionServiceDto } from '../Isessions';
 import { CheckoutService } from '../checkout.service';
 import { DiscountService } from '../../discount/discount.service'; // عدّلي المسار
@@ -34,6 +35,7 @@ export class SessionPosModalComponent implements OnInit {
   private serviceCatalog = inject(ServiceCatalogService);
   private sessionProducts = inject(SessionProductsService);
   private sessionServices = inject(SessionServicesService);
+  private sessionsService = inject(SessionsService);
   private checkoutService = inject(CheckoutService);
   private discountService = inject(DiscountService);
   private toastr = inject(ToastrService);
@@ -69,6 +71,9 @@ export class SessionPosModalComponent implements OnInit {
   // ===== Checkout =====
   isCheckingOut = signal(false);
   selectedDiscountId = signal<number | null>(null);
+
+  // لو الـ end session نجح والـ checkout فشل، منعيدش الـ end في المحاولة التانية
+  private sessionEnded = false;
 
   isBusy = computed(() => this.isSaving() || this.isCheckingOut());
 
@@ -300,15 +305,33 @@ export class SessionPosModalComponent implements OnInit {
     });
   }
 
-  // ===== إنهاء الجلسة وتحصيل الفاتورة =====
-  // POST /api/Checkout/sessions/{sessionId}
+  // ===== إنهاء الجلسة ثم تحصيل الفاتورة =====
+  // 1) POST /api/Sessions/{id}/end
+  // 2) POST /api/Checkout/sessions/{sessionId}
   confirmCheckout() {
     this.isCheckingOut.set(true);
-    this.checkoutService
-      .checkoutSession(this.sessionId(), {
-        discountId: this.selectedDiscountId(),
-        taxRate: null,
-      })
+    const sid = this.sessionId();
+
+    const end$: Observable<unknown> = this.sessionEnded
+      ? of(null)
+      : this.sessionsService.endSession(sid).pipe(
+          tap((res: any) => {
+            if (res?.succeeded === false) {
+              throw new Error(res?.message || this.lang.t('SESSIONS.POS.ERR_CHECKOUT'));
+            }
+            this.sessionEnded = true;
+          })
+        );
+
+    end$
+      .pipe(
+        switchMap(() =>
+          this.checkoutService.checkoutSession(sid, {
+            discountId: this.selectedDiscountId(),
+            taxRate: null,
+          })
+        )
+      )
       .subscribe({
         next: (res: any) => {
           this.isCheckingOut.set(false);
@@ -322,7 +345,9 @@ export class SessionPosModalComponent implements OnInit {
         },
         error: (err) => {
           this.isCheckingOut.set(false);
-          this.toastr.error(err?.error?.message || this.lang.t('SESSIONS.POS.ERR_CHECKOUT'));
+          this.toastr.error(
+            err?.error?.message || err?.message || this.lang.t('SESSIONS.POS.ERR_CHECKOUT')
+          );
         },
       });
   }
